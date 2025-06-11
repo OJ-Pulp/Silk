@@ -3,6 +3,21 @@ This script generates a fake supply chain for model aircrafts and outputs it to 
 
 """
 
+# Corbin - 
+# [ ] other information
+# Neoj4 Alternatives: https://memgraph.com/blog/neo4j-alternative-what-are-my-open-source-db-options
+# Memgraph OSS Github: https://github.com/memgraph/memgraph
+# Memgraph Cypher Examples: https://memgraph.com/docs/querying
+# Memgraph GOT Example: https://playground.memgraph.com/sandbox/game-of-thrones-deaths
+# Corbin -
+# [ ] alternative node types
+# Other nodes could be used in the graph instead of keeping all relevant data in one node.
+# Ex. a Location node, a Company node, a Manufacturer node
+# Corbin -
+# [ ] alternative edge types
+# Different edge types could be used to denote different relationships.
+# Ex. Manufactured by, Located in, Owned by
+
 import json
 import uuid
 import faker
