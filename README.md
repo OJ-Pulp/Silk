@@ -2,7 +2,7 @@
 
 ## 📦 Supply Chain Network Analyzer
 
-This project applies **graph theory** and **network analysis** to model and visualize supply chains. The system is designed to represent key entities (like suppliers, distributors, warehouses) as **nodes**, and their relationships (flows, contracts, dependencies) as **edges**.
+This project applies **graph theory** and **network analysis** to model and visualize supply chains. The system is designed to represent key entities (Parts) as **nodes**, and their relationships as **edges**.
 
 🔧 It includes:
 - A **backend** for managing node/edge data using a relational graph database structure
