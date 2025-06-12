@@ -46,7 +46,9 @@ RETURN s.name, c.name, total_lead_time
 LIMIT 10
 ```
 
-- **Other Tools:** Lead times may need to be determined by another analyst tool and added to graph database.
+#### Other Tools
+
+- Lead times may need to be determined by another analyst tool and added to graph database.
   - Project Management and Review Technique (PERT)
   - Critical Path Method (CPM)
 
@@ -59,24 +61,188 @@ LIMIT 10
 #### Cypher Query
 
 ```cypher
-// 
+// Match all manufacturers from a location
 MATCH (loc:Location {name: $location_name})<-[:LOCATED_AT]-(m:Manufacturer)
+
+// Match products from manufacturer
 MATCH (m)-[:PRODUCES]->(p:Product)
+
+// Match affected customers
 MATCH (p)-[:SHIPS_TO]->(customer:Customer)
 RETURN p.name as affected_product, 
        collect(customer.name) as affected_customers,
+       // Sum daily volume from product as the lost daily production
        sum(p.daily_volume) as lost_daily_production
 ```
 
 ### Question 3
 
+- Start with the failed location
+- Propagate impact through network layers
+- Model time-based delays, and inventory buffers
+
+#### Cypher Query
+
+```cypher
+// Find failed location
+MATCH (failed:Location {name: $failed_location})
+
+// Call relationship filter to yield our path of edges
+CALL apoc.path.expandConfig(failed, {
+    relationshipFilter: "SUPPLIES>|SHIPS_TO>|REQUIRES>",
+    minLevel: 1,
+    maxLevel: 5
+}) YIELD path
+
+// Set variables, using the length of the path as the impact level
+WITH nodes(path) as cascade_nodes, length(path) as impact_level
+
+// Unwind nodes from our cascade path
+UNWIND cascade_nodes as node
+
+// Return nodes based on the described impact level
+RETURN labels(node)[0] as node_type, 
+       node.name as name,
+       impact_level,
+       node.daily_capacity as capacity_at_risk
+ORDER BY impact_level
+```
+
+#### Other Tools
+
+- Discrete Event Simulations
+- Monte Carlo Method
+
 ### Question 4
+
+1. Aggregate failure rate data by components
+2. Calculate production impact per failure
+3. Rank by total production risk
+
+#### Cipher Query
+
+```cypher
+// Match all components required for a product
+MATCH (c:Component)-[:REQUIRED_FOR]->(p:Product)
+
+// Set failure rate variables
+WITH c, collect(p) as products, c.failure_rate as failure_rate
+
+// Product variables
+UNWIND products as product
+
+// Sum the daily volume as total volume at risk
+WITH c, failure_rate, sum(product.daily_volume) as total_volume_at_risk
+
+// Calculate risk score and order components by risk score
+RETURN c.name, 
+       failure_rate,
+       total_volume_at_risk,
+       (failure_rate * total_volume_at_risk) as risk_score
+ORDER BY risk_score DESC
+```
 
 ### Question 5
 
+1. Calculate vulnerability as $(\text{failure rate}* \text{impact} * \text{concentration})$
+2. Consider alternate sourcing options
+3. Order by business criticality, revenue impact, reliability, etc.
+
+#### Cipher Query
+
+```cypher
+// Find number of suppliers that supply a component, create reliability score variable
+MATCH (c:Component)<-[:SUPPLIES]-(s:Supplier)
+WITH c, count(s) as supplier_count, avg(s.reliability_score) as avg_reliability
+
+// Match components required for a product
+MATCH (c)-[:REQUIRED_FOR]->(p:Product)
+
+// Sum total revenue impact
+WITH c, supplier_count, avg_reliability, sum(p.revenue_impact) as total_revenue_impact
+
+// Do lots of math to create vulnerability score
+// A lot of these calculations could probably be done using Python instead with the data given
+RETURN c.name,
+       (1.0/supplier_count) as concentration_risk,
+       (1.0 - avg_reliability) as supply_risk,
+       total_revenue_impact,
+       ((1.0/supplier_count) * (1.0 - avg_reliability) * total_revenue_impact) as vulnerability_score
+ORDER BY vulnerability_score DESC
+```
+
 ### Question 6
 
+1. Calculate the network topology metrics
+2. Analyze redundancy levels (higher is better)
+3. Assess geographic concentration (more concentrated the better)
+4. Create an overall network resilience score
+
+#### Cypher Query
+
+```cypher
+// Create node summary
+MATCH (n)
+WITH labels(n)[0] as node_type, count(n) as node_count
+WITH collect({type: node_type, count: node_count}) as node_summary
+
+// Create edge sum
+MATCH ()-[r]->()
+WITH node_summary, type(r) as relationship_type, count(r) as rel_count
+WITH node_summary, collect({type: relationship_type, count: rel_count}) as rel_summary
+
+// Calculate clustering coefficient and path redundancy
+// Create a graph projection for the GDS algorithms
+CALL gds.graph.project('supply_chain', '*', '*')
+
+// Calculate triangle count for each node
+CALL gds.triangleCount.stream('supply_chain') YIELD nodeId, triangleCount
+
+// Calculate degree of each node 
+CALL gds.degree.stream('supply_chain') YIELD nodeId, score as degree
+
+// Convert node IDs back to actual node objects and combine the metrics
+WITH gds.util.asNode(nodeId) as node, triangleCount, degree
+
+// Calculate clustering coeficient for the entire network
+WITH avg(triangleCount * 2.0 / (degree * (degree - 1))) as avg_clustering
+
+// Comprehensive network resilience summary
+// Higher clustering coefficient is better, more resilience and redundancy
+// Lower clustering coefficient is worse, represents more of a tree-like structure
+RETURN node_summary, rel_summary, avg_clustering as network_resilience_score
+```
+
+#### Additional Tools
+
+- Network analysis libraries (Python)
+  - NetworkX
+  - igraph
+- Resilience metrics
+
 ### Question 7
+
+1. Identify bridge nodes
+2. Find critical edges whose removal disconnects graph
+    - Complete disconnection => supply chain interruption
+3. Calculate edge betweenness centrality
+
+```cypher
+// Find nodes with high betweenness centrality (bottlenecks)
+CALL gds.graph.project('supply_network', '*', '*')
+CALL gds.betweenness.stream('supply_network') 
+YIELD nodeId, score
+WITH gds.util.asNode(nodeId) as node, score
+WHERE score > 0
+
+// Create bottleneck score based on score returned earlier
+RETURN labels(node)[0] as node_type, 
+       node.name, 
+       score as bottleneck_score
+
+ORDER BY bottleneck_score DESC
+LIMIT 20
+```
 
 ### Question 8
 
