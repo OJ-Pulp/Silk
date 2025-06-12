@@ -23,6 +23,13 @@ It is important to describe our graph data model going forward, such as:
 - That is where Cypher query language comes in. It is a fully open-source query language that operates specifically on graph databases, and is used by Memgraph and Neo4J.
 - Memgraph may be useful for visualizing our graph information for testing.
 
+#### Resources
+
+- Neoj4 Alternatives: <https://memgraph.com/blog/neo4j-alternative-what-are-my-open-source-db-options>
+- Memgraph OSS Github: <https://github.com/memgraph/memgraph>
+- Memgraph Cypher Examples: <https://memgraph.com/docs/querying>
+- Memgraph GOT Example: <https://playground.memgraph.com/sandbox/game-of-thrones-deaths>
+
 ## Questions
 
 These are questions asking ourselves what is important for the data model to include:
