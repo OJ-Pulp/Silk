@@ -4,17 +4,21 @@ This script generates a fake supply chain for model aircrafts and outputs it to 
 """
 
 # Corbin - 
-# [ ] other information
+# [x] other information
 # Neoj4 Alternatives: https://memgraph.com/blog/neo4j-alternative-what-are-my-open-source-db-options
 # Memgraph OSS Github: https://github.com/memgraph/memgraph
 # Memgraph Cypher Examples: https://memgraph.com/docs/querying
 # Memgraph GOT Example: https://playground.memgraph.com/sandbox/game-of-thrones-deaths
+# Capt. Terry -
+# Possibly good, possibly build from the ground up
 # Corbin -
-# [ ] alternative node types
+# [x] alternative node types
 # Other nodes could be used in the graph instead of keeping all relevant data in one node.
 # Ex. a Location node, a Company node, a Manufacturer node
+# Capt. Terry -
+# Good point, unsure if the project intent was advanced Q&A or metrics portion
 # Corbin -
-# [ ] alternative edge types
+# [x] alternative edge types
 # Different edge types could be used to denote different relationships.
 # Ex. Manufactured by, Located in, Owned by
 
@@ -29,25 +33,36 @@ MANUFACTURERS = DATA["Manufacturers"] # List of Dicts
 PART_CATEGORIES = DATA["Parts"]
 
 # Brooke -
-# [ ] num_products vs num_parts
+# [x] num_products vs num_parts
 # Did you intend for there to be a discrepency between the function parameter and the comment?
+# Capt. Terry -
+# Semi random part numbers
+# Ex. Bombers traditionally have about maybe 57 parts
+# Pick a few model plane types
+# Realistic part types with random names
+# Did not intend to have that commented parameter
 def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     """
     Main Function to generate a fake supply chain for model aircrafts.
-    :param num_parts: Number of parts to generate in the supply chain.
     :return: A dictionary representing the supply chain.
     """
     faker_gen = faker.Faker()
     num_variants = int(num_products * variant_distribution)
     num_base_products = num_products - num_variants
     # Brooke -
-    # [ ] # of parts per product
+    # [x] # of parts per product
     # From what I understand, this means that all products will have the same number of parts which is inaccurate.
     # Is that intended or should we randomize?
+    # Capt. Terry -
+    # See above
+    # Semi random numbers of parts with categories
     # Brooke - 
-    # [ ] mutually exclusive parts
+    # [x] mutually exclusive parts
     # This is counting all parts in each category, but some parts like methods of propulsion will be mutually exclusive.
     # Ex. Propeller and Jet Engine
+    # Capt. Terry -
+    # data.json is going to need a lot of changes
+    # Designate types of aircrafts, then what parts for those aircrafts, then number
     num_parts = num_products * sum(len(PART_CATEGORIES[category]) for category in PART_CATEGORIES)
 
     # 1. Create list of base products
@@ -55,31 +70,43 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     for i in range(num_base_products):
         # Generate UUID for the product
         # Brooke -
-        # [ ] uuid format
+        # [x] uuid format
         # This shouldn't be an issue for our made up data set, but product codes for model airplanes are a different format.
         # Ex. tam61040
         # This includes the first three letters of the manufacturer and an approx. 5 digit code
+        # Capt. Terry -
+        # Combine the generated uuid with the first three letters of the organization
         product_id = str(uuid.uuid4())
         # Brooke -
-        # [ ] product_name format
+        # [x] product_name format
         # This product_name does not fit the description of a (one) character with numbers.
         # This change in formatting should not be an issue as long as it is consistent.
         # Generate Random Product Name (Noun) with a character and numbers
+        # Capt. Terry -
+        # Try to make it more realistic
+        # Not the biggest deal
         product_name = faker_gen.word(part_of_speech='noun').capitalize()
         # Brooke -
-        # [ ] normal distribution of companies
+        # [x] normal distribution of companies
         # What represents your normal distribution? 
         # Have you assigned weights to the companies or defined a range?
+        # Capt. Terry -
+        # Keep it uniform
+        # Leave it how it is
         # Choose a random company from a normal distribution
         company = faker_gen.random_element(elements=list(COMPANIES.keys()))
         # Brooke -
-        # [ ] normal distribution of locations
+        # [x] normal distribution of locations
+        # Same thing here
+        # Capt. Terry -
         # Same thing here
         # Choose a random location from a normal distribution
         location = faker_gen.random_element(elements=COMPANIES[company])
         # Brooke -
-        # [ ] supply chain flow
+        # [x] supply chain flow
         # There is no currently set way to add the manufacturer/company's set of parts to the product parts list.
+        # Capt. Terry -
+        # Going to add that later
         product = {
             "ID": product_id,
             "Name": product_name,
@@ -96,12 +123,16 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         # Sample a random product from the products list
         base_product = faker_gen.random_element(elements=products)
         # Brooke - 
-        # [ ] uuid format cont.
+        # [x] uuid format cont.
         # Generate UUID for the variant
+        # Capt. Terry -
+        # Same thing
         variant_id = str(uuid.uuid4())
         # Brooke - 
-        # [ ] product_name format cont.
+        # [x] product_name format cont.
         # The Noun is not randomly generated at this step unlike the comment's statment due to being taken from the base.
+        # Capt. Terry -
+        # Copy and Pasted Comment
         # Generate Random Product Name (Noun) with a character and numbers
         variant_name = base_product["Name"] + " " + str(faker_gen.random_letter()) + " " + str(faker_gen.random_int(10, 1000))
         # Resample the location
@@ -117,9 +148,12 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
             "Parts": [base_product["ID"]]
         }
         # Brooke - 
-        # [ ] multi-layer variants?
+        # [x] multi-layer variants?
         # This will cause the variant_product to be treated as base_product in the next iteration.
         # Ex. variant_name = Applec45b300
+        # Capt. Terry -
+        # Make a dummy array and add it all at the end extend
+        # no multi-layer
         # Brooke + Corbin -
         # [ ] variant structure
         # Currently a variant is just the base_product going into a new product with no other changes.
@@ -162,11 +196,22 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     # 3. Create list of parts
     parts = []
     # Brooke -
-    # [ ] companies vs manufacturers
+    # [x] companies vs manufacturers
     # These would be some more key terms to define in an opening comment.
     # The format of the data.json file concerning these two is particularly confusing.
     # It needs to be consolidated and better defined.
     # Both have a category of a company with manufacturing locations.
+    # Capt. Terry -
+    # Wanted to differentiate 
+    # Manufacturers have different names than companies
+    # Companies - assemble the aircraft
+    # Manufacturers - assemble the sprues
+    # Possibly mix and match a bit
+    # Derek
+    # Suppliers vs Manufacturers
+    # Make vocab sheet
+    # Later make way to customize different stuff about data?
+    # How to figure out if a thing is supplier or manufacturer?
 
     # We want completely random locations for the parts
     # The assumption is that while the companies assemble the kits and products, the individual parts were sourced from various manufacturing locations
