@@ -26,7 +26,7 @@ It is important to describe our graph data model going forward, such as:
 
 - Memgraph is an open-source graph database system that can be locally hosted using Docker.
 - Go to `localhost:3000` for local hosted Memgraph Lab.
-- Can easily import CSV files, Kafka or Pulsar streams, or `CYPHERL` files.
+- Can easily import **CSV** files, Kafka or Pulsar streams, or `CYPHERL` files.
   - I would assume the native storage file for these databases is `CYPHERL`.
 
 #### Memgraph Resources
