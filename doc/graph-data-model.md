@@ -1,5 +1,11 @@
 # Graph Data Model
 
+It is important to describe our graph data model going forward, such as:
+
+- What query language we are using
+- What are all the node & edge types we have
+- All the properties of each node (metadata)
+
 ## Database Options
 
 ### JSON
@@ -17,9 +23,22 @@
 - That is where Cypher query language comes in. It is a fully open-source query language that operates specifically on graph databases, and is used by Memgraph and Neo4J.
 - Memgraph may be useful for visualizing our graph information for testing.
 
-## Node & Edge Types
+## Questions
 
-### Nodes
+These are questions asking ourselves what is important for the data model to include:
+
+- Why is `base_model` an edge characteristic?
+- What differentiates between what is stored in metadata and what is stored in plain node data?
+
+- If a part is manufactured in multiple places, should that variable be a list?
+  - Our edges should tell us this information
+
+- Should materials of parts be included?
+  - Unless gaining materials contributes significantly to lead time, I think that materials should be ignored - Corbin
+
+## Node & Edge Types & Characteristics
+
+### Node Types
 
 - Location
 - Component
@@ -32,8 +51,41 @@
 > [!note]
 > It may be important to make a distinction between manufacturers, companies, and suppliers, or consolidate them.
 
-### Edges
+### Node Characteristics
 
-- REQUIRES
-- SUPPLIES
--
+#### Component
+
+- `part_number` : \[List\[ID\]\]
+- `manufacturer` : \[string\]
+- `dimensions` : \[int,int,int\]
+- `full_product` : \[bool\]
+  - It may not be necessary to include this as a component characteristic, it can be inferred if it has no outgoing edges
+- `company` : \[string\]
+- `cost` : \[int\]
+- `criticality` : \[%\]
+- `failure_rate` : \[?\]
+- `substitutions` : \[list\[ID\]\]
+- `breakability` : \[?\]
+
+#### Manufacturer
+
+- `restricted_territory` : \[bool\]
+
+#### Supplier
+
+- `capacity` : \[int\]
+
+### Edge Types
+
+- `:REQUIRES`
+- `:SUPPLIES`
+- `:LOCATED_AT`
+- `:SHIPS_TO`
+- `:ASSEMBLES`
+
+### Edge Characteristics
+
+#### `:REQUIRES`
+
+- `base_model` : \[bool\]
+- `lead_time` : \[int\]
