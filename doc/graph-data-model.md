@@ -21,11 +21,17 @@ It is important to describe our graph data model going forward, such as:
 ### Cypher query language
 
 - That is where Cypher query language comes in. It is a fully open-source query language that operates specifically on graph databases, and is used by Memgraph and Neo4J.
-- Memgraph may be useful for visualizing our graph information for testing.
 
-#### Resources
+### Memgraph
 
-- Neoj4 Alternatives: <https://memgraph.com/blog/neo4j-alternative-what-are-my-open-source-db-options>
+- Memgraph is an open-source graph database system that can be locally hosted using Docker.
+- Go to `localhost:3000` for local hosted Memgraph Lab.
+- Can easily import CSV files, Kafka or Pulsar streams, or `CYPHERL` files.
+  - I would assume the native storage file for these databases is `CYPHERL`.
+
+#### Memgraph Resources
+
+- Memgraph Docs: <https://memgraph.com/docs/getting-started>
 - Memgraph OSS Github: <https://github.com/memgraph/memgraph>
 - Memgraph Cypher Examples: <https://memgraph.com/docs/querying>
 - Memgraph GOT Example: <https://playground.memgraph.com/sandbox/game-of-thrones-deaths>
