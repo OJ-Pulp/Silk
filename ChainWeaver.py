@@ -11,10 +11,15 @@ This script generates a fake supply chain for model aircrafts and outputs it to 
 # Memgraph GOT Example: https://playground.memgraph.com/sandbox/game-of-thrones-deaths
 # Capt. Terry -
 # Possibly good, possibly build from the ground up
+# Brooke - 
+# [ ] other information cont. 
+# Another database option to explore is Oracle Database with 23ai
+# I believe that the Air Force has a liscense that we could use or we could use the free version.
+# I would be happy to send over more information upon request.
 # Corbin -
 # [x] alternative node types
 # Other nodes could be used in the graph instead of keeping all relevant data in one node.
-# Ex. a Location node, a Company node, a Manufacturer node
+# Ex. a Location node, a Company  node, a Manufacturer node
 # Capt. Terry -
 # Good point, unsure if the project intent was advanced Q&A or metrics portion
 # Corbin -
@@ -27,148 +32,137 @@ import uuid
 import faker
 from config import WeaverDir
 
-DATA = json.load(open(f"{WeaverDir}/Chain/data.json", "r"))
-COMPANIES = DATA["Companies"] # List of Dicts
-MANUFACTURERS = DATA["Manufacturers"] # List of Dicts
-PART_CATEGORIES = DATA["Parts"]
+INPUTDATA = json.load(open(f"{WeaverDir}/Chain/inputdata.json", "r"))
+DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
+COMPANIES = INPUTDATA["Companies"] # List of Dicts
+# MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
+# PART_CATEGORIES = INPUTDATA["Parts"]
 
-# Brooke -
-# [x] num_products vs num_parts
-# Did you intend for there to be a discrepency between the function parameter and the comment?
-# Capt. Terry -
-# Semi random part numbers
-# Ex. Bombers traditionally have about maybe 57 parts
-# Pick a few model plane types
-# Realistic part types with random names
-# Did not intend to have that commented parameter
+def get_next_letter(current_letter):
+    """
+    Minor Function to get the variant_designation_letter of multi-layer variants.
+    :param current_letter: The variant_designation_letter of the variant on its last variation.
+    :return: A string of one capital letter to be the next variant_designation_letter.
+    """
+    # Get the ASCII value of the current letter and adds 1 to get the ASCII of the next
+    next_char_code = ord(current_letter) + 1
+    
+    # If it goes past "Z", wrap around to "A"
+    if next_char_code > ord("Z"):
+        next_char_code = ord("A")
+    
+    # Converts back to chr and outputs as a string of a standard capital letter
+    return chr(next_char_code)
+
 def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     """
     Main Function to generate a fake supply chain for model aircrafts.
+    :param num_products: The total number of unique model aircraft products to include in the supply chain.
+                         Defaults to 40.
+    :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
+                         Defaults to 0.25, meaning roughly 25% of products will be variations.
     :return: A dictionary representing the supply chain.
     """
+    # Sets overall variables
     faker_gen = faker.Faker()
     num_variants = int(num_products * variant_distribution)
     num_base_products = num_products - num_variants
-    # Brooke -
-    # [x] # of parts per product
-    # From what I understand, this means that all products will have the same number of parts which is inaccurate.
-    # Is that intended or should we randomize?
-    # Capt. Terry -
-    # See above
-    # Semi random numbers of parts with categories
-    # Brooke - 
-    # [x] mutually exclusive parts
-    # This is counting all parts in each category, but some parts like methods of propulsion will be mutually exclusive.
-    # Ex. Propeller and Jet Engine
-    # Capt. Terry -
-    # data.json is going to need a lot of changes
-    # Designate types of aircrafts, then what parts for those aircrafts, then number
-    num_parts = num_products * sum(len(PART_CATEGORIES[category]) for category in PART_CATEGORIES)
+    
+    # Sets base_product variables
+    base_products = []
+    designation_num = {designation_type: 0 for designation_type in DESIGNATIONS.keys()}
 
     # 1. Create list of base products
-    products = []
     for i in range(num_base_products):
-        # Generate UUID for the product
-        # Brooke -
-        # [x] uuid format
-        # This shouldn't be an issue for our made up data set, but product codes for model airplanes are a different format.
-        # Ex. tam61040
-        # This includes the first three letters of the manufacturer and an approx. 5 digit code
-        # Capt. Terry -
-        # Combine the generated uuid with the first three letters of the organization
-        product_id = str(uuid.uuid4())
-        # Brooke -
-        # [x] product_name format
-        # This product_name does not fit the description of a (one) character with numbers.
-        # This change in formatting should not be an issue as long as it is consistent.
-        # Generate Random Product Name (Noun) with a character and numbers
-        # Capt. Terry -
-        # Try to make it more realistic
-        # Not the biggest deal
-        product_name = faker_gen.word(part_of_speech='noun').capitalize()
-        # Brooke -
-        # [x] normal distribution of companies
-        # What represents your normal distribution? 
-        # Have you assigned weights to the companies or defined a range?
-        # Capt. Terry -
-        # Keep it uniform
-        # Leave it how it is
-        # Choose a random company from a normal distribution
-        company = faker_gen.random_element(elements=list(COMPANIES.keys()))
-        # Brooke -
-        # [x] normal distribution of locations
-        # Same thing here
-        # Capt. Terry -
-        # Same thing here
-        # Choose a random location from a normal distribution
-        location = faker_gen.random_element(elements=COMPANIES[company])
-        # Brooke -
-        # [x] supply chain flow
-        # There is no currently set way to add the manufacturer/company's set of parts to the product parts list.
-        # Capt. Terry -
-        # Going to add that later
-        product = {
-            "ID": product_id,
-            "Name": product_name,
+
+        # Assigns base_product designation
+        designation_mm = faker_gen.random_element(elements=list(DESIGNATIONS.keys()))
+        designation_num[designation_mm] += 1
+        base_product_designation_num = designation_num[designation_mm]
+        base_product_designation = f"{designation_mm}-{base_product_designation_num}"
+
+        # Assigns base_product popular_name and name
+        base_product_popular_name = faker_gen.word(part_of_speech='noun').capitalize()
+        base_product_name = f"{base_product_popular_name} {base_product_designation}"
+
+        # Assigns base_product company and company_location
+        base_product_company = faker_gen.random_element(elements=list(COMPANIES.keys()))
+        base_product_company_location = faker_gen.random_element(elements=COMPANIES[base_product_company])
+
+        # Assigns base_product id
+        base_product_base_uuid = str(uuid.uuid4())
+        base_product_id = f"{base_product_company[0:3].lower()}{base_product_base_uuid}"
+
+        # Assigns base_product
+        base_product = {
+            "ID": base_product_id,
+            "Name": base_product_name,
             "Full_Product": True,
-            "Company": company,
-            "Location": location,
-            "Metadata": {},
+            "Company": base_product_company,
+            "Location": base_product_company_location,
+            "Metadata": {"Designation": base_product_designation,
+                         "Popular Name": base_product_popular_name},
             "Parts": []
         }
-        products.append(product)
-    
+
+        # Appends base_product to the overall list of base_products
+        base_products.append(base_product)
+
+    # Sets variant variables
+    variant_products = []
+
     # 2. Create list of variants
     for i in range(num_variants):
-        # Sample a random product from the products list
-        base_product = faker_gen.random_element(elements=products)
-        # Brooke - 
-        # [x] uuid format cont.
-        # Generate UUID for the variant
-        # Capt. Terry -
-        # Same thing
-        variant_id = str(uuid.uuid4())
-        # Brooke - 
-        # [x] product_name format cont.
-        # The Noun is not randomly generated at this step unlike the comment's statment due to being taken from the base.
-        # Capt. Terry -
-        # Copy and Pasted Comment
-        # Generate Random Product Name (Noun) with a character and numbers
-        variant_name = base_product["Name"] + " " + str(faker_gen.random_letter()) + " " + str(faker_gen.random_int(10, 1000))
-        # Resample the location
-        location = faker_gen.random_element(elements=COMPANIES[base_product["Company"]])
-        # Create the variant product
+
+        # Assigns variant base_product
+        variant_base_product = faker_gen.random_element(elements=base_products)
+
+        # Assigns variant designation
+        variant_base_designation = variant_base_product["Metadata"]["Designation"]
+        if variant_base_designation[-1].isdigit():
+            variant_designation_letter = "A"
+        else:
+            variant_designation_letter = get_next_letter(variant_base_designation[-1])
+        variant_designation = f"{variant_base_designation}{variant_designation_letter}"
+
+        # Assigns variant name and carries on variant_base_product's popular_name
+        variant_name = f"{variant_base_product["Metadata"]["Popular Name"]} {variant_designation}"
+
+        # Assigns variant company and company_location
+        variant_company = variant_base_product["Company"]
+        variant_company_location = faker_gen.random_element(elements=COMPANIES[variant_company])
+
+        # Assigns variant id
+        variant_base_uuid = str(uuid.uuid4())
+        variant_id = f"{variant_company[0:3].lower()}{variant_base_uuid}"
+
+        # Assigns variant
         variant_product = {
             "ID": variant_id,
             "Name": variant_name,
             "Full_Product": True,
-            "Company": base_product["Company"],
-            "Location": location,
-            "Metadata": {},
-            "Parts": [base_product["ID"]]
+            "Company": variant_company,
+            "Location": variant_company_location,
+            "Metadata": {"Designation": variant_designation,
+                         "Popular Name": variant_base_product["Metadata"]["Popular Name"]},
+            "Parts": []
         }
-        # Brooke - 
-        # [x] multi-layer variants?
-        # This will cause the variant_product to be treated as base_product in the next iteration.
-        # Ex. variant_name = Applec45b300
-        # Capt. Terry -
-        # Make a dummy array and add it all at the end extend
-        # no multi-layer
-        # Brooke + Corbin -
-        # [ ] variant structure
-        # Currently a variant is just the base_product going into a new product with no other changes.
-        # This code looks as if the intent is to later ADD parts in conjunction with the base_product.
-        # It would be more consice and more accurate to take the consistent sprues over from the base_product.
-        # Then other different or replacement sprues could be added to the parts of the variant.
-        # This would take away the base_product as a part of the variant.
-        # It would also avoid a more tree like structure and stay consistent to the desired sprawling graph.
-        # It would also be far easier to identify what parts go into multiple different products.
-        # This would avoid an odd flow and interconnection of nodes.
-        # This would make it consistent that a full_product could be identified by not being an input part for anything.
-        # Therefore, it would likely no longer be necessary to keep the booleans signifying a full_product.
-        # This could potentially save space as long as another process was in place to use these factors to identify one.
-        products.append(variant_product)
 
+        variant_products.append(variant_product)
+
+    # Brooke + Corbin -
+    # [ ] variant structure
+    # Currently a variant is just the base_product going into a new product with no other changes.
+    # This code looks as if the intent is to later ADD parts in conjunction with the base_product.
+    # It would be more consice and more accurate to take the consistent sprues over from the base_product.
+    # Then other different or replacement sprues could be added to the parts of the variant.
+    # This would take away the base_product as a part of the variant.
+    # It would also avoid a more tree like structure and stay consistent to the desired sprawling graph.
+    # It would also be far easier to identify what parts go into multiple different products.
+    # This would avoid an odd flow and interconnection of nodes.
+    # This would make it consistent that a full_product could be identified by not being an input part for anything.
+    # Therefore, it would likely no longer be necessary to keep the booleans signifying a full_product.
+    # This could potentially save space as long as another process was in place to use these factors to identify one.
     # Brooke + Corbin -
     # [ ] sprue variant structure
     # Looking to the future, if the variant structure above is concured with, there would need to be a defined sprue variant structure.
