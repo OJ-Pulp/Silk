@@ -2,8 +2,9 @@ OVERVIEW - This script generates a fake supply chain for model aircrafts and out
 
 IMPORT - json, uuid, faker, WeaverDir
 
-Define data types and categories from data.json
-[ ] check correspondance
+Define data types and categories from inputdata.json
+[x] check correspondance
+RESOLUTION - Made definition for Company and utilized that for the dataset
 [ ] consolidate inputdata.json
 
 MAIN FUNCTION - weave
@@ -124,6 +125,14 @@ MAIN FUNCTION - weave
         Append variant_product to the overall list of variant_products.
         [ ] EXTEN. multi-layer variants
         [x] CHECK how to call metadata
+
+        Combine base_products and variant_products lists into products.
+
+        Set parts list.
+
+        for all products
+
+
 
 
 
