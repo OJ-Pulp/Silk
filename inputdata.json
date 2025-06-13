@@ -1,4 +1,23 @@
 {
+
+"Designations": {
+    "B": {"type": "Bomber"},
+    "F": {"type": "Fighter"},
+    "C": {"type": "Cargo"},
+    "A": {"type": "Attack"},
+    "P": {"type": "Patrol"},
+    "R": {"type": "Reconnaissance"},
+    "T": {"type": "Trainer"},
+    "K": {"type": "Tanker"},
+    "O": {"type": "Observation"},
+    "H": {"type": "MEDEVAC"},
+    "L": {"type": "Cold Weather"},
+    "M": {"type": "Multimission"},
+    "U": {"type": "Utility"},
+    "W": {"type": "Weather"},
+    "S": {"type": "Anti-Submarine Warfare"}
+}
+
     "Parts": {
         "Airframe": [
             "Fuselage",
