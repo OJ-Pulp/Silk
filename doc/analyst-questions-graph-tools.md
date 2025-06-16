@@ -227,12 +227,20 @@ RETURN node_summary, rel_summary, avg_clustering as network_resilience_score
     - Complete disconnection => supply chain interruption
 3. Calculate edge betweenness centrality
 
+#### Cypher Query
+
 ```cypher
 // Find nodes with high betweenness centrality (bottlenecks)
 CALL gds.graph.project('supply_network', '*', '*')
 CALL gds.betweenness.stream('supply_network') 
+
+// Return node IDs and score
 YIELD nodeId, score
+
+// Grab nodes from node IDs
 WITH gds.util.asNode(nodeId) as node, score
+
+// Condition for non-negative scores 
 WHERE score > 0
 
 // Create bottleneck score based on score returned earlier
@@ -246,7 +254,68 @@ LIMIT 20
 
 ### Question 8
 
+1. Count critical functions per supplier
+2. Calculate the revenue/volume concentration
+3. Assess substitution difficulty
+
+#### Cypher Query
+
+```cypher
+// Find suppliers that supply a component for a product
+MATCH (s:Supplier)-[:SUPPLIES]->(c:Component)-[:REQUIRED_FOR]->(p:Product)
+
+// Get counts of suppliers and products, sum annual revenue from each supplier
+WITH s, count(DISTINCT c) as component_count, 
+     count(DISTINCT p) as product_count,
+     sum(p.annual_revenue) as total_revenue_exposure
+
+// Condition for counts
+WHERE component_count > 1 OR product_count > 3
+
+// Return names of suppliers, counts of components and products, total revenue exposure of supplier, and then calculate concentration risk score
+RETURN s.name,
+       component_count,
+       product_count, 
+       total_revenue_exposure,
+       (component_count * product_count * total_revenue_exposure) as concentration_risk_score
+ORDER BY concentration_risk_score DESC
+```
+
 ### Question 9
+
+1. Identify suppliers providing identical components
+2. Analyze cost and performance overlap
+3. Consider geographic and risk diversification
+
+#### Cypher Query
+
+```cypher
+// Match 2 suppliers that supply the same component (I love this syntax, so symmetrical)
+MATCH (s1:Supplier)-[:SUPPLIES]->(c:Component)<-[:SUPPLIES]-(s2:Supplier)
+
+// Avoid duplicates (s1 and s2 swapped)
+WHERE s1.name < s2.name
+
+// Use collect to compare information on suppliers (unit cost, lead time)
+// WITH c, collect({supplier, unit_cost, lead_time}) -> + as suppliers
+WITH c, collect({supplier: s1, cost: s1.unit_cost, lead_time: s1.lead_time}) + 
+          collect({supplier: s2, cost: s2.unit_cost, lead_time: s2.lead_time}) as suppliers
+
+// Condition of number of suppliers
+WHERE size(suppliers) > 2
+
+
+// Return components with redundant suppliers and order by cost spread, returning lead time spread
+WITH c, suppliers, 
+     [sup IN suppliers | sup.cost] as costs,
+     [sup IN suppliers | sup.lead_time] as lead_times
+
+RETURN c.name as component,
+       [sup IN suppliers | sup.supplier.name] as redundant_suppliers,
+       apoc.coll.max(costs) - apoc.coll.min(costs) as cost_spread,
+       apoc.coll.max(lead_times) - apoc.coll.min(lead_times) as lead_time_spread
+ORDER BY cost_spread DESC
+```
 
 ### Question 10
 
