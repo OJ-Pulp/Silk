@@ -19,6 +19,8 @@ MAIN FUNCTION - weave
     Set num_variants according to the desired variant_distribution.
     Set num_base_products through the seperation from variants in the overall num_products.
 
+##  BASE PRODUCTS
+
     Set base_products list.
     Set each designation type shortcut to a num of 1.
         [x] decide to add before or after
@@ -85,6 +87,8 @@ MAIN FUNCTION - weave
         [ ] LATER way to add parts
         Append base_product to the overall list of base_products.
 
+##  VARIANTS
+
     Set variants list.
 
     for all variants
@@ -128,6 +132,8 @@ MAIN FUNCTION - weave
 
         Combine base_products and variant_products lists into products.
 
+##      CREATE PARTS
+
         for all products
 
             Set parts list.
@@ -154,6 +160,8 @@ MAIN FUNCTION - weave
             Assign checklist as a list of the names of all the parts.
             Set complete_checklist dictionary.
 
+##          CREATE SPRUES
+
             for all manufacturers
 
                 Assign current_manufacturer as the chosen manufacturer for this iteration.
@@ -177,6 +185,10 @@ MAIN FUNCTION - weave
                     Append location to manufacturer with current_location as the key.
 
                 Append sprue_manufacturer to complete_checklist with current_manufacturer as the key.
+
+##          ADD SPRUES TO PRODUCTS
+
+
 
 
 
