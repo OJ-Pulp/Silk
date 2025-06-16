@@ -137,7 +137,7 @@ MAIN FUNCTION - weave
             Assign product_designation as product["Metadata"]["Designation"].
             Assign product_num_parts as DESIGNATIONS[product_designation]["Number of Parts"].
 
-            for all part
+            for all parts
 
                 Generate a random uuid as part_id.
 
@@ -147,7 +147,41 @@ MAIN FUNCTION - weave
                 Assign part_base_name as the first part in the parts list for that designation.
                 Assign part_name as part_base_name " " random letter "" random number.
 
-                Assign product as a dictionary of all currently generated data with standard fields.
+                Assign part as a dictionary of all currently generated data with standard fields.
+
+                Append part to parts.
+
+            Assign checklist as a list of the names of all the parts.
+            Set complete_checklist dictionary.
+
+            for all manufacturers
+
+                Assign current_manufacturer as the chosen manufacturer for this iteration.
+
+                Set sprue_manufacturer dictionary.
+
+                for all locations
+
+                    Assign current_location as the chosen location for this iteration.
+
+                    Set sprue_location list.
+
+                    for all of checklist
+
+                        Assign current_part as the chosen part for this iteration.
+
+                        if current_part["Manufacturer"] == current_manufacturer and item["Location"] == current_location
+
+                            Append current_part to sprue_location.
+
+                    Append location to manufacturer with current_location as the key.
+
+                Append sprue_manufacturer to complete_checklist with current_manufacturer as the key.
+
+
+
+                    
+
 
 
 
