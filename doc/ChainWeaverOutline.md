@@ -128,9 +128,30 @@ MAIN FUNCTION - weave
 
         Combine base_products and variant_products lists into products.
 
-        Set parts list.
-
         for all products
+
+            Set parts list.
+
+            Pick a random product from the products list.
+
+            Assign product_designation as product["Metadata"]["Designation"].
+            Assign product_num_parts as DESIGNATIONS[product_designation]["Number of Parts"].
+
+            for all part
+
+                Generate a random uuid as part_id.
+
+                Pick a random manufacturer as part_manufacturer.
+                Pick a random manufacturer location as part_manufacturer_location.
+
+                Assign part_base_name as the first part in the parts list for that designation.
+                Assign part_name as part_base_name " " random letter "" random number.
+
+                Assign product as a dictionary of all currently generated data with standard fields.
+
+
+
+
 
 
 

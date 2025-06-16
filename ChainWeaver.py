@@ -35,8 +35,8 @@ from config import WeaverDir
 INPUTDATA = json.load(open(f"{WeaverDir}/Chain/inputdata.json", "r"))
 DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
 COMPANIES = INPUTDATA["Companies"] # List of Dicts
-# MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
-# PART_CATEGORIES = INPUTDATA["Parts"]
+MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
+PART_CATEGORIES = DESIGNATIONS["Parts"] # List of Dicts
 
 def get_next_letter(current_letter):
     """
@@ -152,37 +152,40 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         variant_products.append(variant_product)
 
     # FLAG - START HERE
-
-    parts = []
+    products = base_products + variant_products
 
     # 3. Create list of parts
     for i in range(num_products):
-        # Brooke -
-        # [ ] mutually exclusive parts cont.
-        # Same as before, although this is probably a more proper location.
-        # For every product create a part for each part in each category
-        for category, part_list in PART_CATEGORIES.items():
-            for part in part_list:
-                # Generate UUID for the part
-                part_id = str(uuid.uuid4())
-                # Brooke -
-                # [ ] companies vs manufacturers cont.
-                # Here company is used as the comment explanation even though manufacturer is used as the variable and data. 
-                # Company
-                manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
 
-                part_data = {
+        parts = []
+        product = faker_gen.random_element(elements=products)
+        product_designation = product["Metadata"]["Designation"]
+        product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
+
+        for category, part_list in PART_CATEGORIES.items():
+
+            for part in part_list:
+
+                part_id = str(uuid.uuid4())
+
+                part_name = f"{part} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}"
+
+                part_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
+                part_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[part_manufacturer])
+
+                part = {
                     "ID": part_id,
-                    "Name": part + " " + str(faker_gen.random_letter()) + " " + str(faker_gen.random_int(10, 1000)),
+                    "Name": part_name,
                     "Full_Product": False,
-                    "Company": manufacturer,
-                    "Location": faker_gen.random_element(elements=MANUFACTURERS[manufacturer]),
+                    "Manufacturer": part_manufacturer,
+                    "Location": part_manufacturer_location,
                     "Metadata": {
                         "Category": category,
                         "Type": part
                     }
                 }
-                parts.append(part_data)
+
+                parts.append(part)
 
     # 4. A company has a list of parts needed for an 
     #    aircraft, so they randomly go to each manufacturer and show them the list. The manufacturer says that they can provide
