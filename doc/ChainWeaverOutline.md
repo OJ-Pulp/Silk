@@ -27,7 +27,7 @@ MAIN FUNCTION - weave
     for all base_products
 
         Pick a designation randomly from inputdata.json.
-            [ ] create designation section
+            [x] create designation section
                 [x] pick a set of designations
                     Mission Modifiers
                         Bomber
@@ -64,12 +64,12 @@ MAIN FUNCTION - weave
         Reset that designation's type shortcut num to the current val + 1.
 
         Generate a random capitalized noun as base_product_popular_name.
-            [ ] include adjective noun option?
+            [ ] EXTEN. include adjective noun option?
         Assign base_product_name as the base_product_designation " " base_product_popular_name.
         Assign base_product_name to base_product.
 
         Pick a company randomly from inputdata.json.
-            [ ] review and edit company section
+            [x] review and edit company section
             [ ] EXTEN. normal distribution
         Assign base_product_company to base_product.
 
@@ -78,7 +78,7 @@ MAIN FUNCTION - weave
         Assign base_product_id to base_product.
 
         Pick a location randomly from the chosen company's options in inputdata.json.
-            [ ] review and edit location section
+            [x] review and edit location section
         Assign base_product_company_location to base_product.
 
         Assign base_product as a dictionary of all currently generated data with standard fields.
