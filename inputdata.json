@@ -2,6 +2,7 @@
 
 "Designations": {
     "B": {"Type": "Bomber",
+        "Number of Parts": "69",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -90,6 +91,7 @@
                 ]
         }},
     "F": {"Type": "Fighter",
+        "Number of Parts": "77",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -186,6 +188,7 @@
                 ]
         }},
     "C": {"Type": "Cargo",
+        "Number of Parts": "71",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -276,6 +279,7 @@
                 ]
         }},
     "A": {"Type": "Attack",
+        "Number of Parts": "80",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -375,6 +379,7 @@
                 ]
         }},
     "P": {"Type": "Patrol",
+        "Number of Parts": "73",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -467,6 +472,7 @@
                 ]
         }},
     "R": {"Type": "Reconnaissance",
+        "Number of Parts": "85",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -554,6 +560,7 @@
                 ]
         }},
     "T": {"Type": "Trainer",
+        "Number of Parts": "88",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -650,6 +657,7 @@
                 ]
         }},
     "K": {"Type": "Tanker",
+        "Number of Parts": "77",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -735,6 +743,7 @@
                 ]
         }},
     "O": {"Type": "Observation",
+        "Number of Parts": "79",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -822,6 +831,7 @@
                 ]
         }},
     "H": {"Type": "MEDEVAC",
+        "Number of Parts": "92",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -919,6 +929,7 @@
                 ]
         }},
     "L": {"Type": "Cold Weather",
+        "Number of Parts": "52",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -979,6 +990,7 @@
                 ]     
         }},
     "M": {"Type": "Multimission",
+        "Number of Parts": "60",
         "Parts": {
             "Airframe": [
                 "Modular Fuselage Sections",
@@ -1048,6 +1060,7 @@
                 ]
         }},
     "U": {"Type": "Utility",
+        "Number of Parts": "50",
         "Parts": {
             "Airframe": [
                 "High-Wing Design",
@@ -1098,12 +1111,14 @@
             "Miscellaneous": [
                 "Tool Kits",
                 "Spare Parts Kit",
+                "First Aid Kit",
                 "Survival Gear",
                 "Tow Hooks",
                 "Hose Reel"
                 ]
         }},
     "W": {"Type": "Weather",
+        "Number of Parts": "88",
         "Parts": {
             "Airframe": [
                 "Fuselage",
@@ -1191,6 +1206,7 @@
                 ]
         }},
     "S": {"Type": "Anti-Submarine Warfare",
+        "Number of Parts": "93",
         "Parts": {
             "Airframe": [
                 "Fuselage",

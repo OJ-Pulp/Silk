@@ -56,8 +56,8 @@ MAIN FUNCTION - weave
                         Glider
                         Lighter-than-Air (Z)
                         Spaceplane
-                [ ] pick part_types per designation
-                [ ] pick a num_parts per designation
+                [x] pick part_types per designation
+                [x] pick a num_parts per designation
                 Ensure NO MUTUALLY EXCLUSIVE PARTS.
         Assign base_product_designation as the designation type shorcut "-" shortcut num.
             Ex. B-17 or F-16
