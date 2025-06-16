@@ -36,7 +36,6 @@ INPUTDATA = json.load(open(f"{WeaverDir}/Chain/inputdata.json", "r"))
 DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
 COMPANIES = INPUTDATA["Companies"] # List of Dicts
 MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
-PART_CATEGORIES = DESIGNATIONS["Parts"] # List of Dicts
 
 def get_next_letter(current_letter):
     """
@@ -151,18 +150,17 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         # Appends variant_product to the overall list of variant_products
         variant_products.append(variant_product)
 
-    # FLAG - START HERE
     products = base_products + variant_products
 
-    # 3. Create list of parts
-    for i in range(num_products):
+    for product in products:
 
         parts = []
         product = faker_gen.random_element(elements=products)
         product_designation = product["Metadata"]["Designation"]
         product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
+        PARTS_CATEGORIES = DESIGNATIONS[product_designation]["Parts"]
 
-        for category, part_list in PART_CATEGORIES.items():
+        for category, part_list in PARTS_CATEGORIES.items():
 
             for part in part_list:
 
@@ -187,21 +185,35 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
                 parts.append(part)
 
-    # 4. A company has a list of parts needed for an 
-    #    aircraft, so they randomly go to each manufacturer and show them the list. The manufacturer says that they can provide
-    #    some of the parts that they will make into a kit. The company agrees and then crosses the items in the kit off the list.
-    #    The company then goes to the next manufacturer and does the same thing until they have all the parts they need.
-    for product in products:
-        check_list = [part for _category, part_list in PART_CATEGORIES.items() for part in part_list]
-        # Randomly select manufacturers to provide parts
-        manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
-        while check_list:
-            # Get list of parts that the manufacturer can provide
-            available_parts = [part for part in parts if part["Company"] == manufacturer and part["Metadata"]["Type"] in check_list]
-            if not available_parts:
-                # If no parts are available, choose a new manufacturer
-                manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
-            else:
+
+        checklist = [part for _category, part_list in PARTS_CATEGORIES.items() for part in part_list]
+        complete_checklist = {}
+
+        for current_manufacturer in MANUFACTURERS:
+
+            sprue_manufacturer = {}
+
+            for current_location in MANUFACTURERS[current_manufacturer]:
+
+                sprue_location = []
+
+                for item in checklist:
+
+                    parts_by_name = {current_part["Name"]: current_part for current_part in parts}
+                    current_part = parts_by_name[item]
+
+                    if current_part["Manufacturer"] == current_manufacturer and current_part["Location"] == current_location:
+                        
+                        sprue_location.append(current_part)
+
+                sprue_manufacturer[current_location] = sprue_location
+
+            complete_checklist[current_manufacturer] = sprue_manufacturer
+
+
+
+        
+            """
                 # Create a kit with the available parts
                 kit_id = str(uuid.uuid4())
                 # Brooke -
@@ -225,6 +237,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                 }
                 parts.append(kit_data)
                 product["Parts"].append(kit_id)
+                """
 
     # Brooke + Corbin -
     # [ ] variant structure
