@@ -1339,7 +1339,7 @@
       "Palm Beach, Florida, USA",
       "Montreal, Canada"
     ],
-    "Safran Landing Systems": [
+    "Safran Systems": [
       "Brest, France",
       "Gloucestershire, UK",
       "Columbus, Ohio, USA",
@@ -1362,84 +1362,8 @@
       "Dulles, Virginia, USA",
       "Wokingham, UK"
     ]
-  }, 
-    "Parts": {
-        "Airframe": [
-            "Fuselage",
-            "NoseCone",
-            "Canopy",
-            "CockpitCover",
-            "Wing",
-            "WingSpar",
-            "Aileron",
-            "Flap",
-            "Winglet",
-            "TipTank",
-            "VerticalStabilizer",
-            "Rudder",
-            "HorizontalStabilizer",
-            "Elevator",
-            "LandingGear",
-            "MainGear",
-            "NoseGear",
-            "TailWheel",
-            "GearDoor"
-        ],
-        "Propulsion": [
-            "Propeller",
-            "Spinner",
-            "JetEngine",
-            "ExhaustNozzle",
-            "Motor",
-            "EngineMount",
-            "Intake",
-            "FuelTank",
-            "BatteryCompartment"
-        ],
-        "ControlAndElectronics": [
-            "Servo",
-            "ControlHorn",
-            "Pushrod",
-            "Linkage",
-            "Receiver",
-            "Transmitter",
-            "FlightController",
-            "SpeedController",
-            "BatteryPack",
-            "Wire"
-        ],
-        "AvionicsAndSensors": [
-            "Gyroscope",
-            "Accelerometer",
-            "GPS Unit",
-            "Barometer",
-            "Antenna"
-        ],
-        "InternalComponents": [
-            "FrameRib",
-            "Former",
-            "Bulkhead",
-            "ServoTray",
-            "PayloadBay",
-            "CoolingDuct"
-        ],
-        "ExteriorDetails": [
-            "Decal",
-            "PaintScheme",
-            "NavigationLight",
-            "Antenna",
-            "PitotTube",
-            "AirBrake",
-            "StaticWick"
-        ],
-        "Miscellaneous": [
-            "Fastener",
-            "Hinge",
-            "ControlSurfaceTape",
-            "MountingBracket",
-            "AssemblyJig"
-        ]
-        },
+  },
+  
 "Manufacturers": {
     "Parker Hannifin": [
       "Cleveland, Ohio, USA",
