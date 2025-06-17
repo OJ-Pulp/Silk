@@ -11,7 +11,7 @@ class Node(ABC):
     Each node has a unique ID and a name.
     Examples:
     - Component nodes might have the component name as the name.
-    - Manufacturer nodes might use the company name.
+    - Manufacturer nodes might use the name of the company (ex. "Ford Motor Company").
     """
 
     def __init__(self, name):
@@ -35,9 +35,8 @@ class Component(Node):
         self,
         name: str,
         full_product: bool,
-        company: str,
+        manufacturer: str,
         locations: List[str],
-        components: List[str],
         dimensions: Optional[List[int]] = None,
         cost: Optional[float] = None,
         criticality: Optional[float] = None,
@@ -51,9 +50,8 @@ class Component(Node):
 
         :param name: Name of the component.
         :param full_product: Whether or not this component is a full product to be sold to customers.
-        :param company: The company or manufacturer that produces this component.
+        :param manufacturer: The manufacturer that produces this component.
         :param locations: The locations that this component is produced in.
-        :param parts: List of components required by this component.
         :param dimensions: A list of three integers [length, width, height].
         :param cost: Monetary cost of the component (float).
         :param criticality: Value (0–1) indicating component importance.
@@ -67,9 +65,11 @@ class Component(Node):
         # PLAIN NODE DATA
         # These attributes of each component are NOT OPTIONAL
         self.full_product = full_product
-        self.company = company
+        self.manufacturer = manufacturer
         self.locations = locations
-        self.components = components
+
+        # Empty components list that will be filled when the REQUIRES edges are created.
+        self.components = []
 
         # METADATA
         # All metadata is completely OPTIONAL
@@ -233,6 +233,7 @@ class Requires(Edge):
         # My type checker gets very angry at me if I don't do this
         assert isinstance(self.start_node, Component), "start_node must be a Component"
         assert isinstance(self.end_node, Component), "end_node must be a Component"
+
         self.start_node.components.append(self.end_node.id)
 
     def __init__(self, start_node: Component, end_node: Component, base_model: bool):
@@ -279,29 +280,30 @@ def main():
     """
     Example generator for random components.
     """
-    components = []
-    for i in range(5):
-        name = f"Component-{i}"
-        dims = [random.randint(1, 10) for _ in range(3)]
-        cost = random.uniform(10, 100)
-        criticality = random.uniform(0, 1)
-        failure_rate = random.uniform(0.001, 0.1)
-        substitutions = []
-        breakability = random.uniform(0, 1)
-
-        comp = Component(
-            name=name,
-            full_product=False,
-            dimensions=dims,
-            cost=cost,
-            criticality=criticality,
-            failure_rate=failure_rate,
-            substitutions=substitutions,
-            breakability=breakability,
-        )
-        components.append(comp)
-
-        print(f"{components[i].name} has ID: {components[i].id}")
+    # components = []
+    # for i in range(5):
+    #     name = f"Component-{i}"
+    #     dims = [random.randint(1, 10) for _ in range(3)]
+    #     cost = random.uniform(10, 100)
+    #     criticality = random.uniform(0, 1)
+    #     failure_rate = random.uniform(0.001, 0.1)
+    #     substitutions = []
+    #     breakability = random.uniform(0, 1)
+    #
+    #     comp = Component(
+    #         name=name,
+    #         full_product=False,
+    #         dimensions=dims,
+    #         cost=cost,
+    #         criticality=criticality,
+    #         failure_rate=failure_rate,
+    #         substitutions=substitutions,
+    #         breakability=breakability,
+    #     )
+    #     components.append(comp)
+    #
+    #     print(f"{components[i].name} has ID: {components[i].id}")
+    #
 
 
 if __name__ == "__main__":
