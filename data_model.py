@@ -34,6 +34,7 @@ class Component(Node):
     def __init__(
         self,
         name: str,
+        full_product: bool,
         dimensions: List[int],
         cost: float,
         criticality: float,
@@ -45,6 +46,7 @@ class Component(Node):
         Initialize a Component with specific attributes.
 
         :param name: Name of the component.
+        :param full_product:
         :param dimensions: A list of three integers [length, width, height].
         :param cost: Monetary cost of the component (float).
         :param criticality: Value (0–1) indicating component importance.
@@ -157,7 +159,7 @@ class Produces(Edge):
         self.daily_capacity = daily_capacity
         self.quality_grade = quality_grade
 
-    def add_to_sql(self, database):
+    #   def add_to_sql(self, database):
 
     def to_csv_row(self):
         """
@@ -197,7 +199,6 @@ def main():
     Example generator for random components.
     """
     components = []
-
     for i in range(5):
         name = f"Component-{i}"
         dims = [random.randint(1, 10) for _ in range(3)]
@@ -209,6 +210,7 @@ def main():
 
         comp = Component(
             name=name,
+            full_product=False,
             dimensions=dims,
             cost=cost,
             criticality=criticality,
