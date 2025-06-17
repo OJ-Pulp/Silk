@@ -4,6 +4,9 @@ OVERVIEW - This script generates a fake supply chain for model aircrafts and out
 
 ##  STRUCTURE
 
+[ ] include extras?
+    cost, criticality, failure_rate, breakablility
+
 Component = {
     "ID": [],
     "Name": [],
@@ -37,6 +40,14 @@ Manufacturer = {
     "Location": [],
     "Component": []
 }
+
+Component       :REQUIRED_FOR       Component
+Component       :MANUFACTURED_IN    Location
+Component       :MANUFACTURED_AT    Plant
+Component       :MANUFACTURED_BY    Manufacturer
+Plant           :LOCATED_IN         Location
+Plant           :OWNED_BY           Manufacturer
+Manufacturer    :LOCATED_AT         Location
 
 ##  START
 
