@@ -82,7 +82,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
         # Assigns base_product popular_name and name
         base_product_popular_name = faker_gen.word(part_of_speech='noun').capitalize()
-        base_product_name = f"{base_product_popular_name} {base_product_designation}"
+        base_product_name = f"{base_product_popular_name_1} {base_product_designation}"
 
         # Assigns base_product company and company_location
         base_product_company = faker_gen.random_element(elements=list(COMPANIES.keys()))
@@ -95,14 +95,11 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         # Assigns base_product
         base_product = {
             "ID": base_product_id,
-            "Name": base_product_name,
-            # [ ] no full product
-            "Full_Product": True,
+            "Name": [base_product_name],
             "Company": base_product_company,
-            # [ ] location lists
             "Location": base_product_company_location,
             "Metadata": {"Designation": base_product_designation,
-                         "Popular Name": base_product_popular_name},
+                         "Popular Name": [base_product_popular_name]},
             "Parts": []
         }
 
