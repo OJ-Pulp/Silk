@@ -1,1549 +1,1424 @@
-<<<<<<<< HEAD:Weavers/Chain/data.json
 {
-    "Parts": {
-        "Airframe": [
-            "Fuselage",
-            "NoseCone",
-            "Canopy",
-            "CockpitCover",
-            "Wing",
-            "WingSpar",
-            "Aileron",
-            "Flap",
-            "Winglet",
-            "TipTank",
-            "VerticalStabilizer",
-            "Rudder",
-            "HorizontalStabilizer",
-            "Elevator",
-            "LandingGear",
-            "MainGear",
-            "NoseGear",
-            "TailWheel",
-            "GearDoor"
-        ],
-        "Propulsion": [
-            "Propeller",
-            "Spinner",
-            "JetEngine",
-            "ExhaustNozzle",
-            "Motor",
-            "EngineMount",
-            "Intake",
-            "FuelTank",
-            "BatteryCompartment"
-        ],
-        "ControlAndElectronics": [
-            "Servo",
-            "ControlHorn",
-            "Pushrod",
-            "Linkage",
-            "Receiver",
-            "Transmitter",
-            "FlightController",
-            "SpeedController",
-            "BatteryPack",
-            "Wire"
-        ],
-        "AvionicsAndSensors": [
-            "Gyroscope",
-            "Accelerometer",
-            "GPSUnit",
-            "Barometer",
-            "Antenna"
-        ],
-        "InternalComponents": [
-            "FrameRib",
-            "Former",
-            "Bulkhead",
-            "ServoTray",
-            "PayloadBay",
-            "CoolingDuct"
-        ],
-        "ExteriorDetails": [
-            "Decal",
-            "PaintScheme",
-            "NavigationLight",
-            "Antenna",
-            "PitotTube",
-            "AirBrake",
-            "StaticWick"
-        ],
-        "Miscellaneous": [
-            "Fastener",
-            "Hinge",
-            "ControlSurfaceTape",
-            "MountingBracket",
-            "AssemblyJig"
-        ]
+    "Designations": {
+        "B": {
+            "Type": "Bomber",
+            "Number of Parts": "69",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Cone",
+                    "Canopy",
+                    "Cockpit Cover",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Winglet",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Tail Wheel",
+                    "Gear Door"
+                ],
+                "Propulsion": [
+                    "Jet Engine",
+                    "Exhaust Nozzle",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank"
+                ],
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Receiver",
+                    "Transmitter",
+                    "Flight Controller",
+                    "Speed Controller",
+                    "Battery Pack",
+                    "Wire"
+                ],
+                "AvionicsAndSensors": [
+                    "Gyroscope",
+                    "Accelerometer",
+                    "GPS Unit",
+                    "Barometer",
+                    "Antenna",
+                    "Radar",
+                    "Targeting System",
+                    "Norden Bombsight",
+                    "Electronic Warfare Suite"
+                ],
+                "WeaponryAndPayload": [
+                    "Bomb Bay",
+                    "Bomb Rack",
+                    "Bomb Release Mechanism",
+                    "Payload Compartment",
+                    "Internal Weapons Bay",
+                    "External Hardpoint",
+                    "Rotary Launcher",
+                    "Defensive Turret",
+                    "Gunner Station",
+                    "Chaff Dispenser",
+                    "Flare Dispenser"
+                ],
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Servo Tray",
+                    "Cooling Duct"
+                ],
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Pitot Tube",
+                    "Air Brake",
+                    "Static Wick"
+                ],
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig"
+                ]
+            }
         },
-"Companies": {
-    "Parker Hannifin": [
-      "Cleveland, Ohio, USA",
-      "Hannover, Germany",
-      "Basingstoke, UK",
-      "Singapore"
-    ],
-    "Moog Inc.": [
-      "East Aurora, New York, USA",
-      "Toronto, Canada",
-      "Basingstoke, UK",
-      "Singapore"
-    ],
-    "BendixKing": [
-      "Spokane, Washington, USA",
-      "Kansas City, Missouri, USA",
-      "San Diego, California, USA"
-    ],
-    "Honeywell Aerospace": [
-      "Phoenix, Arizona, USA",
-      "South Bend, Indiana, USA",
-      "Brussels, Belgium",
-      "Mississauga, Canada"
-    ],
-    "Sagem Avionics": [
-      "Paris, France",
-      "Toulouse, France",
-      "Tucson, Arizona, USA"
-    ],
-    "Sikorsky Aircraft": [
-      "Stratford, Connecticut, USA",
-      "Palm Beach, Florida, USA",
-      "Montreal, Canada"
-    ],
-    "Safran Landing Systems": [
-      "Brest, France",
-      "Gloucestershire, UK",
-      "Columbus, Ohio, USA",
-      "Kolkata, India"
-    ],
-    "Triumph Group": [
-      "Berwyn, Pennsylvania, USA",
-      "Hot Springs, Arkansas, USA",
-      "Toulouse, France",
-      "Singapore"
-    ],
-    "Woodward Inc.": [
-      "Fort Collins, Colorado, USA",
-      "Norrköping, Sweden",
-      "Basingstoke, UK",
-      "Shanghai, China"
-    ],
-    "AeroVironment": [
-      "Simi Valley, California, USA",
-      "Dulles, Virginia, USA",
-      "Wokingham, UK"
-    ]
-  }, 
-"Manufacturers": {
-    "Parker Hannifin": [
-      "Cleveland, Ohio, USA",
-      "Hannover, Germany"
-    ],
-    "Moog Inc.": [
-      "East Aurora, New York, USA",
-      "Toronto, Canada"
-    ],
-    "BendixKing": [
-      "Spokane, Washington, USA",
-      "Kansas City, Missouri, USA"
-    ],
-    "Honeywell Aerospace": [
-      "Phoenix, Arizona, USA",
-      "Brussels, Belgium"
-    ],
-    "Sagem Avionics": [
-      "Paris, France",
-      "Tucson, Arizona, USA"
-    ],
-    "Sikorsky Aircraft": [
-      "Stratford, Connecticut, USA",
-      "Montreal, Canada"
-    ],
-    "Safran Landing Systems": [
-      "Brest, France",
-      "Columbus, Ohio, USA"
-    ],
-    "Triumph Group": [
-      "Berwyn, Pennsylvania, USA",
-      "Singapore"
-    ],
-    "Woodward Inc.": [
-      "Fort Collins, Colorado, USA",
-      "Shanghai, China"
-    ],
-    "AeroVironment": [
-      "Simi Valley, California, USA",
-      "Wokingham, UK"
-    ]
-  }
-========
-{
-
-"Designations": {
-    "B": {"Type": "Bomber",
-        "Number of Parts": "69",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Cone",
-                "Canopy",
-                "Cockpit Cover",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Winglet",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Tail Wheel",
-                "Gear Door"
+        "F": {
+            "Type": "Fighter",
+            "Number of Parts": "77",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Cone",
+                    "Canopy",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Leading Edge Extension",
+                    "Strake",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Stabilator",
+                    "Canard",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Gear Door",
+                    "Speed Brake"
                 ],
-            "Propulsion": [
-                "Jet Engine",
-                "Exhaust Nozzle",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Jet Engine",
+                    "Afterburner",
+                    "Thrust Vectoring Nozzle",
+                    "Exhaust Nozzle",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Receiver",
-                "Transmitter",
-                "Flight Controller",
-                "Speed Controller",
-                "Battery Pack",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Receiver",
+                    "Transmitter",
+                    "Flight Control Computer",
+                    "Hands-On Throttle And Stick",
+                    "Mission Computer",
+                    "Data Link System",
+                    "Wire"
                 ],
-            "AvionicsAndSensors": [
-                "Gyroscope",
-                "Accelerometer",
-                "GPS Unit",
-                "Barometer",
-                "Antenna",
-                "Radar",
-                "Targeting System",
-                "Norden Bombsight",
-                "Electronic Warfare Suite"
+                "AvionicsAndSensors": [
+                    "Infra-Red Search and Track Radar",
+                    "Head-Up Display",
+                    "Helmet-Mounted Display",
+                    "Targeting Pod",
+                    "Weather/Navigation Radar",
+                    "GPS Unit",
+                    "Radar Warning Receiver",
+                    "Chaff Dispenser",
+                    "Flare Dispenser",
+                    "Antenna",
+                    "Jammer Pod"
                 ],
-            "WeaponryAndPayload": [
-                "Bomb Bay",
-                "Bomb Rack",
-                "Bomb Release Mechanism",
-                "Payload Compartment",
-                "Internal Weapons Bay",
-                "External Hardpoint",
-                "Rotary Launcher",
-                "Defensive Turret",
-                "Gunner Station",
-                "Chaff Dispenser",
-                "Flare Dispenser"
+                "WeaponryAndPayload": [
+                    "Internal Gun",
+                    "Gun Pod",
+                    "Missile Pylon",
+                    "Bomb Rack",
+                    "External Hardpoint",
+                    "Air-to-Air Missile",
+                    "Air-to-Ground Missile",
+                    "Guided Bomb",
+                    "Rocket Pod"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Servo Tray",
-                "Cooling Duct"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Avionics Bay",
+                    "Ejection Seat",
+                    "Life Support System",
+                    "Cooling Duct"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Pitot Tube",
-                "Air Brake",
-                "Static Wick"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Pitot Tube",
+                    "Static Wick",
+                    "Stealth Coating",
+                    "Access Panels"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig"
                 ]
-        }},
-    "F": {"Type": "Fighter",
-        "Number of Parts": "77",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Cone",
-                "Canopy",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Leading Edge Extension",
-                "Strake",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Stabilator",
-                "Canard",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Gear Door",
-                "Speed Brake"
+            }
+        },
+        "C": {
+            "Type": "Cargo",
+            "Number of Parts": "71",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Cone",
+                    "Cockpit",
+                    "Windshield",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Slats",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Gear Door",
+                    "Cargo Ramp",
+                    "Cargo Door",
+                    "Troop Door",
+                    "Paratroop Door"
                 ],
-            "Propulsion": [
-                "Jet Engine",
-                "Afterburner",
-                "Thrust Vectoring Nozzle",
-                "Exhaust Nozzle",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Turbofan Engine",
+                    "Exhaust Nozzle",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Receiver",
-                "Transmitter",
-                "Flight Control Computer",
-                "Hands-On Throttle And Stick",
-                "Mission Computer",
-                "Data Link System",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Receiver",
+                    "Transmitter",
+                    "Flight Management System",
+                    "Autopilot",
+                    "Communication System",
+                    "Wire"
                 ],
-            "AvionicsAndSensors": [
-                "Infra-Red Search and Track Radar",
-                "Head-Up Display",
-                "Helmet-Mounted Display",
-                "Targeting Pod",
-                "Weather/Navigation Radar",
-                "GPS Unit",
-                "Radar Warning Receiver",
-                "Chaff Dispenser",
-                "Flare Dispenser",
-                "Antenna",
-                "Jammer Pod"
+                "AvionicsAndSensors": [
+                    "Weather/Navigation Radar",
+                    "GPS Unit",
+                    "Traffic Collision Avoidance System",
+                    "Enhanced Ground Proximity Warning System",
+                    "Navigation Lights",
+                    "Antenna",
+                    "Altimeter",
+                    "Airspeed Indicator"
                 ],
-            "WeaponryAndPayload": [
-                "Internal Gun",
-                "Gun Pod",
-                "Missile Pylon",
-                "Bomb Rack",
-                "External Hardpoint",
-                "Air-to-Air Missile",
-                "Air-to-Ground Missile",
-                "Guided Bomb",
-                "Rocket Pod"
+                "CargoAndLoadingSystems": [
+                    "Cargo Floor",
+                    "Roller System",
+                    "Tie-Down Points",
+                    "Winch System",
+                    "Cargo Loading Ramps",
+                    "Pallet Mover",
+                    "Airdrop System",
+                    "Cargo Restraint System",
+                    "Freight Container Locks"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Avionics Bay",
-                "Ejection Seat",
-                "Life Support System",
-                "Cooling Duct"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Floor Beams",
+                    "Cargo Hold Lining",
+                    "Crew Rest Area",
+                    "Cooling Duct"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Pitot Tube",
-                "Static Wick",
-                "Stealth Coating",
-                "Access Panels"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Pitot Tube",
+                    "Static Wick",
+                    "Access Panels"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig",
+                    "Emergency Exit"
                 ]
-        }},
-    "C": {"Type": "Cargo",
-        "Number of Parts": "71",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Cone",
-                "Cockpit",
-                "Windshield",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Slats",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Gear Door",
-                "Cargo Ramp",
-                "Cargo Door",
-                "Troop Door",
-                "Paratroop Door"
+            }
+        },
+        "A": {
+            "Type": "Attack",
+            "Number of Parts": "80",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Section",
+                    "Armored Cockpit",
+                    "Canopy",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Slats",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Gear Door",
+                    "Targeting Pod Mount"
                 ],
-            "Propulsion": [
-                "Turbofan Engine",
-                "Exhaust Nozzle",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Jet Engine",
+                    "Exhaust Nozzle",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Receiver",
-                "Transmitter",
-                "Flight Management System",
-                "Autopilot",
-                "Communication System",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Receiver",
+                    "Transmitter",
+                    "Flight Control System",
+                    "Weapon Release System",
+                    "Hands-On Throttle And Stick",
+                    "Mission Computer",
+                    "Data Link System",
+                    "Wire"
                 ],
-            "AvionicsAndSensors": [
-                "Weather/Navigation Radar",
-                "GPS Unit",
-                "Traffic Collision Avoidance System",
-                "Enhanced Ground Proximity Warning System",
-                "Navigation Lights",
-                "Antenna",
-                "Altimeter",
-                "Airspeed Indicator"
+                "AvionicsAndSensors": [
+                    "Targeting Pod",
+                    "Forward-Looking Infrared Camera",
+                    "Laser Designator",
+                    "Ground-Mapping Radar",
+                    "Head-Up Display",
+                    "Helmet-Mounted Display",
+                    "GPS Unit",
+                    "Navigation System",
+                    "Radar Warning Receiver",
+                    "Chaff Dispenser",
+                    "Flare Dispenser",
+                    "Antenna",
+                    "Threat Warning System"
                 ],
-            "CargoAndLoadingSystems": [
-                "Cargo Floor",
-                "Roller System",
-                "Tie-Down Points",
-                "Winch System",
-                "Cargo Loading Ramps",
-                "Pallet Mover",
-                "Airdrop System",
-                "Cargo Restraint System",
-                "Freight Container Locks"
+                "WeaponryAndPayload": [
+                    "Internal Gun",
+                    "Cannon Pod",
+                    "Rocket Pod",
+                    "Missile Pylon",
+                    "Bomb Rack",
+                    "External Hardpoint",
+                    "Air-to-Ground Missile",
+                    "Guided Bomb",
+                    "Unguided Bomb",
+                    "Anti-Tank Missile",
+                    "Cluster Munition Dispenser"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Floor Beams",
-                "Cargo Hold Lining",
-                "Crew Rest Area",
-                "Cooling Duct"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Avionics Bay",
+                    "Ejection Seat",
+                    "Life Support System",
+                    "Cooling Duct",
+                    "Ammunition Drum"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Pitot Tube",
-                "Static Wick",
-                "Access Panels"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Pitot Tube",
+                    "Static Wick",
+                    "Access Panels",
+                    "Armoring Plates"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig",
-                "Emergency Exit"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig",
+                    "Emergency Egress System"
                 ]
-        }},
-    "A": {"Type": "Attack",
-        "Number of Parts": "80",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Section",
-                "Armored Cockpit",
-                "Canopy",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Slats",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Gear Door",
-                "Targeting Pod Mount"
+            }
+        },
+        "P": {
+            "Type": "Patrol",
+            "Number of Parts": "73",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Section",
+                    "Cockpit",
+                    "Observation Window",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Slats",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Gear Door",
+                    "Bomb Bay",
+                    "Searchlight Mount"
                 ],
-            "Propulsion": [
-                "Jet Engine",
-                "Exhaust Nozzle",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Turboprop Engine",
+                    "Exhaust Nozzle",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank",
+                    "Auxiliary Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Receiver",
-                "Transmitter",
-                "Flight Control System",
-                "Weapon Release System",
-                "Hands-On Throttle And Stick",
-                "Mission Computer",
-                "Data Link System",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Flight Management System",
+                    "Autopilot",
+                    "Navigation System",
+                    "Communication System",
+                    "Data Link System",
+                    "Mission Computer",
+                    "Wire"
                 ],
-            "AvionicsAndSensors": [
-                "Targeting Pod",
-                "Forward-Looking Infrared Camera",
-                "Laser Designator",
-                "Ground-Mapping Radar",
-                "Head-Up Display",
-                "Helmet-Mounted Display",
-                "GPS Unit",
-                "Navigation System",
-                "Radar Warning Receiver",
-                "Chaff Dispenser",
-                "Flare Dispenser",
-                "Antenna",
-                "Threat Warning System"
+                "AvionicsAndSensors": [
+                    "Maritime Surveillance/Synthetic Aperture Radar",
+                    "Magnetic Anomaly Detector",
+                    "Forward-Looking Infrared Camera",
+                    "Electro-Optical/Infrared Camera",
+                    "Sonobuoy Dispenser",
+                    "Acoustic Processor",
+                    "Automatic Identification System",
+                    "GPS Unit",
+                    "Weather/Navigation Radar",
+                    "Searchlight",
+                    "Antenna Array"
                 ],
-            "WeaponryAndPayload": [
-                "Internal Gun",
-                "Cannon Pod",
-                "Rocket Pod",
-                "Missile Pylon",
-                "Bomb Rack",
-                "External Hardpoint",
-                "Air-to-Ground Missile",
-                "Guided Bomb",
-                "Unguided Bomb",
-                "Anti-Tank Missile",
-                "Cluster Munition Dispenser"
+                "SpecializedMissionSystems": [
+                    "Sonobuoy Launch Tubes",
+                    "Torpedo Launch Tubes",
+                    "Crew Workstations",
+                    "Galley/Rest Area",
+                    "Search and Rescue Kit Stowage",
+                    "Medical Bay"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Avionics Bay",
-                "Ejection Seat",
-                "Life Support System",
-                "Cooling Duct",
-                "Ammunition Drum"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Avionics Bay",
+                    "Equipment Racks",
+                    "Crew Seating",
+                    "Cooling Duct"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Pitot Tube",
-                "Static Wick",
-                "Access Panels",
-                "Armoring Plates"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Pitot Tube",
+                    "Static Wick",
+                    "Access Panels",
+                    "Emergency Exits"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig",
-                "Emergency Egress System"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig",
+                    "Life Raft Stowage"
                 ]
-        }},
-    "P": {"Type": "Patrol",
-        "Number of Parts": "73",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Section",
-                "Cockpit",
-                "Observation Window",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Slats",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Gear Door",
-                "Bomb Bay",
-                "Searchlight Mount"
+            }
+        },
+        "R": {
+            "Type": "Reconnaissance",
+            "Number of Parts": "85",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Section",
+                    "Cockpit",
+                    "Observation Window",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Gear Door",
+                    "Sensor Pod Mounts",
+                    "Antenna Fairings"
                 ],
-            "Propulsion": [
-                "Turboprop Engine",
-                "Exhaust Nozzle",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank",
-                "Auxiliary Fuel Tank"
+                "Propulsion": [
+                    "High-Altitude Engine",
+                    "Exhaust Nozzle",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Flight Management System",
-                "Autopilot",
-                "Navigation System",
-                "Communication System",
-                "Data Link System",
-                "Mission Computer",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Flight Management System",
+                    "Autopilot",
+                    "Data Link System",
+                    "Satellite Communication System",
+                    "Mission Computer",
+                    "Wire"
                 ],
-            "AvionicsAndSensors": [
-                "Maritime Surveillance/Synthetic Aperture Radar",
-                "Magnetic Anomaly Detector",
-                "Forward-Looking Infrared Camera",
-                "Electro-Optical/Infrared Camera",
-                "Sonobuoy Dispenser",
-                "Acoustic Processor",
-                "Automatic Identification System",
-                "GPS Unit",
-                "Weather/Navigation Radar",
-                "Searchlight",
-                "Antenna Array"
+                "AvionicsAndSensors": [
+                    "SAR/GMTI Radar",
+                    "Electro-Optical/Infrared Camera",
+                    "Hyperspectral Sensor",
+                    "Lidar Sensor",
+                    "Signals Intelligence Suite",
+                    "Communications Intelligence System",
+                    "Electronic Intelligence System",
+                    "GPS Unit",
+                    "Navigation System",
+                    "High-Resolution Still Camera",
+                    "Video Camera System",
+                    "Antenna Array",
+                    "Chaff Dispenser",
+                    "Flare Dispenser",
+                    "Self-Protection Jammer"
                 ],
-            "SpecializedMissionSystems": [
-                "Sonobuoy Launch Tubes",
-                "Torpedo Launch Tubes",
-                "Crew Workstations",
-                "Galley/Rest Area",
-                "Search and Rescue Kit Stowage",
-                "Medical Bay"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Sensor Bays",
+                    "Equipment Racks",
+                    "Crew Workstations",
+                    "High CapacityData Storage Units",
+                    "Cooling System",
+                    "Life Support System"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Avionics Bay",
-                "Equipment Racks",
-                "Crew Seating",
-                "Cooling Duct"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Pitot Tube",
+                    "Static Wick",
+                    "Access Panels",
+                    "Stealth Coating"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Pitot Tube",
-                "Static Wick",
-                "Access Panels",
-                "Emergency Exits"
-                ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig",
-                "Life Raft Stowage"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig",
+                    "Emergency Egress System"
                 ]
-        }},
-    "R": {"Type": "Reconnaissance",
-        "Number of Parts": "85",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Section",
-                "Cockpit",
-                "Observation Window",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Gear Door",
-                "Sensor Pod Mounts",
-                "Antenna Fairings"
+            }
+        },
+        "T": {
+            "Type": "Trainer",
+            "Number of Parts": "88",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Cone",
+                    "Tandem Cockpit",
+                    "Canopy",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Tail Wheel",
+                    "Gear Door",
+                    "Stall Strips"
                 ],
-            "Propulsion": [
-                "High-Altitude Engine",
-                "Exhaust Nozzle",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Piston Engine",
+                    "Propeller",
+                    "Exhaust System",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Flight Management System",
-                "Autopilot",
-                "Data Link System",
-                "Satellite Communication System",
-                "Mission Computer",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Receiver",
+                    "Transmitter",
+                    "Flight Control System",
+                    "Dual Controls",
+                    "Intercom System",
+                    "Communication Radio",
+                    "Navigational Radio",
+                    "Wire"
                 ],
-            "AvionicsAndSensors": [
-                "SAR/GMTI Radar",
-                "Electro-Optical/Infrared Camera",
-                "Hyperspectral Sensor",
-                "Lidar Sensor",
-                "Signals Intelligence Suite",
-                "Communications Intelligence System",
-                "Electronic Intelligence System",
-                "GPS Unit",
-                "Navigation System",
-                "High-Resolution Still Camera",
-                "Video Camera System",
-                "Antenna Array",
-                "Chaff Dispenser",
-                "Flare Dispenser",
-                "Self-Protection Jammer"
+                "AvionicsAndSensors": [
+                    "Altimeter",
+                    "Airspeed Indicator",
+                    "Attitude Indicator",
+                    "Heading Indicator",
+                    "Vertical Speed Indicator",
+                    "GPS Unit",
+                    "VOR/ILS Receiver",
+                    "Transponder",
+                    "Engine Gauges",
+                    "Pitot Tube",
+                    "Static Port",
+                    "Antenna"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Sensor Bays",
-                "Equipment Racks",
-                "Crew Workstations",
-                "High CapacityData Storage Units",
-                "Cooling System",
-                "Life Support System"
+                "SafetyAndTrainingSystems": [
+                    "Ejection Seat",
+                    "Parachute Stowage",
+                    "Emergency Locator Transmitter",
+                    "Fire Extinguisher System",
+                    "In-Flight Recording System",
+                    "Simulated Weapon Systems",
+                    "Gear Warning System",
+                    "Stall Warning System"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Pitot Tube",
-                "Static Wick",
-                "Access Panels",
-                "Stealth Coating"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Instrument Panel",
+                    "Student Seat",
+                    "Instructor Seat",
+                    "Rudder Pedals",
+                    "Control Stick/Yoke",
+                    "Cooling Duct"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig",
-                "Emergency Egress System"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Landing Light",
+                    "Strobe Light",
+                    "Access Panels"
+                ],
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig",
+                    "Tow Bar Attachment Point"
                 ]
-        }},
-    "T": {"Type": "Trainer",
-        "Number of Parts": "88",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Cone",
-                "Tandem Cockpit",
-                "Canopy",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Tail Wheel",
-                "Gear Door",
-                "Stall Strips"
+            }
+        },
+        "K": {
+            "Type": "Tanker",
+            "Number of Parts": "77",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Cone",
+                    "Cockpit",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Gear Door",
+                    "Refueling Boom Receptacle"
                 ],
-            "Propulsion": [
-                "Piston Engine",
-                "Propeller",
-                "Exhaust System",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Turbofan Engine",
+                    "Engine Mount",
+                    "Intake",
+                    "Internal Fuel Tank",
+                    "External Fuel Pod"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Receiver",
-                "Transmitter",
-                "Flight Control System",
-                "Dual Controls",
-                "Intercom System",
-                "Communication Radio",
-                "Navigational Radio",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Flight Management System",
+                    "Autopilot",
+                    "Communication System",
+                    "Navigation System",
+                    "Wire"
                 ],
-            "AvionicsAndSensors": [
-                "Altimeter",
-                "Airspeed Indicator",
-                "Attitude Indicator",
-                "Heading Indicator",
-                "Vertical Speed Indicator",
-                "GPS Unit",
-                "VOR/ILS Receiver",
-                "Transponder",
-                "Engine Gauges",
-                "Pitot Tube",
-                "Static Port",
-                "Antenna"
+                "AvionicsAndSensors": [
+                    "Weather/Navigation Radar",
+                    "GPS Unit",
+                    "Traffic Collision Avoidance System",
+                    "Ground Proximity Warning System",
+                    "Altimeter",
+                    "Airspeed Indicator",
+                    "Antenna"
                 ],
-            "SafetyAndTrainingSystems": [
-                "Ejection Seat",
-                "Parachute Stowage",
-                "Emergency Locator Transmitter",
-                "Fire Extinguisher System",
-                "In-Flight Recording System",
-                "Simulated Weapon Systems",
-                "Gear Warning System",
-                "Stall Warning System"
+                "FuelTransferSystems": [
+                    "Fuel Pumps",
+                    "Fuel Lines",
+                    "Refueling Boom",
+                    "Hose-and-Drogue System",
+                    "Wing-mounted Refueling Pod",
+                    "Boom Operator Station",
+                    "Fuel Quantity Gauges",
+                    "Intertank Transfer System",
+                    "Defueling System"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Instrument Panel",
-                "Student Seat",
-                "Instructor Seat",
-                "Rudder Pedals",
-                "Control Stick/Yoke",
-                "Cooling Duct"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Fuel Bladders/Tanks",
+                    "Crew Rest Area",
+                    "Cargo Compartment",
+                    "Cooling Duct"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Landing Light",
-                "Strobe Light",
-                "Access Panels"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Pitot Tube",
+                    "Static Wick",
+                    "Access Panels",
+                    "Refueling Lights"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig",
-                "Tow Bar Attachment Point"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig",
+                    "Emergency Exits"
                 ]
-        }},
-    "K": {"Type": "Tanker",
-        "Number of Parts": "77",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Cone",
-                "Cockpit",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Gear Door",
-                "Refueling Boom Receptacle"
+            }
+        },
+        "O": {
+            "Type": "Observation",
+            "Number of Parts": "79",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Section",
+                    "Cockpit",
+                    "Large Observation Window",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Tail Wheel",
+                    "Gear Door",
+                    "Hardpoints"
                 ],
-            "Propulsion": [
-                "Turbofan Engine",
-                "Engine Mount",
-                "Intake",
-                "Internal Fuel Tank",
-                "External Fuel Pod"
+                "Propulsion": [
+                    "Propeller",
+                    "Exhaust System",
+                    "Muffler",
+                    "Engine Mount",
+                    "Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Flight Management System",
-                "Autopilot",
-                "Communication System",
-                "Navigation System",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Flight Control System",
+                    "Communication Radio",
+                    "Navigation Radio",
+                    "Wire"
                 ],
-            "AvionicsAndSensors": [
-                "Weather/Navigation Radar",
-                "GPS Unit",
-                "Traffic Collision Avoidance System",
-                "Ground Proximity Warning System",
-                "Altimeter",
-                "Airspeed Indicator",
-                "Antenna"
+                "AvionicsAndSensors": [
+                    "Altimeter",
+                    "Airspeed Indicator",
+                    "Attitude Indicator",
+                    "Heading Indicator",
+                    "Vertical Speed Indicator",
+                    "GPS Unit",
+                    "Communication Headsets",
+                    "Electro-Optical/Infrared Camera",
+                    "Mapping Camera",
+                    "Digital Recorder",
+                    "Spotting Scope Mounts",
+                    "Searchlight",
+                    "Antenna"
                 ],
-            "FuelTransferSystems": [
-                "Fuel Pumps",
-                "Fuel Lines",
-                "Refueling Boom",
-                "Hose-and-Drogue System",
-                "Wing-mounted Refueling Pod",
-                "Boom Operator Station",
-                "Fuel Quantity Gauges",
-                "Intertank Transfer System",
-                "Defueling System"
+                "MissionSpecificEquipment": [
+                    "Observation Seating",
+                    "Mission Console",
+                    "Equipment Racks",
+                    "Auxiliary Power Unit",
+                    "Data Downlink System",
+                    "Marking Flare Dispenser"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Fuel Bladders/Tanks",
-                "Crew Rest Area",
-                "Cargo Compartment",
-                "Cooling Duct"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Instrument Panel",
+                    "Crew Seating",
+                    "Cooling Duct"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Pitot Tube",
-                "Static Wick",
-                "Access Panels",
-                "Refueling Lights"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Pitot Tube",
+                    "Static Wick",
+                    "Access Panels"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig",
-                "Emergency Exits"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig",
+                    "Emergency Exits"
                 ]
-        }},
-    "O": {"Type": "Observation",
-        "Number of Parts": "79",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Section",
-                "Cockpit",
-                "Large Observation Window",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Tail Wheel",
-                "Gear Door",
-                "Hardpoints"
+            }
+        },
+        "H": {
+            "Type": "MEDEVAC",
+            "Number of Parts": "92",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Section",
+                    "Cockpit",
+                    "Cabin/Patient Compartment",
+                    "Loading Ramp",
+                    "Large Access Doors",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Tail Wheel",
+                    "Gear Door"
                 ],
-            "Propulsion": [
-                "Propeller",
-                "Exhaust System",
-                "Muffler",
-                "Engine Mount",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Turboprop Engine",
+                    "Propeller",
+                    "Exhaust System",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Flight Control System",
-                "Communication Radio",
-                "Navigation Radio",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Flight Control System",
+                    "Autopilot",
+                    "Communication System",
+                    "Navigation System",
+                    "Wire",
+                    "Intercom System"
                 ],
-            "AvionicsAndSensors": [
-                "Altimeter",
-                "Airspeed Indicator",
-                "Attitude Indicator",
-                "Heading Indicator",
-                "Vertical Speed Indicator",
-                "GPS Unit",
-                "Communication Headsets",
-                "Electro-Optical/Infrared Camera",
-                "Mapping Camera",
-                "Digital Recorder",
-                "Spotting Scope Mounts",
-                "Searchlight",
-                "Antenna"
+                "AvionicsAndSensors": [
+                    "Weather/Navigation Radar",
+                    "GPS Unit",
+                    "Forward-Looking Infrared Camera",
+                    "Electro-Optical/Infrared Camera",
+                    "Night Vision Compatible Lighting",
+                    "Moving Map Display",
+                    "Traffic Collision Avoidance System",
+                    "Ground Proximity Warning System",
+                    "Searchlight",
+                    "Antenna",
+                    "Medical Equipment Power Outlets"
                 ],
-            "MissionSpecificEquipment": [
-                "Observation Seating",
-                "Mission Console",
-                "Equipment Racks",
-                "Auxiliary Power Unit",
-                "Data Downlink System",
-                "Marking Flare Dispenser"
+                "MedicalEquipmentAndSystems": [
+                    "Stretcher Loading System",
+                    "Medical Oxygen System",
+                    "Medical Suction System",
+                    "IV Hooks/Mounts",
+                    "Medical Equipment Mounts",
+                    "Medical Crew Seats",
+                    "Environmental Control System",
+                    "Medical Lighting",
+                    "Patient Monitoring System Integration"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Instrument Panel",
-                "Crew Seating",
-                "Cooling Duct"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Soundproofing",
+                    "Insulation",
+                    "Medical Cabin Lining",
+                    "Equipment Racks",
+                    "Crew Rest Area",
+                    "Cooling Duct"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Pitot Tube",
-                "Static Wick",
-                "Access Panels"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Pitot Tube",
+                    "Static Wick",
+                    "Access Panels",
+                    "Emergency Floodlights"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig",
-                "Emergency Exits"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Control Surface Tape",
+                    "Mounting Bracket",
+                    "Assembly Jig",
+                    "Emergency Exits",
+                    "Survival Kit"
                 ]
-        }},
-    "H": {"Type": "MEDEVAC",
-        "Number of Parts": "92",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Section",
-                "Cockpit",
-                "Cabin/Patient Compartment",
-                "Loading Ramp",
-                "Large Access Doors",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Tail Wheel",
-                "Gear Door"
+            }
+        },
+        "L": {
+            "Type": "Cold Weather",
+            "Number of Parts": "52",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Wing",
+                    "Vertical Stabilizer",
+                    "Horizontal Stabilizer",
+                    "Landing Gear",
+                    "Float Landing Gear",
+                    "De-icing Boots",
+                    "Heated Pitot Tube",
+                    "Ice Protection System",
+                    "Reinforced Airframe"
                 ],
-            "Propulsion": [
-                "Turboprop Engine",
-                "Propeller",
-                "Exhaust System",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Turbofan Engine (with cold-start capability)",
+                    "Engine Inlet Anti-ice System",
+                    "Fuel System Heaters",
+                    "Oil System Heaters",
+                    "Auxiliary Power Unit"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Flight Control System",
-                "Autopilot",
-                "Communication System",
-                "Navigation System",
-                "Wire",
-                "Intercom System"
+                "ControlAndElectronics": [
+                    "Heated Control Surfaces",
+                    "Low-Temperature Hydraulic Fluid System",
+                    "Heated Batteries",
+                    "Insulated Wiring",
+                    "Environmental Control System",
+                    "Navigation Lights"
                 ],
-            "AvionicsAndSensors": [
-                "Weather/Navigation Radar",
-                "GPS Unit",
-                "Forward-Looking Infrared Camera",
-                "Electro-Optical/Infrared Camera",
-                "Night Vision Compatible Lighting",
-                "Moving Map Display",
-                "Traffic Collision Avoidance System",
-                "Ground Proximity Warning System",
-                "Searchlight",
-                "Antenna",
-                "Medical Equipment Power Outlets"
+                "AvionicsAndSensors": [
+                    "Weather/Navigation Radar",
+                    "GPS Unit",
+                    "Radio Altimeter",
+                    "Icing Detector",
+                    "Forward-Looking Infrared Camera",
+                    "Arctic Survival Beacon"
                 ],
-            "MedicalEquipmentAndSystems": [
-                "Stretcher Loading System",
-                "Medical Oxygen System",
-                "Medical Suction System",
-                "IV Hooks/Mounts",
-                "Medical Equipment Mounts",
-                "Medical Crew Seats",
-                "Environmental Control System",
-                "Medical Lighting",
-                "Patient Monitoring System Integration"
+                "CabinAndCrewFeatures": [
+                    "Insulated Cabin",
+                    "Crew Oxygen System",
+                    "Survival Kits",
+                    "Heated Seats",
+                    "Thermal Windows"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Soundproofing",
-                "Insulation",
-                "Medical Cabin Lining",
-                "Equipment Racks",
-                "Crew Rest Area",
-                "Cooling Duct"
+                "MaintenanceAndGroundSupport": [
+                    "Engine Covers",
+                    "Ground Power Unit",
+                    "Aircraft Tie-Downs",
+                    "Ski Dolly",
+                    "Maintenance Access Panels"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Pitot Tube",
-                "Static Wick",
-                "Access Panels",
-                "Emergency Floodlights"
-                ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Control Surface Tape",
-                "Mounting Bracket",
-                "Assembly Jig",
-                "Emergency Exits",
-                "Survival Kit"
+                "Miscellaneous": [
+                    "Fasteners",
+                    "Seals",
+                    "Specialized Lubricants",
+                    "Ice Scrapers",
+                    "Ice Brushes",
+                    "Emergency Flares"
                 ]
-        }},
-    "L": {"Type": "Cold Weather",
-        "Number of Parts": "52",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Wing",
-                "Vertical Stabilizer",
-                "Horizontal Stabilizer",
-                "Landing Gear",
-                "Float Landing Gear",
-                "De-icing Boots",
-                "Heated Pitot Tube",
-                "Ice Protection System",
-                "Reinforced Airframe"
+            }
+        },
+        "M": {
+            "Type": "Multimission",
+            "Number of Parts": "60",
+            "Parts": {
+                "Airframe": [
+                    "Modular Fuselage Sections",
+                    "Reconfigurable Wing Hardpoints",
+                    "Internal Weapons Bay",
+                    "External Hardpoints",
+                    "Convertible Cargo/Passenger Compartment",
+                    "Landing Gear",
+                    "Stealth Features",
+                    "Aerial Refueling Receptacle"
                 ],
-            "Propulsion": [
-                "Turbofan Engine (with cold-start capability)",
-                "Engine Inlet Anti-ice System",
-                "Fuel System Heaters",
-                "Oil System Heaters",
-                "Auxiliary Power Unit"
+                "Propulsion": [
+                    "High-Bypass Turbofan Engines",
+                    "Thrust Vectoring Nozzles",
+                    "Adaptive Engine Technology",
+                    "Integrated Fuel Tanks",
+                    "Auxiliary Power Unit"
                 ],
-            "ControlAndElectronics": [
-                "Heated Control Surfaces",
-                "Low-Temperature Hydraulic Fluid System",
-                "Heated Batteries",
-                "Insulated Wiring",
-                "Environmental Control System",
-                "Navigation Lights"
+                "ControlAndElectronics": [
+                    "Fly-by-Wire/Light Flight Control System",
+                    "Integrated Cockpit Display System",
+                    "Mission Computers",
+                    "Data Link Systems",
+                    "Electronic Warfare Suite",
+                    "Communications Suite",
+                    "Autonomous Flight Capability"
                 ],
-            "AvionicsAndSensors": [
-                "Weather/Navigation Radar",
-                "GPS Unit",
-                "Radio Altimeter",
-                "Icing Detector",
-                "Forward-Looking Infrared Camera",
-                "Arctic Survival Beacon"
+                "AvionicsAndSensors": [
+                    "Active Electronically Scanned Array Radar",
+                    "Electro-Optical/Infrared Camera",
+                    "Signals Intelligence Suite",
+                    "Electronic Intelligence System",
+                    "Communications Intelligence System",
+                    "Synthetic Aperture Radar",
+                    "Moving Target Indicator",
+                    "Weather/Navigation Radar",
+                    "Integrated Defensive Aids System"
                 ],
-            "CabinAndCrewFeatures": [
-                "Insulated Cabin",
-                "Crew Oxygen System",
-                "Survival Kits",
-                "Heated Seats",
-                "Thermal Windows"
+                "WeaponryAndPayload": [
+                    "Smart Bomb Kits",
+                    "Precision-Guided Missiles",
+                    "Reconnaissance System",
+                    "Targeting System",
+                    "Aerial Delivery Systems",
+                    "Search and Rescue Equipment",
+                    "Special Operations Equipment Bays"
                 ],
-            "MaintenanceAndGroundSupport": [
-                "Engine Covers",
-                "Ground Power Unit",
-                "Aircraft Tie-Downs",
-                "Ski Dolly",
-                "Maintenance Access Panels"
+                "InternalComponents": [
+                    "Modular Avionics Bays",
+                    "Reconfigurable Cabin Interior",
+                    "Environmental Control System",
+                    "Crew Rest Areas",
+                    "Life Support Systems"
                 ],
-            "Miscellaneous": [
-                "Fasteners",
-                "Seals",
-                "Specialized Lubricants",
-                "Ice Scrapers",
-                "Ice Brushes",
-                "Emergency Flares"
-                ]     
-        }},
-    "M": {"Type": "Multimission",
-        "Number of Parts": "60",
-        "Parts": {
-            "Airframe": [
-                "Modular Fuselage Sections",
-                "Reconfigurable Wing Hardpoints",
-                "Internal Weapons Bay",
-                "External Hardpoints",
-                "Convertible Cargo/Passenger Compartment",
-                "Landing Gear",
-                "Stealth Features",
-                "Aerial Refueling Receptacle"
+                "ExteriorDetails": [
+                    "Modular Fairings and Pylons",
+                    "Sensor Integration Points",
+                    "Paint Scheme",
+                    "Signature Reduction Measures",
+                    "Universal Connector Points"
                 ],
-            "Propulsion": [
-                "High-Bypass Turbofan Engines",
-                "Thrust Vectoring Nozzles",
-                "Adaptive Engine Technology",
-                "Integrated Fuel Tanks",
-                "Auxiliary Power Unit"
-                ],
-            "ControlAndElectronics": [
-                "Fly-by-Wire/Light Flight Control System",
-                "Integrated Cockpit Display System",
-                "Mission Computers",
-                "Data Link Systems",
-                "Electronic Warfare Suite",
-                "Communications Suite",
-                "Autonomous Flight Capability"
-                ],
-            "AvionicsAndSensors": [
-                "Active Electronically Scanned Array Radar",
-                "Electro-Optical/Infrared Camera",
-                "Signals Intelligence Suite",
-                "Electronic Intelligence System",
-                "Communications Intelligence System",
-                "Synthetic Aperture Radar",
-                "Moving Target Indicator",
-                "Weather/Navigation Radar",
-                "Integrated Defensive Aids System"
-                ],
-            "WeaponryAndPayload": [
-                "Smart Bomb Kits",
-                "Precision-Guided Missiles",
-                "Reconnaissance System",
-                "Targeting System",
-                "Aerial Delivery Systems",
-                "Search and Rescue Equipment",
-                "Special Operations Equipment Bays"
-                ],
-            "InternalComponents": [
-                "Modular Avionics Bays",
-                "Reconfigurable Cabin Interior",
-                "Environmental Control System",
-                "Crew Rest Areas",
-                "Life Support Systems"
-                ],
-            "ExteriorDetails": [
-                "Modular Fairings and Pylons",
-                "Sensor Integration Points",
-                "Paint Scheme",
-                "Signature Reduction Measures",
-                "Universal Connector Points"
-                ],
-            "Miscellaneous": [
-                "Standardized Interface Connectors",
-                "Quick-Change Kits",
-                "Integrated Diagnostics and Health Monitoring Systems",
-                "Software-Defined Systems"
+                "Miscellaneous": [
+                    "Standardized Interface Connectors",
+                    "Quick-Change Kits",
+                    "Integrated Diagnostics and Health Monitoring Systems",
+                    "Software-Defined Systems"
                 ]
-        }},
-    "U": {"Type": "Utility",
-        "Number of Parts": "50",
-        "Parts": {
-            "Airframe": [
-                "High-Wing Design",
-                "Robust Fuselage",
-                "Large Cargo Doors",
-                "Large Cargo Ramps",
-                "Fixed Landing Gear",
-                "Short Takeoff and Landing Features",
-                "Float Attachments",
-                "Ski Attachments",
-                "External Hardpoints"
+            }
+        },
+        "U": {
+            "Type": "Utility",
+            "Number of Parts": "50",
+            "Parts": {
+                "Airframe": [
+                    "High-Wing Design",
+                    "Robust Fuselage",
+                    "Large Cargo Doors",
+                    "Large Cargo Ramps",
+                    "Fixed Landing Gear",
+                    "Short Takeoff and Landing Features",
+                    "Float Attachments",
+                    "Ski Attachments",
+                    "External Hardpoints"
                 ],
-            "Propulsion": [
-                "Turboprop Engine",
-                "Propeller",
-                "Engine Mount",
-                "Intake",
-                "Internal Fuel Tank",
-                "Accessible Engine Bays"
+                "Propulsion": [
+                    "Turboprop Engine",
+                    "Propeller",
+                    "Engine Mount",
+                    "Intake",
+                    "Internal Fuel Tank",
+                    "Accessible Engine Bays"
                 ],
-            "ControlAndElectronics": [
-                "Simple, Reliable Flight Controls",
-                "GPS Unit",
-                "Autopilot",
-                "Electrical System",
-                "Cargo Tie-Down System"
+                "ControlAndElectronics": [
+                    "Simple, Reliable Flight Controls",
+                    "GPS Unit",
+                    "Autopilot",
+                    "Electrical System",
+                    "Cargo Tie-Down System"
                 ],
-            "AvionicsAndSensors": [
-                "Weather/Navigation Radar",
-                "Searchlight",
-                "Aerial Survey Cameras",
-                "Basic Communications Suite"
+                "AvionicsAndSensors": [
+                    "Weather/Navigation Radar",
+                    "Searchlight",
+                    "Aerial Survey Cameras",
+                    "Basic Communications Suite"
                 ],
-            "CabinAndPayloadFeatures": [
-                "Reconfigurable Cabin Interior",
-                "Tie-Down Points",
-                "Bench Seating",
-                "Medical Stretcher Attachments",
-                "Cargo Nets",
-                "Jump Doors"
+                "CabinAndPayloadFeatures": [
+                    "Reconfigurable Cabin Interior",
+                    "Tie-Down Points",
+                    "Bench Seating",
+                    "Medical Stretcher Attachments",
+                    "Cargo Nets",
+                    "Jump Doors"
                 ],
-            "ExteriorDetails": [
-                "Paint Scheme",
-                "External Antennas",
-                "Inspection Panels",
-                "Skid Plates"
+                "ExteriorDetails": [
+                    "Paint Scheme",
+                    "External Antennas",
+                    "Inspection Panels",
+                    "Skid Plates"
                 ],
-            "Miscellaneous": [
-                "Tool Kits",
-                "Spare Parts Kit",
-                "First Aid Kit",
-                "Survival Gear",
-                "Tow Hooks",
-                "Hose Reel"
+                "Miscellaneous": [
+                    "Tool Kits",
+                    "Spare Parts Kit",
+                    "First Aid Kit",
+                    "Survival Gear",
+                    "Tow Hooks",
+                    "Hose Reel"
                 ]
-        }},
-    "W": {"Type": "Weather",
-        "Number of Parts": "88",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Cone",
-                "Canopy",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Gear Door"
+            }
+        },
+        "W": {
+            "Type": "Weather",
+            "Number of Parts": "88",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Cone",
+                    "Canopy",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Gear Door"
                 ],
-            "Propulsion": [
-                "Propeller",
-                "Exhaust Nozzle",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Propeller",
+                    "Exhaust Nozzle",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Receiver",
-                "Transmitter",
-                "Flight Control System",
-                "Autopilot System",
-                "Data Logger",
-                "Communication System",
-                "Wire"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Receiver",
+                    "Transmitter",
+                    "Flight Control System",
+                    "Autopilot System",
+                    "Data Logger",
+                    "Communication System",
+                    "Wire"
                 ],
-            "AvionicsAndSensors": [
-                "Weather/Navigation Radar",
-                "Doppler Radar",
-                "Dropwindsonde Launcher",
-                "Temperature Sensor",
-                "Humidity Sensor",
-                "Pressure Sensor",
-                "Wind Sensor",
-                "GPS Unit",
-                "Infrared Sensor",
-                "Lidar System",
-                "Microwave Radiometer",
-                "Flight Data Recorder",
-                "Cockpit Voice Recorder",
-                "Antenna"
+                "AvionicsAndSensors": [
+                    "Weather/Navigation Radar",
+                    "Doppler Radar",
+                    "Dropwindsonde Launcher",
+                    "Temperature Sensor",
+                    "Humidity Sensor",
+                    "Pressure Sensor",
+                    "Wind Sensor",
+                    "GPS Unit",
+                    "Infrared Sensor",
+                    "Lidar System",
+                    "Microwave Radiometer",
+                    "Flight Data Recorder",
+                    "Cockpit Voice Recorder",
+                    "Antenna"
                 ],
-            "SpecializedEquipment": [
-                "Weather Station",
-                "Scientific Instrument Rack",
-                "Mission Specialist Station",
-                "Observation Window",
-                "Pressurized Cabin",
-                "Auxiliary Power Unit",
-                "Oxygen System"
+                "SpecializedEquipment": [
+                    "Weather Station",
+                    "Scientific Instrument Rack",
+                    "Mission Specialist Station",
+                    "Observation Window",
+                    "Pressurized Cabin",
+                    "Auxiliary Power Unit",
+                    "Oxygen System"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Equipment Bay",
-                "Insulation",
-                "Wiring Harness"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Equipment Bay",
+                    "Insulation",
+                    "Wiring Harness"
                 ],
-            "ExteriorDetails": [
-                "Paint Scheme",
-                "Navigation Light",
-                "Static Wick",
-                "Probe Mounts",
-                "Access Panels"
+                "ExteriorDetails": [
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Static Wick",
+                    "Probe Mounts",
+                    "Access Panels"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Mounting Bracket",
-                "Tool Kit",
-                "Safety Equipment"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Mounting Bracket",
+                    "Tool Kit",
+                    "Safety Equipment"
                 ]
-        }},
-    "S": {"Type": "Anti-Submarine Warfare",
-        "Number of Parts": "93",
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Cone",
-                "Cockpit",
-                "Canopy",
-                "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Gear Door",
-                "Bomb Bay Doors",
-                "Weapons Bay"
+            }
+        },
+        "S": {
+            "Type": "Anti-Submarine Warfare",
+            "Number of Parts": "93",
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Cone",
+                    "Cockpit",
+                    "Canopy",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Gear Door",
+                    "Bomb Bay Doors",
+                    "Weapons Bay"
                 ],
-            "Propulsion": [
-                "Jet Engine",
-                "Exhaust Nozzle",
-                "Engine Mount",
-                "Intake",
-                "Fuel Tank"
+                "Propulsion": [
+                    "Jet Engine",
+                    "Exhaust Nozzle",
+                    "Engine Mount",
+                    "Intake",
+                    "Fuel Tank"
                 ],
-            "ControlAndElectronics": [
-                "Servo",
-                "Control Horn",
-                "Pushrod",
-                "Linkage",
-                "Receiver",
-                "Transmitter",
-                "Flight Control Computer",
-                "Mission Computer",
-                "Data Link System",
-                "Communication System",
-                "Wire",
-                "Acoustic Processor",
-                "Tactical Workstation"
+                "ControlAndElectronics": [
+                    "Servo",
+                    "Control Horn",
+                    "Pushrod",
+                    "Linkage",
+                    "Receiver",
+                    "Transmitter",
+                    "Flight Control Computer",
+                    "Mission Computer",
+                    "Data Link System",
+                    "Communication System",
+                    "Wire",
+                    "Acoustic Processor",
+                    "Tactical Workstation"
                 ],
-            "AvionicsAndSensors": [
-                "Magnetic Anomaly Detector",
-                "Sonobuoy Launcher",
-                "Surface Search Radar",
-                "Electro-Optical/Infrared Camera",
-                "Electronic Support Measures System",
-                "Acoustic Sensor",
-                "GPS Unit",
-                "Weather/Navigation System",
-                "Head-Up Display",
-                "Multi-Function Displays",
-                "Radar Warning Receiver",
-                "Chaff Dispenser",
-                "Flare Dispenser",
-                "Antenna"
+                "AvionicsAndSensors": [
+                    "Magnetic Anomaly Detector",
+                    "Sonobuoy Launcher",
+                    "Surface Search Radar",
+                    "Electro-Optical/Infrared Camera",
+                    "Electronic Support Measures System",
+                    "Acoustic Sensor",
+                    "GPS Unit",
+                    "Weather/Navigation System",
+                    "Head-Up Display",
+                    "Multi-Function Displays",
+                    "Radar Warning Receiver",
+                    "Chaff Dispenser",
+                    "Flare Dispenser",
+                    "Antenna"
                 ],
-            "WeaponryAndPayload": [
-                "Sonobuoys",
-                "Torpedo Launch Tubes",
-                "Depth Charges",
-                "Anti-Ship Missile",
-                "Internal Weapons Bay",
-                "External Hardpoint",
-                "Weapon Release Mechanism"
+                "WeaponryAndPayload": [
+                    "Sonobuoys",
+                    "Torpedo Launch Tubes",
+                    "Depth Charges",
+                    "Anti-Ship Missile",
+                    "Internal Weapons Bay",
+                    "External Hardpoint",
+                    "Weapon Release Mechanism"
                 ],
-            "InternalComponents": [
-                "Frame Rib",
-                "Former",
-                "Bulkhead",
-                "Equipment Rack",
-                "Avionics Bay",
-                "Crew Stations",
-                "Rest Area",
-                "Galley",
-                "Life Support System",
-                "Cooling System"
+                "InternalComponents": [
+                    "Frame Rib",
+                    "Former",
+                    "Bulkhead",
+                    "Equipment Rack",
+                    "Avionics Bay",
+                    "Crew Stations",
+                    "Rest Area",
+                    "Galley",
+                    "Life Support System",
+                    "Cooling System"
                 ],
-            "ExteriorDetails": [
-                "Decal",
-                "Paint Scheme",
-                "Navigation Light",
-                "Pitot Tube",
-                "Static Wick",
-                "Access Panels"
+                "ExteriorDetails": [
+                    "Decal",
+                    "Paint Scheme",
+                    "Navigation Light",
+                    "Pitot Tube",
+                    "Static Wick",
+                    "Access Panels"
                 ],
-            "Miscellaneous": [
-                "Fastener",
-                "Hinge",
-                "Mounting Bracket",
-                "Assembly Jig",
-                "Ground Support Equipment Connections"
+                "Miscellaneous": [
+                    "Fastener",
+                    "Hinge",
+                    "Mounting Bracket",
+                    "Assembly Jig",
+                    "Ground Support Equipment Connections"
                 ]
-    }}
-},
-
-"Manufacturers": {
-    "Parker Hannifin": {"ID": "f9f23e9d-bd4b-4942-81ca-68c0f339c4e1",
-        "Locations": [
-            "Cleveland, : Ohio, USA",
-            "Hannover, Germany",
-            "Basingstoke, UK",
-            "Singapore"
-        ]},
-    "Moog Inc.": {"ID": "e1c99d53-d046-401d-9c20-4eb33745a6e1",
-        "Locations": [
-            "East Aurora, New York, USA",
-            "Toronto, Canada",
-            "Basingstoke, UK",
-            "Singapore"
-        ]},
-    "BendixKing": [
-      "Spokane, Washington, USA",
-      "Kansas City, Missouri, USA",
-      "San Diego, California, USA"
-    ],
-    "Honeywell Aerospace": [
-      "Phoenix, Arizona, USA",
-      "South Bend, Indiana, USA",
-      "Brussels, Belgium",
-      "Mississauga, Canada"
-    ],
-    "Sagem Avionics": [
-      "Paris, France",
-      "Toulouse, France",
-      "Tucson, Arizona, USA"
-    ],
-    "Sikorsky Aircraft": [
-      "Stratford, Connecticut, USA",
-      "Palm Beach, Florida, USA",
-      "Montreal, Canada"
-    ],
-    "Safran Systems": [
-      "Brest, France",
-      "Gloucestershire, UK",
-      "Columbus, Ohio, USA",
-      "Kolkata, India"
-    ],
-    "Triumph Group": [
-      "Berwyn, Pennsylvania, USA",
-      "Hot Springs, Arkansas, USA",
-      "Toulouse, France",
-      "Singapore"
-    ],
-    "Woodward Inc.": [
-      "Fort Collins, Colorado, USA",
-      "Norrköping, Sweden",
-      "Basingstoke, UK",
-      "Shanghai, China"
-    ],
-    "AeroVironment": [
-      "Simi Valley, California, USA",
-      "Dulles, Virginia, USA",
-      "Wokingham, UK"
-    ]
-  }
->>>>>>>> ddd9c4c (Rewrote Code in Accordance with Determined Logical Structure and Addressed Tickets):inputdata.json
+            }
+        }
+    },
+    "Manufacturers": {
+        "Parker Hannifin": {
+            "ID": "f9f23e9d-bd4b-4942-81ca-68c0f339c4e1",
+            "Locations": [
+                "Cleveland, : Ohio, USA",
+                "Hannover, Germany",
+                "Basingstoke, UK",
+                "Singapore"
+            ]
+        },
+        "Moog Inc.": {
+            "ID": "e1c99d53-d046-401d-9c20-4eb33745a6e1",
+            "Locations": [
+                "East Aurora, New York, USA",
+                "Toronto, Canada",
+                "Basingstoke, UK",
+                "Singapore"
+            ]
+        },
+        "BendixKing": {
+            "ID": "f2b2df23-dba8-4782-900c-be3c1d11a6f3",
+            "Locations": [
+                "Spokane, Washington, USA",
+                "Kansas City, Missouri, USA",
+                "San Diego, California, USA"
+            ]
+        },
+        "Honeywell Aerospace": {
+            "ID": "7aa7f297-94d0-467e-b6af-73dbe42110c9",
+            "Locations": [
+                "Phoenix, Arizona, USA",
+                "South Bend, Indiana, USA",
+                "Brussels, Belgium",
+                "Mississauga, Canada"
+            ]
+        },
+        "Sagem Avionics": {
+            "ID": "e21ca8f1-f2e8-48e5-ac26-4017084497cf",
+            "Locations": [
+                "Paris, France",
+                "Toulouse, France",
+                "Tucson, Arizona, USA"
+            ]
+        },
+        "Sikorsky Aircraft": {
+            "ID": "f6dcb560-ad26-493f-83e0-93c46d3b8eae",
+            "Locations": [
+                "Stratford, Connecticut, USA",
+                "Palm Beach, Florida, USA",
+                "Montreal, Canada"
+            ]
+        },
+        "Safran Systems": {
+            "ID": "9bb635bb-e150-4d8f-a132-163667316fcb",
+            "Locations": [
+                "Brest, France",
+                "Gloucestershire, UK",
+                "Columbus, Ohio, USA",
+                "Kolkata, India"
+            ]
+        },
+        "Triumph Group": {
+            "ID": "c8424a6d-6d8e-4b2d-94c1-3126c7419334",
+            "Locations": [
+                "Berwyn, Pennsylvania, USA",
+                "Hot Springs, Arkansas, USA",
+                "Toulouse, France",
+                "Singapore"
+            ]
+        },
+        "Woodward Inc.": {
+            "ID": "8e84b095-d725-4a8a-bbe1-df229e2f15e5",
+            "Locations": [
+                "Fort Collins, Colorado, USA",
+                "Norrköping, Sweden",
+                "Basingstoke, UK",
+                "Shanghai, China"
+            ]
+        },
+        "AeroVironment": {
+            "ID": "8c3f4dbd-3002-4a23-b70a-6c870741298e",
+            "Locations": [
+                "Simi Valley, California, USA",
+                "Dulles, Virginia, USA",
+                "Wokingham, UK"
+            ]
+        }
+    }
 }
