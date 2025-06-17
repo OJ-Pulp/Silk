@@ -96,6 +96,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         base_product = {
             "ID": base_product_id,
             "Name": [base_product_name],
+            "Full_Product": True,
             "Company": base_product_company,
             "Location": base_product_company_location,
             "Metadata": {"Designation": base_product_designation,
@@ -174,8 +175,6 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                     "ID": part_id,
                     "Name": part_name,
                     "Full_Product": False,
-                    # [ ] company vs manufacturer cont.
-                    # All might need to be the same format
                     "Manufacturer": part_manufacturer,
                     "Location": part_manufacturer_location,
                     "Metadata": {
@@ -193,27 +192,63 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
         checklist = [part for _category, part_list in PARTS_CATEGORIES.items() for part in part_list]
         complete_checklist = {}
+        sub_sprues = []
+        sprues = []
 
         for current_manufacturer in MANUFACTURERS:
 
             sprue_manufacturer = {}
 
+            sprue = {
+                "ID": str(uuid.uuid4()),
+                "Name": f"Sprue {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}",
+                "Full_Product": False,
+                "Manufacturer": current_manufacturer,
+                "Parts": []
+            }
+
             for current_location in MANUFACTURERS[current_manufacturer]:
 
-                sprue_location = []
+                sub_location = []
+
+                sub_sprue = {
+                    "ID": str(uuid.uuid4()),
+                    "Name": f"Sub_Sprue {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}",
+                    "Full_Product": False,
+                    "Manufacturer": current_manufacturer,
+                    "Location": current_location,
+                    "Parts": []
+                }
 
                 for item in checklist:
 
-                    parts_by_name = {current_part["Name"]: current_part for current_part in parts}
-                    current_part = parts_by_name[item]
+                    parts_by_id = {current_part["ID"]: current_part for current_part in parts}
+                    current_part = parts_by_id[item]
 
                     if current_part["Manufacturer"] == current_manufacturer and current_part["Location"] == current_location:
                         
-                        sprue_location.append(current_part)
+                        sub_location.append(current_part)
+                        sub_sprue["Parts"].append(current_part)
 
-                sprue_manufacturer[current_location] = sprue_location
+                        """
+                        OR
 
+                        sprue["Parts"].append(current_part)
+
+                        And take out a bunch of other stuff.
+                        """
+
+                sprue_manufacturer[current_location] = sub_location
+                sub_sprues.append(sub_sprue)
+            
+            sub_sprue["Parts"].append(sub_sprues)
+
+            
+
+            # List of Parts organized by manufacturer then location
             complete_checklist[current_manufacturer] = sprue_manufacturer
+
+
 
 
 
