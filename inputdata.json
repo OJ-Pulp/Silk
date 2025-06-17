@@ -1305,19 +1305,21 @@
     }}
 },
 
-"Companies": {
-    "Parker Hannifin": [
-      "Cleveland, Ohio, USA",
-      "Hannover, Germany",
-      "Basingstoke, UK",
-      "Singapore"
-    ],
-    "Moog Inc.": [
-      "East Aurora, New York, USA",
-      "Toronto, Canada",
-      "Basingstoke, UK",
-      "Singapore"
-    ],
+"Manufacturers": {
+    "Parker Hannifin": {"ID": "f9f23e9d-bd4b-4942-81ca-68c0f339c4e1",
+        "Locations": [
+            "Cleveland, : Ohio, USA",
+            "Hannover, Germany",
+            "Basingstoke, UK",
+            "Singapore"
+        ]},
+    "Moog Inc.": {"ID": "e1c99d53-d046-401d-9c20-4eb33745a6e1",
+        "Locations": [
+            "East Aurora, New York, USA",
+            "Toronto, Canada",
+            "Basingstoke, UK",
+            "Singapore"
+        ]},
     "BendixKing": [
       "Spokane, Washington, USA",
       "Kansas City, Missouri, USA",
@@ -1360,49 +1362,6 @@
     "AeroVironment": [
       "Simi Valley, California, USA",
       "Dulles, Virginia, USA",
-      "Wokingham, UK"
-    ]
-  },
-  
-"Manufacturers": {
-    "Parker Hannifin": [
-      "Cleveland, Ohio, USA",
-      "Hannover, Germany"
-    ],
-    "Moog Inc.": [
-      "East Aurora, New York, USA",
-      "Toronto, Canada"
-    ],
-    "BendixKing": [
-      "Spokane, Washington, USA",
-      "Kansas City, Missouri, USA"
-    ],
-    "Honeywell Aerospace": [
-      "Phoenix, Arizona, USA",
-      "Brussels, Belgium"
-    ],
-    "Sagem Avionics": [
-      "Paris, France",
-      "Tucson, Arizona, USA"
-    ],
-    "Sikorsky Aircraft": [
-      "Stratford, Connecticut, USA",
-      "Montreal, Canada"
-    ],
-    "Safran Landing Systems": [
-      "Brest, France",
-      "Columbus, Ohio, USA"
-    ],
-    "Triumph Group": [
-      "Berwyn, Pennsylvania, USA",
-      "Singapore"
-    ],
-    "Woodward Inc.": [
-      "Fort Collins, Colorado, USA",
-      "Shanghai, China"
-    ],
-    "AeroVironment": [
-      "Simi Valley, California, USA",
       "Wokingham, UK"
     ]
   }

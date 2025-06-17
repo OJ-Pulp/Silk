@@ -14,7 +14,7 @@ OVERVIEW - This script generates a fake supply chain for model aircrafts and out
     [ ] "Manufacturer": ,
     [ ] "Plant": ,
     [ ] "Location": ,
-    [ ] "Parts": [],
+    [ ] "Component": [],
 }
 
 [ ] Component = {
@@ -23,7 +23,7 @@ OVERVIEW - This script generates a fake supply chain for model aircrafts and out
     [ ] "Manufacturer": [],
     [ ] "Plant": [],
     [ ] "Location": [],
-    [ ] "Parts": []
+    [ ] "Component": []
         }
 
 [ ] Location = {
@@ -249,6 +249,10 @@ MAIN FUNCTION - weave
                 Append sprue_manufacturer to complete_checklist with current_manufacturer as the key.
 
 ##          ADD SPRUES TO PRODUCTS
+
+            for all checklist
+
+                
 
             
 

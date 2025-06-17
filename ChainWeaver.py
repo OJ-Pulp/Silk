@@ -99,7 +99,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
             "Company": base_product_company,
             "Location": base_product_company_location,
             "Metadata": {"Designation": base_product_designation,
-                         "Popular Name": [base_product_popular_name]},
+                         "Popular Name": base_product_popular_name},
             "Parts": []
         }
 
