@@ -76,7 +76,7 @@ class Component(Node):
         # Include runtime validation for supported arguments
         self.metadata = {}
         if dimensions is not None:
-            if len(self.metadata) != 3:
+            if len(dimensions) != 3:
                 raise ValueError(
                     "dimensions must be a list of three integers [L, W, H]"
                 )
@@ -220,9 +220,9 @@ class Requires(Edge):
     """
     :REQUIRES is the relationship that relates components to components.
     It states that the source component requires the target component along the supply chain.
-
-    Include attributes such as a boolean base model variable, which states if the source component is a base model.
     """
+
+    # TODO: ask Cpt. Terry for more clarification on base model edge characteristic, for a better description in the docstring.
 
     def __append_components_lists(self):
         """
@@ -236,17 +236,26 @@ class Requires(Edge):
 
         self.start_node.components.append(self.end_node.id)
 
-    def __init__(self, start_node: Component, end_node: Component, base_model: bool):
+    def __init__(
+        self,
+        start_node: Component,
+        end_node: Component,
+        base_model: bool,
+        lead_time: int,
+    ):
         """
         Creates a :REQUIRES relationship from one component to another.
         The start node requires the target node.
 
         :param start_node: The source node (must be a Component).
         :param end_node: The target node (must be a Component).
+        :param base_model:
+        :param lead_time: The time it takes for the target component to be shipped & fabricated into the source component. (hours, days, business days)
         """
 
         super().__init__(start_node, end_node)
         self.base_model = base_model
+        self.lead_time = lead_time
 
         self.__append_components_lists()
 
@@ -269,6 +278,7 @@ class Requires(Edge):
             ":END_ID(Component)": self.end_node.id,
             ":TYPE": "REQUIRES",
             "base_model": self.base_model,
+            "lead_time": self.lead_time,
         }
 
 
@@ -280,30 +290,33 @@ def main():
     """
     Example generator for random components.
     """
-    # components = []
-    # for i in range(5):
-    #     name = f"Component-{i}"
-    #     dims = [random.randint(1, 10) for _ in range(3)]
-    #     cost = random.uniform(10, 100)
-    #     criticality = random.uniform(0, 1)
-    #     failure_rate = random.uniform(0.001, 0.1)
-    #     substitutions = []
-    #     breakability = random.uniform(0, 1)
-    #
-    #     comp = Component(
-    #         name=name,
-    #         full_product=False,
-    #         dimensions=dims,
-    #         cost=cost,
-    #         criticality=criticality,
-    #         failure_rate=failure_rate,
-    #         substitutions=substitutions,
-    #         breakability=breakability,
-    #     )
-    #     components.append(comp)
-    #
-    #     print(f"{components[i].name} has ID: {components[i].id}")
-    #
+    components = []
+    for i in range(10):
+        name = f"Component-{i}"
+        dims = [random.randint(1, 10) for _ in range(3)]
+        cost = random.uniform(10, 100)
+        criticality = random.uniform(0, 1)
+        failure_rate = random.uniform(0.001, 0.1)
+        substitutions = []
+        breakability = random.uniform(0, 1)
+
+        comp = Component(
+            name=name,
+            full_product=False,
+            manufacturer="Test Inc.",
+            locations=["Singapore", "New York City, USA"],
+            dimensions=dims,
+            cost=cost,
+            criticality=criticality,
+            failure_rate=failure_rate,
+            substitutions=substitutions,
+            breakability=breakability,
+        )
+        components.append(comp)
+
+        print(
+            f"{components[i].name} has ID: {components[i].id} and criticality of {components[i].metadata['criticality']} and costs {components[i].metadata['cost']}"
+        )
 
 
 if __name__ == "__main__":
