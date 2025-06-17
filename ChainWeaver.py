@@ -150,27 +150,36 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         # Appends variant_product to the overall list of variant_products
         variant_products.append(variant_product)
 
+    # Combines all products together as equals
     products = base_products + variant_products
 
+    # 3. Creates parts and sprues
     for product in products:
 
+        # Sets parts variables
         parts = []
         product = faker_gen.random_element(elements=products)
         product_designation = product["Metadata"]["Designation"]
-        product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
+        # product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
         PARTS_CATEGORIES = DESIGNATIONS[product_designation]["Parts"]
 
+        # 3a. Creates parts
         for category, part_list in PARTS_CATEGORIES.items():
 
+            # According to the inputdata.json list of desired parts for that product
             for part in part_list:
 
+                # Assigns part id
                 part_id = str(uuid.uuid4())
 
+                # Assigns part name
                 part_name = f"{part} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}"
 
+                # Assigns part manufacturer and manufacturer location
                 part_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
                 part_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[part_manufacturer])
 
+                # Assigns part
                 part = {
                     "ID": part_id,
                     "Name": part_name,
@@ -184,20 +193,27 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                     "Parts": []
                 }
 
+                # Appends part to the overall list of parts for this product
                 parts.append(part)
 
 
         # [ ] Interconnect Locations
         # Components are manufactured at multiple locatios
 
+        # Sets categorization variables
         checklist = [part for _category, part_list in PARTS_CATEGORIES.items() for part in part_list]
         complete_checklist = {}
         sub_sprues = []
         sprues = []
 
+        # 3b. Creates sprues
         for current_manufacturer in MANUFACTURERS:
 
+            # Sets manufacturer variables
             sprue_manufacturer = {}
+
+            """
+            OR
 
             sprue = {
                 "ID": str(uuid.uuid4()),
@@ -206,11 +222,15 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                 "Manufacturer": current_manufacturer,
                 "Parts": []
             }
+            """
 
+            # 3bsub. Creates subsprues
             for current_location in MANUFACTURERS[current_manufacturer]:
 
+                # Sets subsprue variables
                 sub_location = []
 
+                # Assigns sub_sprue
                 sub_sprue = {
                     "ID": str(uuid.uuid4()),
                     "Name": f"Sub_Sprue {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}",
@@ -220,13 +240,17 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                     "Parts": []
                 }
 
+                # Groups parts with their locations and manufacturers
                 for item in checklist:
 
+                    # Sets consolidation variables
                     parts_by_id = {current_part["ID"]: current_part for current_part in parts}
                     current_part = parts_by_id[item]
 
+                    # Checks if the current part belongs to the current group
                     if current_part["Manufacturer"] == current_manufacturer and current_part["Location"] == current_location:
                         
+                        # LINKAGE - Adds the current part to the parts of the current sub sprue and checklist
                         sub_location.append(current_part)
                         sub_sprue["Parts"].append(current_part)
 
@@ -238,46 +262,15 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                         And take out a bunch of other stuff.
                         """
 
+                # LINKAGE - Adds the current sub sprue to the parts of the current sprue for checklist
                 sprue_manufacturer[current_location] = sub_location
                 sub_sprues.append(sub_sprue)
             
-            sub_sprue["Parts"].append(sub_sprues)
+            # LINKAGE - Adds the current sub sprue to the parts of the current sprue
+            sprues["Parts"].append(sub_sprues)
 
-            
-
-            # List of Parts organized by manufacturer then location
+            # List of parts organized by manufacturer then location
             complete_checklist[current_manufacturer] = sprue_manufacturer
-
-
-
-
-
-        
-            """
-                # Create a kit with the available parts
-                kit_id = str(uuid.uuid4())
-                # Brooke -
-                # [ ] naming structures
-                # A comment or text document to be used as a key for different nameing structures may be useful.
-                # Kit names are random letter of the alphabet and a number
-                kit_name = faker_gen.random_letter().upper() + " " + str(faker_gen.random_int(10, 1000))
-                # Location is the same as the manufacturer
-                kit_location = faker_gen.random_element(elements=MANUFACTURERS[manufacturer])
-                kit_data = {
-                    "ID": kit_id,
-                    "Name": kit_name,
-                    "Full_Product": False,
-                    "Company": manufacturer,
-                    "Location": kit_location,
-                    "Metadata": {
-                        "Category": "Kit",
-                        "Type": "Assembly Kit"
-                    },
-                    "Parts": [part["ID"] for part in available_parts]
-                }
-                parts.append(kit_data)
-                product["Parts"].append(kit_id)
-                """
 
     # Brooke + Corbin -
     # [ ] variant structure
