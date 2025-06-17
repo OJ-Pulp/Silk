@@ -69,11 +69,9 @@ These are questions asking ourselves what is important for the data model to inc
 #### Component
 
 - `part_number` : \[List\[ID\]\]
-- `manufacturer` : \[string\]
 - `dimensions` : \[int,int,int\]
 - `full_product` : \[bool\]
   - It may not be necessary to include this as a component characteristic, it can be inferred if it has no outgoing edges
-- `company` : \[string\]
 - `cost` : \[int\]
 - `criticality` : \[%\]
 - `failure_rate` : \[?\]
@@ -83,14 +81,11 @@ These are questions asking ourselves what is important for the data model to inc
 #### Manufacturer
 
 - `restricted_territory` : \[bool\]
-
-#### Supplier
-
 - `capacity` : \[int\]
 
 ### Edge Types
 
-- `:REQUIRES`
+- `:REQUIRED_FOR`
 - `:SUPPLIES`
 - `:LOCATED_AT`
 - `:SHIPS_TO`
