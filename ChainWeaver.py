@@ -4,17 +4,26 @@ This script generates a fake supply chain for model aircrafts and outputs it to 
 """
 
 # Corbin - 
-# [ ] other information
+# [x] other information
 # Neoj4 Alternatives: https://memgraph.com/blog/neo4j-alternative-what-are-my-open-source-db-options
 # Memgraph OSS Github: https://github.com/memgraph/memgraph
 # Memgraph Cypher Examples: https://memgraph.com/docs/querying
 # Memgraph GOT Example: https://playground.memgraph.com/sandbox/game-of-thrones-deaths
+# Capt. Terry -
+# Possibly good, possibly build from the ground up
+# Brooke - 
+# [ ] other information cont. 
+# Another database option to explore is Oracle Database with 23ai
+# I believe that the Air Force has a liscense that we could use or we could use the free version.
+# I would be happy to send over more information upon request.
 # Corbin -
-# [ ] alternative node types
+# [x] alternative node types
 # Other nodes could be used in the graph instead of keeping all relevant data in one node.
-# Ex. a Location node, a Company node, a Manufacturer node
+# Ex. a Location node, a Company  node, a Manufacturer node
+# Capt. Terry -
+# Good point, unsure if the project intent was advanced Q&A or metrics portion
 # Corbin -
-# [ ] alternative edge types
+# [x] alternative edge types
 # Different edge types could be used to denote different relationships.
 # Ex. Manufactured by, Located in, Owned by
 
@@ -23,118 +32,231 @@ import uuid
 import faker
 from config import WeaverDir
 
-DATA = json.load(open(f"{WeaverDir}/Chain/data.json", "r"))
-COMPANIES = DATA["Companies"] # List of Dicts
-MANUFACTURERS = DATA["Manufacturers"] # List of Dicts
-PART_CATEGORIES = DATA["Parts"]
+INPUTDATA = json.load(open(f"{WeaverDir}/Chain/inputdata.json", "r"))
+DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
+COMPANIES = INPUTDATA["Companies"] # List of Dicts
+MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
 
-# Brooke -
-# [ ] num_products vs num_parts
-# Did you intend for there to be a discrepency between the function parameter and the comment?
+def get_next_letter(current_letter):
+    """
+    Minor Function to get the variant_designation_letter of multi-layer variants.
+    :param current_letter: The variant_designation_letter of the variant on its last variation.
+    :return: A string of one capital letter to be the next variant_designation_letter.
+    """
+    # Get the ASCII value of the current letter and adds 1 to get the ASCII of the next
+    next_char_code = ord(current_letter) + 1
+    
+    # If it goes past "Z", wrap around to "A"
+    if next_char_code > ord("Z"):
+        next_char_code = ord("A")
+    
+    # Converts back to chr and outputs as a string of a standard capital letter
+    return chr(next_char_code)
+
 def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     """
     Main Function to generate a fake supply chain for model aircrafts.
-    :param num_parts: Number of parts to generate in the supply chain.
+    :param num_products: The total number of unique model aircraft products to include in the supply chain.
+                         Defaults to 40.
+    :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
+                         Defaults to 0.25, meaning roughly 25% of products will be variations.
     :return: A dictionary representing the supply chain.
     """
+    # Sets overall variables
     faker_gen = faker.Faker()
     num_variants = int(num_products * variant_distribution)
     num_base_products = num_products - num_variants
-    # Brooke -
-    # [ ] # of parts per product
-    # From what I understand, this means that all products will have the same number of parts which is inaccurate.
-    # Is that intended or should we randomize?
-    # Brooke - 
-    # [ ] mutually exclusive parts
-    # This is counting all parts in each category, but some parts like methods of propulsion will be mutually exclusive.
-    # Ex. Propeller and Jet Engine
-    num_parts = num_products * sum(len(PART_CATEGORIES[category]) for category in PART_CATEGORIES)
+    
+    # Sets base_product variables
+    base_products = []
+    designation_num = {designation_type: 0 for designation_type in DESIGNATIONS.keys()}
 
     # 1. Create list of base products
-    products = []
     for i in range(num_base_products):
-        # Generate UUID for the product
-        # Brooke -
-        # [ ] uuid format
-        # This shouldn't be an issue for our made up data set, but product codes for model airplanes are a different format.
-        # Ex. tam61040
-        # This includes the first three letters of the manufacturer and an approx. 5 digit code
-        product_id = str(uuid.uuid4())
-        # Brooke -
-        # [ ] product_name format
-        # This product_name does not fit the description of a (one) character with numbers.
-        # This change in formatting should not be an issue as long as it is consistent.
-        # Generate Random Product Name (Noun) with a character and numbers
-        product_name = faker_gen.word(part_of_speech='noun').capitalize()
-        # Brooke -
-        # [ ] normal distribution of companies
-        # What represents your normal distribution? 
-        # Have you assigned weights to the companies or defined a range?
-        # Choose a random company from a normal distribution
-        company = faker_gen.random_element(elements=list(COMPANIES.keys()))
-        # Brooke -
-        # [ ] normal distribution of locations
-        # Same thing here
-        # Choose a random location from a normal distribution
-        location = faker_gen.random_element(elements=COMPANIES[company])
-        # Brooke -
-        # [ ] supply chain flow
-        # There is no currently set way to add the manufacturer/company's set of parts to the product parts list.
-        product = {
-            "ID": product_id,
-            "Name": product_name,
-            "Full_Product": True,
-            "Company": company,
-            "Location": location,
-            "Metadata": {},
+
+        # Assigns base_product designation
+        designation_mm = faker_gen.random_element(elements=list(DESIGNATIONS.keys()))
+        designation_num[designation_mm] += 1
+        base_product_designation_num = designation_num[designation_mm]
+        base_product_designation = f"{designation_mm}-{base_product_designation_num}"
+
+        # Assigns base_product popular_name and name
+        base_product_popular_name = faker_gen.word(part_of_speech='noun').capitalize()
+        base_product_name = f"{base_product_popular_name_1} {base_product_designation}"
+
+        # Assigns base_product company and company_location
+        base_product_company = faker_gen.random_element(elements=list(COMPANIES.keys()))
+        base_product_company_location = faker_gen.random_element(elements=COMPANIES[base_product_company])
+
+        # Assigns base_product id
+        base_product_base_uuid = str(uuid.uuid4())
+        base_product_id = f"{base_product_company[0:3].lower()}{base_product_base_uuid}"
+
+        # Assigns base_product
+        base_product = {
+            "ID": base_product_id,
+            "Name": [base_product_name],
+            "Company": base_product_company,
+            "Location": base_product_company_location,
+            "Metadata": {"Designation": base_product_designation,
+                         "Popular Name": base_product_popular_name},
             "Parts": []
         }
-        products.append(product)
-    
+
+        # Appends base_product to the overall list of base_products
+        base_products.append(base_product)
+
+    # Sets variant variables
+    variant_products = []
+
     # 2. Create list of variants
     for i in range(num_variants):
-        # Sample a random product from the products list
-        base_product = faker_gen.random_element(elements=products)
-        # Brooke - 
-        # [ ] uuid format cont.
-        # Generate UUID for the variant
-        variant_id = str(uuid.uuid4())
-        # Brooke - 
-        # [ ] product_name format cont.
-        # The Noun is not randomly generated at this step unlike the comment's statment due to being taken from the base.
-        # Generate Random Product Name (Noun) with a character and numbers
-        variant_name = base_product["Name"] + " " + str(faker_gen.random_letter()) + " " + str(faker_gen.random_int(10, 1000))
-        # Resample the location
-        location = faker_gen.random_element(elements=COMPANIES[base_product["Company"]])
-        # Create the variant product
+
+        # Assigns variant base_product
+        variant_base_product = faker_gen.random_element(elements=base_products)
+
+        # Assigns variant designation
+        variant_base_designation = variant_base_product["Metadata"]["Designation"]
+        if variant_base_designation[-1].isdigit():
+            variant_designation_letter = "A"
+        else:
+            variant_designation_letter = get_next_letter(variant_base_designation[-1])
+        variant_designation = f"{variant_base_designation}{variant_designation_letter}"
+
+        # Assigns variant name and carries on variant_base_product's popular_name
+        variant_name = f"{variant_base_product["Metadata"]["Popular Name"]} {variant_designation}"
+
+        # Assigns variant company and company_location
+        variant_company = variant_base_product["Company"]
+        variant_company_location = faker_gen.random_element(elements=COMPANIES[variant_company])
+
+        # Assigns variant id
+        variant_base_uuid = str(uuid.uuid4())
+        variant_id = f"{variant_company[0:3].lower()}{variant_base_uuid}"
+
+        # Assigns variant
         variant_product = {
             "ID": variant_id,
             "Name": variant_name,
             "Full_Product": True,
-            "Company": base_product["Company"],
-            "Location": location,
-            "Metadata": {},
-            "Parts": [base_product["ID"]]
+            "Company": variant_company,
+            "Location": variant_company_location,
+            "Metadata": {"Designation": variant_designation,
+                         "Popular Name": variant_base_product["Metadata"]["Popular Name"]},
+            "Parts": []
         }
-        # Brooke - 
-        # [ ] multi-layer variants?
-        # This will cause the variant_product to be treated as base_product in the next iteration.
-        # Ex. variant_name = Applec45b300
-        # Brooke + Corbin -
-        # [ ] variant structure
-        # Currently a variant is just the base_product going into a new product with no other changes.
-        # This code looks as if the intent is to later ADD parts in conjunction with the base_product.
-        # It would be more consice and more accurate to take the consistent sprues over from the base_product.
-        # Then other different or replacement sprues could be added to the parts of the variant.
-        # This would take away the base_product as a part of the variant.
-        # It would also avoid a more tree like structure and stay consistent to the desired sprawling graph.
-        # It would also be far easier to identify what parts go into multiple different products.
-        # This would avoid an odd flow and interconnection of nodes.
-        # This would make it consistent that a full_product could be identified by not being an input part for anything.
-        # Therefore, it would likely no longer be necessary to keep the booleans signifying a full_product.
-        # This could potentially save space as long as another process was in place to use these factors to identify one.
-        products.append(variant_product)
 
+        # Appends variant_product to the overall list of variant_products
+        variant_products.append(variant_product)
+
+    products = base_products + variant_products
+
+    for product in products:
+
+        parts = []
+        product = faker_gen.random_element(elements=products)
+        product_designation = product["Metadata"]["Designation"]
+        product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
+        PARTS_CATEGORIES = DESIGNATIONS[product_designation]["Parts"]
+
+        for category, part_list in PARTS_CATEGORIES.items():
+
+            for part in part_list:
+
+                part_id = str(uuid.uuid4())
+
+                part_name = f"{part} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}"
+
+                part_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
+                part_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[part_manufacturer])
+
+                part = {
+                    "ID": part_id,
+                    "Name": part_name,
+                    "Full_Product": False,
+                    # [ ] company vs manufacturer cont.
+                    # All might need to be the same format
+                    "Manufacturer": part_manufacturer,
+                    "Location": part_manufacturer_location,
+                    "Metadata": {
+                        "Category": category,
+                        "Type": part
+                    },
+                    "Parts": []
+                }
+
+                parts.append(part)
+
+
+        # [ ] Interconnect Locations
+        # Components are manufactured at multiple locatios
+
+        checklist = [part for _category, part_list in PARTS_CATEGORIES.items() for part in part_list]
+        complete_checklist = {}
+
+        for current_manufacturer in MANUFACTURERS:
+
+            sprue_manufacturer = {}
+
+            for current_location in MANUFACTURERS[current_manufacturer]:
+
+                sprue_location = []
+
+                for item in checklist:
+
+                    parts_by_name = {current_part["Name"]: current_part for current_part in parts}
+                    current_part = parts_by_name[item]
+
+                    if current_part["Manufacturer"] == current_manufacturer and current_part["Location"] == current_location:
+                        
+                        sprue_location.append(current_part)
+
+                sprue_manufacturer[current_location] = sprue_location
+
+            complete_checklist[current_manufacturer] = sprue_manufacturer
+
+
+
+        
+            """
+                # Create a kit with the available parts
+                kit_id = str(uuid.uuid4())
+                # Brooke -
+                # [ ] naming structures
+                # A comment or text document to be used as a key for different nameing structures may be useful.
+                # Kit names are random letter of the alphabet and a number
+                kit_name = faker_gen.random_letter().upper() + " " + str(faker_gen.random_int(10, 1000))
+                # Location is the same as the manufacturer
+                kit_location = faker_gen.random_element(elements=MANUFACTURERS[manufacturer])
+                kit_data = {
+                    "ID": kit_id,
+                    "Name": kit_name,
+                    "Full_Product": False,
+                    "Company": manufacturer,
+                    "Location": kit_location,
+                    "Metadata": {
+                        "Category": "Kit",
+                        "Type": "Assembly Kit"
+                    },
+                    "Parts": [part["ID"] for part in available_parts]
+                }
+                parts.append(kit_data)
+                product["Parts"].append(kit_id)
+                """
+
+    # Brooke + Corbin -
+    # [ ] variant structure
+    # Currently a variant is just the base_product going into a new product with no other changes.
+    # This code looks as if the intent is to later ADD parts in conjunction with the base_product.
+    # It would be more consice and more accurate to take the consistent sprues over from the base_product.
+    # Then other different or replacement sprues could be added to the parts of the variant.
+    # This would take away the base_product as a part of the variant.
+    # It would also avoid a more tree like structure and stay consistent to the desired sprawling graph.
+    # It would also be far easier to identify what parts go into multiple different products.
+    # This would avoid an odd flow and interconnection of nodes.
+    # This would make it consistent that a full_product could be identified by not being an input part for anything.
+    # Therefore, it would likely no longer be necessary to keep the booleans signifying a full_product.
+    # This could potentially save space as long as another process was in place to use these factors to identify one.
     # Brooke + Corbin -
     # [ ] sprue variant structure
     # Looking to the future, if the variant structure above is concured with, there would need to be a defined sprue variant structure.
@@ -159,84 +281,28 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     # Currently our thoughts are leading to yes, as a sprue is the linkage of smaller parts.
     # However, we are linking them through manufacturer/company instead of location category.
     # Depending to the degree that this is true, different parts categories could be considered as parts themselves.
-    # 3. Create list of parts
-    parts = []
     # Brooke -
-    # [ ] companies vs manufacturers
+    # [x] companies vs manufacturers
     # These would be some more key terms to define in an opening comment.
     # The format of the data.json file concerning these two is particularly confusing.
     # It needs to be consolidated and better defined.
     # Both have a category of a company with manufacturing locations.
-
+    # Capt. Terry -
+    # Wanted to differentiate 
+    # Manufacturers have different names than companies
+    # Companies - assemble the aircraft
+    # Manufacturers - assemble the sprues
+    # Possibly mix and match a bit
+    # Derek
+    # Suppliers vs Manufacturers
+    # Make vocab sheet
+    # Later make way to customize different stuff about data?
+    # How to figure out if a thing is supplier or manufacturer?
     # We want completely random locations for the parts
     # The assumption is that while the companies assemble the kits and products, the individual parts were sourced from various manufacturing locations
-    for i in range(num_products):
-        # Brooke -
-        # [ ] mutually exclusive parts cont.
-        # Same as before, although this is probably a more proper location.
-        # For every product create a part for each part in each category
-        for category, part_list in PART_CATEGORIES.items():
-            for part in part_list:
-                # Generate UUID for the part
-                part_id = str(uuid.uuid4())
-                # Brooke -
-                # [ ] companies vs manufacturers cont.
-                # Here company is used as the comment explanation even though manufacturer is used as the variable and data. 
-                # Company
-                manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
-
-                part_data = {
-                    "ID": part_id,
-                    "Name": part + " " + str(faker_gen.random_letter()) + " " + str(faker_gen.random_int(10, 1000)),
-                    "Full_Product": False,
-                    "Company": manufacturer,
-                    "Location": faker_gen.random_element(elements=MANUFACTURERS[manufacturer]),
-                    "Metadata": {
-                        "Category": category,
-                        "Type": part
-                    }
-                }
-                parts.append(part_data)
     # Brooke -
     # [ ] sprues vs kits vs parts cont.
     # Here sprues are refered to as kits, according to our current definitions.
-    # 4. A company has a list of parts needed for an 
-    #    aircraft, so they randomly go to each manufacturer and show them the list. The manufacturer says that they can provide
-    #    some of the parts that they will make into a kit. The company agrees and then crosses the items in the kit off the list.
-    #    The company then goes to the next manufacturer and does the same thing until they have all the parts they need.
-    for product in products:
-        check_list = [part for _category, part_list in PART_CATEGORIES.items() for part in part_list]
-        # Randomly select manufacturers to provide parts
-        manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
-        while check_list:
-            # Get list of parts that the manufacturer can provide
-            available_parts = [part for part in parts if part["Company"] == manufacturer and part["Metadata"]["Type"] in check_list]
-            if not available_parts:
-                # If no parts are available, choose a new manufacturer
-                manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
-            else:
-                # Create a kit with the available parts
-                kit_id = str(uuid.uuid4())
-                # Brooke -
-                # [ ] naming structures
-                # A comment or text document to be used as a key for different nameing structures may be useful.
-                # Kit names are random letter of the alphabet and a number
-                kit_name = faker_gen.random_letter().upper() + " " + str(faker_gen.random_int(10, 1000))
-                # Location is the same as the manufacturer
-                kit_location = faker_gen.random_element(elements=MANUFACTURERS[manufacturer])
-                kit_data = {
-                    "ID": kit_id,
-                    "Name": kit_name,
-                    "Full_Product": False,
-                    "Company": manufacturer,
-                    "Location": kit_location,
-                    "Metadata": {
-                        "Category": "Kit",
-                        "Type": "Assembly Kit"
-                    },
-                    "Parts": [part["ID"] for part in available_parts]
-                }
-                parts.append(kit_data)
-                product["Parts"].append(kit_id)
+    
 
                 
