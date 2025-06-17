@@ -6,39 +6,48 @@ OVERVIEW - This script generates a fake supply chain for model aircrafts and out
 
 [ ] include extras?
     cost, criticality, failure_rate, breakablility
+[ ] differentiate part id going in
 
-Component = {
-    "ID": [],
-    "Name": [],
-    "Manufacturer": [],
-    "Plant": [],
-    "Location": [],
-    [ ] differentiate part id going in
-    "Parts": []
+[ ] Product = {
+    [ ] "ID": ,
+    [ ] "Name": ,
+    [ ] "Manufacturer": ,
+    [ ] "Plant": ,
+    [ ] "Location": ,
+    [ ] "Parts": [],
+}
+
+[ ] Component = {
+    [ ] "ID": [],
+    [ ] "Name": [],
+    [ ] "Manufacturer": [],
+    [ ] "Plant": [],
+    [ ] "Location": [],
+    [ ] "Parts": []
         }
 
-Location = {
-    "ID": ,
-    "Name": ,
-    "Manufacturer": [],
-    "Plant": [],
-    "Component": []
+[ ] Location = {
+    [ ] "ID": ,
+    [ ] "Name": ,
+    [ ] "Manufacturer": [],
+    [ ] "Plant": [],
+    [ ] "Component": []
 }
 
-Plant = {
-    "ID": ,
-    "Name": ,
-    "Manufacturer": ,
-    "Location": ,
-    "Component": []
+[ ] Plant = {
+    [ ] "ID": ,
+    [ ] "Name": ,
+    [ ] "Manufacturer": ,
+    [ ] "Location": ,
+    [ ] "Component": []
 }
 
-Manufacturer = {
-    "ID": ,
-    "Name": ,
-    "Plant": [],
-    "Location": [],
-    "Component": []
+[ ] Manufacturer = {
+    [ ] "ID": ,
+    [ ] "Name": ,
+    [ ] "Plant": [],
+    [ ] "Location": [],
+    [ ] "Component": []
 }
 
 Component       :REQUIRED_FOR       Component
