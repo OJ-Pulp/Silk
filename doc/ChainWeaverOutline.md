@@ -1,4 +1,44 @@
+##  OVERVIEW
+
 OVERVIEW - This script generates a fake supply chain for model aircrafts and outputs it to a json file.
+
+##  STRUCTURE
+
+Component = {
+    "ID": [],
+    "Name": [],
+    "Manufacturer": [],
+    "Plant": [],
+    "Location": [],
+    [ ] differentiate part id going in
+    "Parts": []
+        }
+
+Location = {
+    "ID": ,
+    "Name": ,
+    "Manufacturer": [],
+    "Plant": [],
+    "Component": []
+}
+
+Plant = {
+    "ID": ,
+    "Name": ,
+    "Manufacturer": ,
+    "Location": ,
+    "Component": []
+}
+
+Manufacturer = {
+    "ID": ,
+    "Name": ,
+    "Plant": [],
+    "Location": [],
+    "Component": []
+}
+
+##  START
 
 IMPORT - json, uuid, faker, WeaverDir
 
@@ -6,6 +46,8 @@ Define data types and categories from inputdata.json
 [x] check correspondance
 RESOLUTION - Made definition for Company and utilized that for the dataset
 [ ] consolidate inputdata.json
+
+##  MAIN FUNCTION
 
 MAIN FUNCTION - weave
     Main Function to generate a fake supply chain for model aircrafts.
@@ -187,6 +229,8 @@ MAIN FUNCTION - weave
                 Append sprue_manufacturer to complete_checklist with current_manufacturer as the key.
 
 ##          ADD SPRUES TO PRODUCTS
+
+            
 
 
 

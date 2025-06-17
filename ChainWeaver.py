@@ -96,8 +96,10 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         base_product = {
             "ID": base_product_id,
             "Name": base_product_name,
+            # [ ] no full product
             "Full_Product": True,
             "Company": base_product_company,
+            # [ ] location lists
             "Location": base_product_company_location,
             "Metadata": {"Designation": base_product_designation,
                          "Popular Name": base_product_popular_name},
@@ -175,16 +177,22 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                     "ID": part_id,
                     "Name": part_name,
                     "Full_Product": False,
+                    # [ ] company vs manufacturer cont.
+                    # All might need to be the same format
                     "Manufacturer": part_manufacturer,
                     "Location": part_manufacturer_location,
                     "Metadata": {
                         "Category": category,
                         "Type": part
-                    }
+                    },
+                    "Parts": []
                 }
 
                 parts.append(part)
 
+
+        # [ ] Interconnect Locations
+        # Components are manufactured at multiple locatios
 
         checklist = [part for _category, part_list in PARTS_CATEGORIES.items() for part in part_list]
         complete_checklist = {}
