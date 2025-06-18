@@ -1,28 +1,32 @@
 {
-    "Designations": {
-        "B": {
-            "Type": "Bomber",
-            "Number of Parts": "69",
-            "Parts": {
-                "Airframe": [
-                    "Fuselage",
-                    "Nose Cone",
-                    "Canopy",
-                    "Cockpit Cover",
-                    "Wing",
-                    "Wing Spar",
-                    "Aileron",
-                    "Flap",
-                    "Winglet",
-                    "Vertical Stabilizer",
-                    "Rudder",
-                    "Horizontal Stabilizer",
-                    "Elevator",
-                    "Landing Gear",
-                    "Main Gear",
-                    "Nose Gear",
-                    "Tail Wheel",
-                    "Gear Door"
+
+"Designations": {
+    "B": {"Type": "Bomber",
+        "Number of Parts": "69",
+        "Vital Parts": [
+            "Wing",
+            "Jet Engine"
+            ],
+        "Parts": {
+            "Airframe": [
+                "Fuselage",
+                "Nose Cone",
+                "Canopy",
+                "Cockpit Cover",
+                "Wing",
+                "Wing Spar",
+                "Aileron",
+                "Flap",
+                "Winglet",
+                "Vertical Stabilizer",
+                "Rudder",
+                "Horizontal Stabilizer",
+                "Elevator",
+                "Landing Gear",
+                "Main Gear",
+                "Nose Gear",
+                "Tail Wheel",
+                "Gear Door"
                 ],
                 "Propulsion": [
                     "Jet Engine",

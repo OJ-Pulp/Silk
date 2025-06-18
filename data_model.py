@@ -37,7 +37,7 @@ class Component(Node):
         full_product: bool,
         variant: bool,
         manufacturer: str,
-        locations: str,
+        location: str,
         designation: Optional[str] = None,
         popular_name: Optional[str] = None,
         dimensions: Optional[List[int]] = None,
@@ -73,7 +73,7 @@ class Component(Node):
         self.full_product = full_product
         self.variant = variant
         self.manufacturer = manufacturer
-        self.locations = locations
+        self.location = location
 
         # Empty components list that will be filled when the REQUIRES edges are created.
         self.components = []

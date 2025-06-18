@@ -9,9 +9,10 @@ OVERVIEW - This script generates a fake supply chain for model aircrafts and out
 [ ] differentiate part id going in
 
 [ ] Component = {
-    [ ] "ID": [],
+    [x] "ID": [],
     [ ] "Name": [],
     [ ] "Full Product": bool,
+    [ ] "Variant": bool,
     [ ] "Manufacturer": [],
     [ ] "Plant": [],
     [ ] "Location": [],
