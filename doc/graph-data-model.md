@@ -1,5 +1,8 @@
 # Graph Data Model
 
+> [!DANGER]
+> This file is already quite out of date!
+
 It is important to describe our graph data model going forward, such as:
 
 - What query language we are using
@@ -58,11 +61,6 @@ These are questions asking ourselves what is important for the data model to inc
 - Product
   - Product may be a component with no outgoing edges
 - Manufacturers
-- Suppliers
-- Companies
-
-> [!note]
-> It may be important to make a distinction between manufacturers, companies, and suppliers, or consolidate them.
 
 ### Node Characteristics
 

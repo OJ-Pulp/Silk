@@ -37,6 +37,8 @@ class Component(Node):
         full_product: bool,
         manufacturer: str,
         locations: List[str],
+        designation: Optional[str] = None,
+        popular_name: Optional[str] = None,
         dimensions: Optional[List[int]] = None,
         cost: Optional[float] = None,
         criticality: Optional[float] = None,
@@ -52,10 +54,12 @@ class Component(Node):
         :param full_product: Whether or not this component is a full product to be sold to customers.
         :param manufacturer: The manufacturer that produces this component.
         :param locations: The locations that this component is produced in.
-        :param dimensions: A list of three integers [length, width, height].
-        :param cost: Monetary cost of the component (float).
+        :param designation: A specific designation of the component used for any external purposes.
+        :param popular_name: The popular name, or more generally used name, of this component.
+        :param dimensions: A list of three integers [length, width, height]. Dimensions are determined by user.
+        :param cost: Monetary cost of the component (float). Currency used determined by user.
         :param criticality: Value (0–1) indicating component importance.
-        :param failure_rate: Expected failure rate (e.g., failures/hour).
+        :param failure_rate: Expected failure rate (e.g., failures/hour). Rate determined by user.
         :param substitutions: List of substitute component IDs.
         :param breakability: Value (0–1) indicating likelihood of breakage.
         :param year_range: The range of years this component was produced. Each year must be in the list.
@@ -75,6 +79,10 @@ class Component(Node):
         # All metadata is completely OPTIONAL
         # Include runtime validation for supported arguments
         self.metadata = {}
+        if designation is not None:
+            self.metadata["designation"] = designation
+        if popular_name is not None:
+            self.metadata["popular_name"] = popular_name
         if dimensions is not None:
             if len(dimensions) != 3:
                 raise ValueError(
