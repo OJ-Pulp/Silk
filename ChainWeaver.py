@@ -82,7 +82,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
         # Assigns base_product popular_name and name
         base_product_popular_name = faker_gen.word(part_of_speech='noun').capitalize()
-        base_product_name = f"{base_product_popular_name_1} {base_product_designation}"
+        base_product_name = f"{base_product_popular_name} {base_product_designation}"
 
         # Assigns base_product company and company_location
         base_product_company = faker_gen.random_element(elements=list(COMPANIES.keys()))
@@ -151,13 +151,15 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         variant_products.append(variant_product)
 
     # Combines all products together as equals
-    products = base_products + variant_products
+    # [ ] FIX HERE LATER
+    # products = base_products + variant_products
+    parts = []
 
     # 3. Creates parts and sprues
     for product in products:
 
         # Sets parts variables
-        parts = []
+        product_parts = []
         product = faker_gen.random_element(elements=products)
         product_designation = product["Metadata"]["Designation"]
         # product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
@@ -195,6 +197,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
                 # Appends part to the overall list of parts for this product
                 parts.append(part)
+                product_parts.append(part_id)
 
 
         # [ ] Interconnect Locations
@@ -271,6 +274,8 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
             # List of parts organized by manufacturer then location
             complete_checklist[current_manufacturer] = sprue_manufacturer
+            
+            products[product]["Parts"].append(sprues)
 
     # Brooke + Corbin -
     # [ ] variant structure
