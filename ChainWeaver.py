@@ -35,7 +35,6 @@ from data_model import Component, Requires
 
 INPUTDATA = json.load(open(f"{WeaverDir}/Chain/inputdata.json", "r"))
 DESIGNATIONS = INPUTDATA["Designations"]  # List of Dicts
-COMPANIES = INPUTDATA["Companies"]  # List of Dicts
 MANUFACTURERS = INPUTDATA["Manufacturers"]  # List of Dicts
 
 
@@ -87,30 +86,22 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         base_product_name = f"{base_product_popular_name} {base_product_designation}"
 
         # Assigns base_product company and company_location
-        base_product_company = faker_gen.random_element(elements=list(COMPANIES.keys()))
-        base_product_company_location = faker_gen.random_element(
-            elements=COMPANIES[base_product_company]
+        base_product_manufacturer = faker_gen.random_element(
+            elements=list(MANUFACTURERS.keys())
+        )
+        base_product_manufacturer_location = faker_gen.random_element(
+            elements=MANUFACTURERS[base_product_manufacturer]
         )
 
-        """
-        # Assigns base_product id
-        base_product_base_uuid = str(uuid.uuid4())
-        base_product_id = f"{base_product_company[0:3].lower()}{base_product_base_uuid}"
-
-        # Assigns base_product
-        base_product = {
-            "ID": base_product_id,
-            "Name": [base_product_name],
-            "Full_Product": True,
-            "Company": base_product_company,
-            "Location": base_product_company_location,
-            "Metadata": {"Designation": base_product_designation,
-                         "Popular Name": base_product_popular_name},
-            "Parts": []
-        }
-        """
-
-        base_product = Component(base_product)
+        base_product = Component(
+            name=base_product_name,
+            full_product=True,
+            manufacturer=base_product_manufacturer,
+            locations=base_product_manufacturer_location,
+            variant=False,
+            designation=base_product_designation,
+            popular_name=base_product_popular_name,
+        )
 
         # Appends base_product to the overall list of base_products
         base_products.append(base_product)
