@@ -156,11 +156,10 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     parts = []
 
     # 3. Creates parts and sprues
-    for product in products:
+    for product in base_products:
 
         # Sets parts variables
         product_parts = []
-        product = faker_gen.random_element(elements=products)
         product_designation = product["Metadata"]["Designation"]
         # product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
         PARTS_CATEGORIES = DESIGNATIONS[product_designation]["Parts"]
@@ -206,17 +205,10 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         # Sets categorization variables
         checklist = [part for _category, part_list in PARTS_CATEGORIES.items() for part in part_list]
         complete_checklist = {}
-        sub_sprues = []
         sprues = []
 
         # 3b. Creates sprues
         for current_manufacturer in MANUFACTURERS:
-
-            # Sets manufacturer variables
-            sprue_manufacturer = {}
-
-            """
-            OR
 
             sprue = {
                 "ID": str(uuid.uuid4()),
@@ -225,7 +217,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                 "Manufacturer": current_manufacturer,
                 "Parts": []
             }
-            """
+            
 
             # 3bsub. Creates subsprues
             for current_location in MANUFACTURERS[current_manufacturer]:
