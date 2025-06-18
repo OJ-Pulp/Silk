@@ -35,9 +35,9 @@ class Component(Node):
         self,
         name: str,
         full_product: bool,
-        variant: bool,
         manufacturer: str,
         location: str,
+        variant: Optional[str] = None,
         designation: Optional[str] = None,
         popular_name: Optional[str] = None,
         dimensions: Optional[List[int]] = None,
@@ -53,9 +53,9 @@ class Component(Node):
 
         :param name: Name of the component.
         :param full_product: Whether or not this component is a full product to be sold to customers.
-        :param variant: Whether or not this component is a variant of another or is the base_model.
         :param manufacturer: The manufacturer that produces this component.
         :param locations: The locations that this component is produced in.
+        :param variant: Whether or not this component is a variant of another or is the base_model.
         :param designation: A specific designation of the component used for any external purposes.
         :param popular_name: The popular name, or more generally used name, of this component.
         :param dimensions: A list of three integers [length, width, height]. Dimensions are determined by user.
@@ -71,7 +71,6 @@ class Component(Node):
         # PLAIN NODE DATA
         # These attributes of each component are NOT OPTIONAL
         self.full_product = full_product
-        self.variant = variant
         self.manufacturer = manufacturer
         self.location = location
 
@@ -82,6 +81,8 @@ class Component(Node):
         # All metadata is completely OPTIONAL
         # Include runtime validation for supported arguments
         self.metadata = {}
+        if variant is not None:
+            self.metadata["variant"] = variant
         if designation is not None:
             self.metadata["designation"] = designation
         if popular_name is not None:

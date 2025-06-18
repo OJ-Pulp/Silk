@@ -69,6 +69,10 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     num_variants = int(num_products * variant_distribution)
     num_base_products = num_products - num_variants
 
+    # -------------------------------------------------------------------------------------------
+    #                                       BASE_PRODUCTS
+    # -------------------------------------------------------------------------------------------
+
     # Sets base_product variables
     base_products = []
     designation_num = {designation_type: 0 for designation_type in DESIGNATIONS.keys()}
@@ -85,14 +89,11 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         base_product_popular_name = faker_gen.word(part_of_speech="noun").capitalize()
         base_product_name = f"{base_product_popular_name} {base_product_designation}"
 
-        # Assigns base_product company and company_location
-        base_product_manufacturer = faker_gen.random_element(
-            elements=list(MANUFACTURERS.keys())
-        )
-        base_product_manufacturer_location = faker_gen.random_element(
-            elements=MANUFACTURERS[base_product_manufacturer]
-        )
+        # Assigns base_product manufacturer and manufacturer_location
+        base_product_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
+        base_product_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[base_product_manufacturer])
 
+        # Creates base_product node
         base_product = Component(
             name=base_product_name,
             full_product=True,
@@ -105,6 +106,10 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
         # Appends base_product to the overall list of base_products
         base_products.append(base_product)
+
+    # -------------------------------------------------------------------------------------------
+    #                                       VARIANT_PRODUCTS
+    # -------------------------------------------------------------------------------------------
 
     # Sets variant variables
     variant_products = []
@@ -127,29 +132,20 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
             f"{variant_base_product['Metadata']['Popular Name']} {variant_designation}"
         )
 
-        # Assigns variant company and company_location
-        variant_company = variant_base_product["Company"]
-        variant_company_location = faker_gen.random_element(
-            elements=COMPANIES[variant_company]
-        )
+        # Assigns variant manufacturer and manufacturer_location
+        variant_manufacturer = variant_base_product["Manufacturer"]
+        variant_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[variant_manufacturer])
 
-        # Assigns variant id
-        variant_base_uuid = str(uuid.uuid4())
-        variant_id = f"{variant_company[0:3].lower()}{variant_base_uuid}"
-
-        # Assigns variant
-        variant_product = {
-            "ID": variant_id,
-            "Name": variant_name,
-            "Full_Product": True,
-            "Company": variant_company,
-            "Location": variant_company_location,
-            "Metadata": {
-                "Designation": variant_designation,
-                "Popular Name": variant_base_product["Metadata"]["Popular Name"],
-            },
-            "Parts": [],
-        }
+        # Creates variant_product node
+        variant_product = Component(
+            name=variant_name, 
+            full_product=True,
+            manufacturer=variant_manufacturer,
+            location=variant_manufacturer_location, 
+            variant=True,
+            designation=variant_designation, 
+            popular_name=variant_base_product["Metadata"]["Popular Name"]
+            )
 
         # Appends variant_product to the overall list of variant_products
         variant_products.append(variant_product)
