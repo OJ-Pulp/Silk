@@ -8,46 +8,38 @@ OVERVIEW - This script generates a fake supply chain for model aircrafts and out
     cost, criticality, failure_rate, breakablility
 [ ] differentiate part id going in
 
-[ ] Product = {
-    [ ] "ID": ,
-    [ ] "Name": ,
-    [ ] "Manufacturer": ,
-    [ ] "Plant": ,
-    [ ] "Location": ,
-    [ ] "Component": [],
-}
-
 [ ] Component = {
     [ ] "ID": [],
     [ ] "Name": [],
+    [ ] "Full Product": bool,
     [ ] "Manufacturer": [],
     [ ] "Plant": [],
     [ ] "Location": [],
     [ ] "Component": []
         }
 
-[ ] Location = {
-    [ ] "ID": ,
-    [ ] "Name": ,
-    [ ] "Manufacturer": [],
-    [ ] "Plant": [],
-    [ ] "Component": []
+Location = {
+    "ID": ,
+    "Name": ,
+    "Manufacturer": [],
+    "Plant": [],
+    "Component": []
 }
 
-[ ] Plant = {
-    [ ] "ID": ,
-    [ ] "Name": ,
-    [ ] "Manufacturer": ,
-    [ ] "Location": ,
-    [ ] "Component": []
+Plant = {
+    "ID": ,
+    "Name": ,
+    "Manufacturer": ,
+    "Location": ,
+    "Component": []
 }
 
-[ ] Manufacturer = {
-    [ ] "ID": ,
-    [ ] "Name": ,
-    [ ] "Plant": [],
-    [ ] "Location": [],
-    [ ] "Component": []
+Manufacturer = {
+    "ID": ,
+    "Name": ,
+    "Plant": [],
+    "Location": [],
+    "Component": []
 }
 
 Component       :REQUIRED_FOR       Component
