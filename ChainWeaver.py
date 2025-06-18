@@ -54,6 +54,9 @@ def get_next_letter(current_letter):
     # Converts back to chr and outputs as a string of a standard capital letter
     return chr(next_char_code)
 
+# -------------------------------------------------------------------------------------------
+#                                    MAIN_FUNCTION
+# -------------------------------------------------------------------------------------------
 
 def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     """
@@ -72,6 +75,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     # -------------------------------------------------------------------------------------------
     #                                       BASE_PRODUCTS
     # -------------------------------------------------------------------------------------------
+    # region BASE_PRODUCTS
 
     # Sets base_product variables
     base_products = []
@@ -107,9 +111,11 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         # Appends base_product to the overall list of base_products
         base_products.append(base_product)
 
+    # endregion
     # -------------------------------------------------------------------------------------------
     #                                       VARIANT_PRODUCTS
     # -------------------------------------------------------------------------------------------
+    # region VARIANT_PRODUCTS
 
     # Sets variant variables
     variant_products = []
@@ -150,9 +156,15 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         # Appends variant_product to the overall list of variant_products
         variant_products.append(variant_product)
 
+    # endregion
+    # -------------------------------------------------------------------------------------------
+    #                                    MAIN_FUNCTION
+    # -------------------------------------------------------------------------------------------
+
     # Combines all products together as equals
     # [ ] FIX HERE LATER
     # products = base_products + variant_products
+
     parts = []
 
     # 3. Creates parts and sprues
