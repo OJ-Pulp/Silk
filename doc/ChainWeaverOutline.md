@@ -12,10 +12,10 @@ OVERVIEW - This script generates a fake supply chain for model aircrafts and out
     [x] "ID": [],
     [ ] "Name": [],
     [ ] "Full Product": bool,
-    [ ] "Variant": bool,
     [ ] "Manufacturer": [],
-    [ ] "Plant": [],
+    [?] "Plant": [],
     [ ] "Location": [],
+    [ ] "Variant": bool,
     [ ] "Component": []
         }
 
