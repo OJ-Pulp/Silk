@@ -14,7 +14,7 @@ class Node(ABC):
     - Manufacturer nodes might use the name of the company (ex. "Ford Motor Company").
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         """
         Initialize a Node with a name.
 
@@ -232,9 +232,10 @@ class Requires(Edge):
     """
     :REQUIRES is the relationship that relates components to components.
     It states that the source component requires the target component along the supply chain.
-    """
 
-    # TODO: ask Cpt. Terry for more clarification on base model edge characteristic, for a better description in the docstring.
+    Includes if a component is a part of the base model of another component.
+    Additionally includes lead time variable, specific use case determined by the user.
+    """
 
     def __append_components_lists(self):
         """
@@ -261,7 +262,7 @@ class Requires(Edge):
 
         :param start_node: The source node (must be a Component).
         :param end_node: The target node (must be a Component).
-        :param base_model:
+        :param base_model: The target component is in the base model of the source component. When the target component can be replaced by a different component, it is interchangeable and those parts that can replace the base model component have this property set to False. If the source component comes with the target component by default, say when you purchase that component as a customer, this property is set to True. (Ex. In a Ford F-150, the engine that comes in the car when you buy it from a dealership is considered the base model, and the REQUIRES relationship between the car and the engine has the base_model property set to True. If the engine is able to be replaced with a different engine, it is interchangeable, and the REQUIRES relationship between the car and that different engine has base_model set to False.)
         :param lead_time: The time it takes for the target component to be shipped & fabricated into the source component. (hours, days, business days)
         """
 
