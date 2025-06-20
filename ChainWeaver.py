@@ -38,23 +38,16 @@ DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
 MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
 faker_gen = faker.Faker()
 
-def get_next_letter(current_letter):
-    """
-    Minor Function to get the variant_designation_letter of multi-layer variants.
-    :param current_letter: The variant_designation_letter of the variant on its last variation.
-    :return: A string of one capital letter to be the next variant_designation_letter.
-    """
-    # Get the ASCII value of the current letter and adds 1 to get the ASCII of the next
-    next_char_code = ord(current_letter) + 1
-
-    # If it goes past "Z", wrap around to "A"
-    if next_char_code > ord("Z"):
-        next_char_code = ord("A")
-
-    # Converts back to chr and outputs as a string of a standard capital letter
-    return chr(next_char_code)
-
 def weave_products(num_products: int = 40, variant_distribution: float = 0.25):
+
+    """
+    Minor Function to generate a fake set of products.
+    :param num_products: The total number of unique model aircraft products to include in the supply chain.
+                         Defaults to 40.
+    :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
+                         Defaults to 0.25, meaning roughly 25% of products will be variations.
+    :return: Two lists representing all base_products and all variant_products.
+    """
 
     # Sets overall variables
     num_variants = int(num_products * variant_distribution)
@@ -148,11 +141,26 @@ def weave_products(num_products: int = 40, variant_distribution: float = 0.25):
     
     return base_products, variant_products
 
-
+def get_next_letter(current_letter):
+    """
+    Minor Function to get the variant_designation_letter of multi-layer variants.
+    :param current_letter: The variant_designation_letter of the variant on its last variation.
+    :return: A string of one capital letter to be the next variant_designation_letter.
+    """
+    # Get the ASCII value of the current letter and adds 1 to get the ASCII of the next
+    next_char_code = ord(current_letter) + 1
+    
+    # If it goes past "Z", wrap around to "A"
+    if next_char_code > ord("Z"):
+        next_char_code = ord("A")
+    
+    # Converts back to chr and outputs as a string of a standard capital letter
+    return chr(next_char_code)
 
 # -------------------------------------------------------------------------------------------
 #                                    MAIN_FUNCTION
 # -------------------------------------------------------------------------------------------
+# region MAIN_FUNCTION
 
 def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     """
@@ -166,13 +174,14 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
     base_products, variant_products = weave_products(num_products, variant_distribution)
 
-    # -------------------------------------------------------------------------------------------
-    #                                    MAIN_FUNCTION
-    # -------------------------------------------------------------------------------------------
-
     # Combines all products together as equals
     # [ ] FIX HERE LATER
-    # products = base_products + variant_products
+    products = base_products + variant_products
+
+    # -------------------------------------------------------------------------------------------
+    #                                         PARTS
+    # -------------------------------------------------------------------------------------------
+    # region PARTS
 
     parts = []
 
@@ -291,6 +300,68 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
             products[product]["Parts"].append(sprues)
 
+# endregion
+
+    # Brooke + Corbin -
+    # [ ] variant structure
+    # Currently a variant is just the base_product going into a new product with no other changes.
+    # This code looks as if the intent is to later ADD parts in conjunction with the base_product.
+    # It would be more consice and more accurate to take the consistent sprues over from the base_product.
+    # Then other different or replacement sprues could be added to the parts of the variant.
+    # This would take away the base_product as a part of the variant.
+    # It would also avoid a more tree like structure and stay consistent to the desired sprawling graph.
+    # It would also be far easier to identify what parts go into multiple different products.
+    # This would avoid an odd flow and interconnection of nodes.
+    # This would make it consistent that a full_product could be identified by not being an input part for anything.
+    # Therefore, it would likely no longer be necessary to keep the booleans signifying a full_product.
+    # This could potentially save space as long as another process was in place to use these factors to identify one.
+    # Brooke + Corbin -
+    # [ ] sprue variant structure
+    # Looking to the future, if the variant structure above is concured with, there would need to be a defined sprue variant structure.
+    # Consider if there are three bottom level parts (1a, 1b, 1c,) that make up sprue 1 and similarly formatted sprues 2 + 3 that make up part Apple.
+    # Variant Applex300 would have the shared sprues of 2 + 3 and a different sprue of 300 which is made up of 1a, 1b, and 300x.  
+    # (The congruencies with the letters and numbers of 300 and x are examples that are not inherent to the structure though their consistency is.)
+    # Therefore, instead of an entirely new sprue, sprue 300 would share parts 1a and 1b with sprue 1 and have one extra part.
+    # Sprue 300 would then be one of the parts for Applex300.
+    # Brooke + Corbin -
+    # [ ] 3 < layer part structure
+    # Our data set on model airplanes will have only three functioning parts layers (parts, sprues, kits).
+    # For real airplanes, there would be many more layers.
+    # Therefore, throught the design process we need to keep that functionality in mind.
+    # Brooke -
+    # [ ] sprues vs kits vs parts
+    # It may be beneficial to consolidate term usage in an opening comment.
+    # Refering to them all as parts could cause confusion but would be beneficial for multi-layered use cases.
+    # Brooke + Corbin -
+    # [ ] linkage of parts
+    # In both our and real world scale, is the linkage of parts itself considered a part?
+    # Are we certain that it is best overall to define the next collection of parts through the manufacturer/company?
+    # Currently our thoughts are leading to yes, as a sprue is the linkage of smaller parts.
+    # However, we are linking them through manufacturer/company instead of location category.
+    # Depending to the degree that this is true, different parts categories could be considered as parts themselves.
+    # Brooke -
+    # [x] companies vs manufacturers
+    # These would be some more key terms to define in an opening comment.
+    # The format of the data.json file concerning these two is particularly confusing.
+    # It needs to be consolidated and better defined.
+    # Both have a category of a company with manufacturing locations.
+    # Capt. Terry -
+    # Wanted to differentiate 
+    # Manufacturers have different names than companies
+    # Companies - assemble the aircraft
+    # Manufacturers - assemble the sprues
+    # Possibly mix and match a bit
+    # Derek
+    # Suppliers vs Manufacturers
+    # Make vocab sheet
+    # Later make way to customize different stuff about data?
+    # How to figure out if a thing is supplier or manufacturer?
+    # We want completely random locations for the parts
+    # The assumption is that while the companies assemble the kits and products, the individual parts were sourced from various manufacturing locations
+    # Brooke -
+    # [ ] sprues vs kits vs parts cont.
+    # Here sprues are refered to as kits, according to our current definitions.
+    
 
 # Brooke + Corbin -
 # [ ] variant structure
