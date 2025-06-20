@@ -32,21 +32,22 @@ import uuid
 import faker
 from config import WeaverDir
 from data_model import Component, Requires
+from typing import List, Tuple, Optional
 
 INPUTDATA = json.load(open(f"{WeaverDir}/Chain/inputdata.json", "r"))
 DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
 MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
 faker_gen = faker.Faker()
 
-def weave_products(num_products: int = 40, variant_distribution: float = 0.25):
+def create_base_products(num_products: int = 40, variant_distribution: float = 0.25) -> Tuple[int, List[Component]]:
 
     """
-    Minor Function to generate a fake set of products.
+    Minor Function to generate a fake set of base_products.
     :param num_products: The total number of unique model aircraft products to include in the supply chain.
                          Defaults to 40.
     :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
                          Defaults to 0.25, meaning roughly 25% of products will be variations.
-    :return: Two lists representing all base_products and all variant_products.
+    :return: A an integer defining the number of variants and a list of Components representing all base_products.
     """
 
     # Sets overall variables
@@ -93,6 +94,10 @@ def weave_products(num_products: int = 40, variant_distribution: float = 0.25):
         base_products.append(base_product)
 
     # endregion
+
+    return num_variants, base_products
+
+
     # -------------------------------------------------------------------------------------------
     #                                       VARIANT_PRODUCTS
     # -------------------------------------------------------------------------------------------
@@ -105,9 +110,10 @@ def weave_products(num_products: int = 40, variant_distribution: float = 0.25):
     for i in range(num_variants):
         # Assigns variant base_product
         variant_base_product = faker_gen.random_element(elements=base_products)
+        assert isinstance(variant_base_product, Component) 
 
         # Assigns variant designation
-        variant_base_designation = variant_base_product["Metadata"]["Designation"]
+        variant_base_designation = variant_base_product.metadata["designation"]
         if variant_base_designation[-1].isdigit():
             variant_designation_letter = "A"
         else:
@@ -130,6 +136,7 @@ def weave_products(num_products: int = 40, variant_distribution: float = 0.25):
             manufacturer=variant_manufacturer,
             location=variant_manufacturer_location, 
             variant=True,
+            variant_base_product=variant_base_product,
             designation=variant_designation, 
             popular_name=variant_base_product["Metadata"]["Popular Name"]
             )
@@ -189,7 +196,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     for product in base_products:
         # Sets parts variables
         product_parts = []
-        product_designation = product["Metadata"]["Designation"]
+        product_designation = product.metadata["designation"]
         # product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
         PARTS_CATEGORIES = DESIGNATIONS[product_designation]["Parts"]
 
@@ -211,16 +218,6 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                     elements=MANUFACTURERS[part_manufacturer]
                 )
 
-                # Assigns part
-                part = {
-                    "Name": part_name,
-                    "Full_Product": False,
-                    "Manufacturer": part_manufacturer,
-                    "Location": part_manufacturer_location,
-                    "Metadata": {"Category": category, "Type": part},
-                    "Parts": [],
-                }
-
                 # Creates part node
                 part = Component(
                     name=part_name, 
@@ -228,13 +225,15 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                     manufacturer=part_manufacturer,
                     location=part_manufacturer_location, 
                     # variant=True,
-                    category=part_category
-
+                    category=part_category,
+                    type=part_type
                     )
 
                 # Appends part to the overall list of parts for this product
                 parts.append(part)
-                product_parts.append(part_id)
+                product_parts.append(part.id)
+    
+    # endregion
 
         # [ ] Interconnect Locations
         # Components are manufactured at multiple locatios
