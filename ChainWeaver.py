@@ -44,7 +44,7 @@ faker_gen = faker.Faker()
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCTS
 
-def create_base_products(num_base_products) -> Tuple[List[Component], int]:
+def create_base_products(num_base_products) -> List[Component]:
 
     """
     Minor Function to generate a fake set of base_products.
@@ -96,7 +96,7 @@ def create_base_products(num_base_products) -> Tuple[List[Component], int]:
 # -------------------------------------------------------------------------------------------
 # region VARIANT_PRODUCTS
 
-def create_variant_products(base_products, num_variants: int = 10):
+def create_variant_products(base_products, num_variants: int = 10)  -> List[Component]:
 
     # Sets variant variables
     variant_products = []
@@ -143,41 +143,42 @@ def create_variant_products(base_products, num_variants: int = 10):
 # -------------------------------------------------------------------------------------------
 # region PARTS
 
-def create_base_parts(base_product):
-    # Sets parts variables
+def create_base_product_parts(base_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
+    
+    # Sets base_product_parts variables
+    parts = []
     base_product_parts = []
-    product_designation = product.metadata["designation"]
-    # [ ] FIX HERE LATER
-    #product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
-    PARTS_CATEGORIES = DESIGNATIONS[product_designation]["Parts"]
 
-    # 3a. Creates parts
-    for part_category, part_list in PARTS_CATEGORIES.items():
+    for base_product in base_products:
 
-        # According to the inputdata.json list of desired parts for that product
-        for part_type in part_list:
+        # [ ] FIX HERE LATER
+        #product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
+        PARTS_CATEGORIES = DESIGNATIONS[base_product.metadata["designation"]]["Parts"]
 
-            # Assigns part name
-            part_name = f"{part} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}"
+        # 3a. Creates parts
+        for part_category, part_list in PARTS_CATEGORIES.items():
 
-            # Assigns part manufacturer and manufacturer location
-            part_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
-            part_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[part_manufacturer])
+            # According to the inputdata.json list of desired parts for that product
+            for part_type in part_list:
 
-            # Creates part node
-            part = Component(
-                name=part_name, 
-                full_product=False,
-                manufacturer=part_manufacturer,
-                location=part_manufacturer_location, 
-                # variant=True,
-                category=part_category,
-                type=part_type
-                )
+                # Assigns part manufacturer and manufacturer location
+                part_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
+                part_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[part_manufacturer])
 
-            # Appends part to the overall list of parts for this product
-            parts.append(part)
-            product_parts.append(part.id)
+                # Creates part node
+                part = Component(
+                    name=f"{part} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}", 
+                    full_product=False,
+                    manufacturer=part_manufacturer,
+                    location=part_manufacturer_location, 
+                    variant=False,
+                    category=part_category,
+                    part_type=part_type
+                    )
+
+                # Appends part to the overall list of parts for this product
+                parts.append(part)
+                base_product_parts.append(part.id)
 
 # endregion
 
@@ -228,9 +229,10 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     base_products = create_base_products(num_base_products)
     variant_products = create_variant_products(base_products, num_variants)
 
-    for base_product in base_products:
-
-        assert isinstance(base_product, Component) 
+    
+        # [ ] FIX HERE LATER
+        #assert isinstance(base_product, Component) 
+        base_product_parts = create_base_product_parts(base_product)
 
     # Combines all products together as equals
     # [ ] FIX HERE LATER
@@ -238,7 +240,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
 
 
-    parts = []
+    
 
     # 3. Creates parts and sprues
 
