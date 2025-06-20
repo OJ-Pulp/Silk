@@ -41,7 +41,7 @@ class Component(Node):
         if key == "variant":
             if not (isinstance(value, bool)):
                 raise ValueError("variant must be boolean data type")
-        if key == "dimensions":
+        elif key == "dimensions":
             if not (
                 isinstance(value, list)
                 and len(value) == 3

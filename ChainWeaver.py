@@ -139,9 +139,9 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
     # endregion
 
 # -------------------------------------------------------------------------------------------
-#                                         BASE_SPRUES
+#                                      BASE_PRODUCT_SPRUES
 # -------------------------------------------------------------------------------------------
-# region BASE_SPRUES
+# region BASE_PRODUCT_SPRUES
 
 def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
     
@@ -181,15 +181,15 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
 # endregion
 
 # -------------------------------------------------------------------------------------------
-#                                         PARTS
+#                                       BASE_PRODUCT_PARTS
 # -------------------------------------------------------------------------------------------
-# region PARTS
+# region BASE_PRODUCT_PARTS
 
-def create_base_product_parts(base_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
+def create_base_product_parts(base_products: List[Component], base_product_sprues: List[Component]) -> Tuple[List[Component], List[Requires]]:
     
     # Sets base_product_parts variables
     base_product_parts = []
-    base_product_
+    base_product_parts_edges = []
 
     for base_product in base_products:
 
@@ -270,12 +270,13 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     num_base_products = num_products - num_variants
 
     base_products = create_base_products(num_base_products)
+    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
     variant_products = create_variant_products(base_products, num_variants)
 
     
-        # [ ] FIX HERE LATER
-        #assert isinstance(base_product, Component) 
-        base_product_parts = create_base_product_parts(base_product)
+    # [ ] FIX HERE LATER
+    #assert isinstance(base_product, Component) 
+    base_product_parts = create_base_product_parts(base_product)
 
     # Combines all products together as equals
     # [ ] FIX HERE LATER
@@ -293,76 +294,72 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         # [ ] Interconnect Locations
         # Components are manufactured at multiple locatios
 
-        # Sets categorization variables
-        checklist = [
-            part
-            for _category, part_list in PARTS_CATEGORIES.items()
-            for part in part_list
-        ]
-        complete_checklist = {}
-        sprues = []
+    # Sets categorization variables
+    checklist = [part for _category, part_list in PARTS_CATEGORIES.items() for part in part_list]
+    complete_checklist = {}
+    sprues = []
 
-        # 3b. Creates sprues
-        for current_manufacturer in MANUFACTURERS:
-            sprue = {
+    # 3b. Creates sprues
+    for current_manufacturer in MANUFACTURERS:
+
+        sprue = {
+            "ID": str(uuid.uuid4()),
+            "Name": f"Sprue {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}",
+            "Full_Product": False,
+            "Manufacturer": current_manufacturer,
+            "Parts": []
+        }
+        
+
+        # 3bsub. Creates subsprues
+        for current_location in MANUFACTURERS[current_manufacturer]:
+
+            # Sets subsprue variables
+            sub_location = []
+
+            # Assigns sub_sprue
+            sub_sprue = {
                 "ID": str(uuid.uuid4()),
-                "Name": f"Sprue {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}",
+                "Name": f"Sub_Sprue {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}",
                 "Full_Product": False,
                 "Manufacturer": current_manufacturer,
-                "Parts": [],
+                "Location": current_location,
+                "Parts": []
             }
 
-            # 3bsub. Creates subsprues
-            for current_location in MANUFACTURERS[current_manufacturer]:
-                # Sets subsprue variables
-                sub_location = []
+            # Groups parts with their locations and manufacturers
+            for item in checklist:
 
-                # Assigns sub_sprue
-                sub_sprue = {
-                    "ID": str(uuid.uuid4()),
-                    "Name": f"Sub_Sprue {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}",
-                    "Full_Product": False,
-                    "Manufacturer": current_manufacturer,
-                    "Location": current_location,
-                    "Parts": [],
-                }
+                # Sets consolidation variables
+                parts_by_id = {current_part["ID"]: current_part for current_part in parts}
+                current_part = parts_by_id[item]
 
-                # Groups parts with their locations and manufacturers
-                for item in checklist:
-                    # Sets consolidation variables
-                    parts_by_id = {
-                        current_part["ID"]: current_part for current_part in parts
-                    }
-                    current_part = parts_by_id[item]
+                # Checks if the current part belongs to the current group
+                if current_part["Manufacturer"] == current_manufacturer and current_part["Location"] == current_location:
+                    
+                    # LINKAGE - Adds the current part to the parts of the current sub sprue and checklist
+                    sub_location.append(current_part)
+                    sub_sprue["Parts"].append(current_part)
 
-                    # Checks if the current part belongs to the current group
-                    if (
-                        current_part["Manufacturer"] == current_manufacturer
-                        and current_part["Location"] == current_location
-                    ):
-                        # LINKAGE - Adds the current part to the parts of the current sub sprue and checklist
-                        sub_location.append(current_part)
-                        sub_sprue["Parts"].append(current_part)
+                    """
+                    OR
 
-                        """
-                        OR
+                    sprue["Parts"].append(current_part)
 
-                        sprue["Parts"].append(current_part)
+                    And take out a bunch of other stuff.
+                    """
 
-                        And take out a bunch of other stuff.
-                        """
+            # LINKAGE - Adds the current sub sprue to the parts of the current sprue for checklist
+            sprue_manufacturer[current_location] = sub_location
+            sub_sprues.append(sub_sprue)
+        
+        # LINKAGE - Adds the current sub sprue to the parts of the current sprue
+        sprues["Parts"].append(sub_sprues)
 
-                # LINKAGE - Adds the current sub sprue to the parts of the current sprue for checklist
-                sprue_manufacturer[current_location] = sub_location
-                sub_sprues.append(sub_sprue)
-
-            # LINKAGE - Adds the current sub sprue to the parts of the current sprue
-            sprues["Parts"].append(sub_sprues)
-
-            # List of parts organized by manufacturer then location
-            complete_checklist[current_manufacturer] = sprue_manufacturer
-
-            products[product]["Parts"].append(sprues)
+        # List of parts organized by manufacturer then location
+        complete_checklist[current_manufacturer] = sprue_manufacturer
+        
+        products[product]["Parts"].append(sprues)
 
 # endregion
 
