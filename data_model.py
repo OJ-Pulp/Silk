@@ -38,6 +38,9 @@ class Component(Node):
         Raises:
             ValueError, TypeError, or KeyError if validation fails.
         """
+        if key == "variant":
+            if not (isinstance(value, bool)):
+                raise ValueError("variant must be boolean data type")
         if key == "dimensions":
             if not (
                 isinstance(value, list)
@@ -64,14 +67,14 @@ class Component(Node):
             if not (isinstance(value, list) and all(isinstance(x, int) for x in value)):
                 raise TypeError("year_range must be a list of integers")
         else:
-            raise KeyError(f"Unsupported metadata key: '{key}'")
+            return True
 
     def __init__(
         self,
         name: str,
         full_product: bool,
         manufacturer: str,
-        location: str,
+        locations: List[str],
         variant: Optional[bool] = None,
         variant_base_product: Optional[str] = None,
         designation: Optional[str] = None,
@@ -98,7 +101,7 @@ class Component(Node):
         :param designation: A specific designation of the component used for any external purposes.
         :param popular_name: The popular name, or more generally used name, of this component.
         :param category: The category of this component. Definition of category determined by user.
-        :param type: The general type of the component. Specific definition of part type is determined by user.
+        :param part_type: The general type of the component. Specific definition of part type is determined by user.
         :param dimensions: A list of three integers [length, width, height]. Dimensions are determined by user.
         :param cost: Monetary cost of the component (float). Currency used determined by user.
         :param criticality: Value (0–1) indicating component importance.
@@ -113,7 +116,7 @@ class Component(Node):
         # These attributes of each component are NOT OPTIONAL
         self.full_product = full_product
         self.manufacturer = manufacturer
-        self.location = location
+        self.locations = locations
 
         # Empty components list that will be filled when the REQUIRES edges are created.
         self.components = []
@@ -147,6 +150,12 @@ class Component(Node):
         Add or update a metadata entry for the component.
 
         Valid keys:
+            - "variant": bool
+            - "variant_base_product": str
+            - "designation": str
+            - "popular_name": str
+            - "category": str
+            - "type": str
             - "dimensions": List[int] of length 3
             - "cost": float >= 0
             - "criticality": float in [0, 1]
