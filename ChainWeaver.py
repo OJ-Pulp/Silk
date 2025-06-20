@@ -39,7 +39,7 @@ DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
 MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
 faker_gen = faker.Faker()
 
-def create_base_products(num_products: int = 40, variant_distribution: float = 0.25) -> Tuple[int, List[Component]]:
+def create_base_products(num_products: int = 40, variant_distribution: float = 0.25) -> Tuple[List[Component], int]:
 
     """
     Minor Function to generate a fake set of base_products.
@@ -72,8 +72,7 @@ def create_base_products(num_products: int = 40, variant_distribution: float = 0
         base_product_designation = f"{designation_mm}-{base_product_designation_num}"
 
         # Assigns base_product popular_name and name
-        base_product_popular_name = faker_gen.word(part_of_speech="noun").capitalize()
-        base_product_name = f"{base_product_popular_name} {base_product_designation}"
+        base_product_popular_name = faker_gen.word(part_of_speech='noun').capitalize()
 
         # Assigns base_product manufacturer and manufacturer_location
         base_product_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
@@ -81,7 +80,7 @@ def create_base_products(num_products: int = 40, variant_distribution: float = 0
 
         # Creates base_product node
         base_product = Component(
-            name=base_product_name,
+            name=f"{base_product_popular_name} {base_product_designation}", 
             full_product=True,
             manufacturer=base_product_manufacturer,
             locations=base_product_manufacturer_location,
@@ -95,9 +94,9 @@ def create_base_products(num_products: int = 40, variant_distribution: float = 0
 
     # endregion
 
-    return num_variants, base_products
+    return base_products, num_variants
 
-
+def create_variant_products(base_products, num_variants: int = 10):
     # -------------------------------------------------------------------------------------------
     #                                       VARIANT_PRODUCTS
     # -------------------------------------------------------------------------------------------
@@ -120,25 +119,20 @@ def create_base_products(num_products: int = 40, variant_distribution: float = 0
             variant_designation_letter = get_next_letter(variant_base_designation[-1])
         variant_designation = f"{variant_base_designation}{variant_designation_letter}"
 
-        # Assigns variant name and carries on variant_base_product's popular_name
-        variant_name = (
-            f"{variant_base_product['Metadata']['Popular Name']} {variant_designation}"
-        )
-
         # Assigns variant manufacturer and manufacturer_location
-        variant_manufacturer = variant_base_product["Manufacturer"]
+        variant_manufacturer = variant_base_product.manufacturer
         variant_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[variant_manufacturer])
 
         # Creates variant_product node
         variant_product = Component(
-            name=variant_name, 
+            name=f"{variant_base_product.metadata["popular_name"]} {variant_designation}", 
             full_product=True,
             manufacturer=variant_manufacturer,
             location=variant_manufacturer_location, 
             variant=True,
             variant_base_product=variant_base_product,
             designation=variant_designation, 
-            popular_name=variant_base_product["Metadata"]["Popular Name"]
+            popular_name=variant_base_product.metadata["popular_name"]
             )
 
         # Appends variant_product to the overall list of variant_products
