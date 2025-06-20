@@ -89,10 +89,16 @@ class Component(Node):
         self.metadata = {}
         if variant is not None:
             self.metadata["variant"] = variant
+        if variant_base_product is not None:
+            self.metadata["variant_base_product"] = variant_base_product
         if designation is not None:
             self.metadata["designation"] = designation
         if popular_name is not None:
             self.metadata["popular_name"] = popular_name
+        if category is not None:
+            self.metadata["category"] = category
+        if type is not None:
+            self.metadata["type"] = type
         if dimensions is not None:
             if len(dimensions) != 3:
                 raise ValueError(
