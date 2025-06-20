@@ -139,6 +139,48 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
     # endregion
 
 # -------------------------------------------------------------------------------------------
+#                                         BASE_SPRUES
+# -------------------------------------------------------------------------------------------
+# region BASE_SPRUES
+
+def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
+    
+    # Sets base_product_sprues variables
+    base_product_sprues = []
+    base_product_sprue_edges = []
+
+    for base_product in base_products:
+        
+        for manufacturer in MANUFACTURERS:
+
+            # Creates base_product_sprue node
+            base_product_sprue = Component(
+                name=f"Sprue - {base_product.name} - {manufacturer}", 
+                full_product=False,
+                manufacturer=manufacturer,
+                location=faker_gen.random_element(elements=MANUFACTURERS[manufacturer]), 
+                variant=False
+                )
+
+            # Appends part to the overall list of parts for this product
+            base_product_sprues.append(base_product_sprue)
+
+            # Creates base_product to base_product_sprue edge
+            base_product_sprue_edge = Requires(
+                    start_node=base_product,
+                    end_node=base_product_sprue,
+                    base_model=True,
+                    # In Business Days
+                    lead_time=faker_gen.random_int(1, 1000)
+            )
+
+            base_product_sprue_edges.append(base_product_sprue_edge)
+
+    return base_product_sprues, base_product_sprue_edges
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
 #                                         PARTS
 # -------------------------------------------------------------------------------------------
 # region PARTS
@@ -146,8 +188,8 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
 def create_base_product_parts(base_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
     
     # Sets base_product_parts variables
-    parts = []
     base_product_parts = []
+    base_product_
 
     for base_product in base_products:
 
@@ -177,8 +219,9 @@ def create_base_product_parts(base_products: List[Component]) -> Tuple[List[Comp
                     )
 
                 # Appends part to the overall list of parts for this product
-                parts.append(part)
-                base_product_parts.append(part.id)
+                base_product_parts.append(part)
+
+    return base_product_parts, 
 
 # endregion
 
