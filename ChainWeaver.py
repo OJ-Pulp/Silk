@@ -40,7 +40,7 @@ MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
 faker_gen = faker.Faker()
 
 # -------------------------------------------------------------------------------------------
-#                                       BASE_PRODUCTS
+#                                      BASE_PRODUCTS
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCTS
 
@@ -92,7 +92,7 @@ def create_base_products(num_base_products) -> List[Component]:
     # endregion
 
 # -------------------------------------------------------------------------------------------
-#                                      BASE_PRODUCT_SPRUES
+#                                   BASE_PRODUCT_SPRUES
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCT_SPRUES
 
@@ -108,7 +108,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
 
             # Creates base_product_sprue node
             base_product_sprue = Component(
-                name=f"Sprue - {base_product.name} - {manufacturer}", 
+                name=f"{manufacturer} {base_product.name} Sprue", 
                 full_product=False,
                 manufacturer=manufacturer,
                 location=faker_gen.random_element(elements=MANUFACTURERS[manufacturer]), 
@@ -134,7 +134,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
 # endregion
 
 # -------------------------------------------------------------------------------------------
-#                                       BASE_PRODUCT_PARTS
+#                                   BASE_PRODUCT_PARTS
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCT_PARTS
 
@@ -142,7 +142,7 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
     
     # Sets base_product_parts variables
     base_product_parts = []
-    base_product_parts_edges = []
+    base_product_part_edges = []
 
     for base_product in base_products:
 
@@ -161,8 +161,8 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
                 part_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[part_manufacturer])
 
                 # Creates part node
-                part = Component(
-                    name=f"{part} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}", 
+                base_product_part = Component(
+                    name=f"{part_type} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}", 
                     full_product=False,
                     manufacturer=part_manufacturer,
                     location=part_manufacturer_location, 
@@ -179,7 +179,7 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
 # endregion
 
 # -------------------------------------------------------------------------------------------
-#                                       VARIANT_PRODUCTS
+#                                    VARIANT_PRODUCTS
 # -------------------------------------------------------------------------------------------
 # region VARIANT_PRODUCTS
 
@@ -227,7 +227,7 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
     # endregion
 
 # -------------------------------------------------------------------------------------------
-#                                   GET_NEXT_LETTER
+#                                     GET_NEXT_LETTER
 # -------------------------------------------------------------------------------------------
 # region GET_NEXT_LETTER
 
@@ -272,6 +272,7 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
     base_products = create_base_products(num_base_products)
     base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
+    base_product_parts, base_product_part_edges = create_base_product_sprues(base_products, base_product_sprues)
     variant_products = create_variant_products(base_products, num_variants)
 
     
