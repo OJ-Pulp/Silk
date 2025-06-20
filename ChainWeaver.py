@@ -139,6 +139,49 @@ def create_variant_products(base_products, num_variants: int = 10):
     # endregion
 
 # -------------------------------------------------------------------------------------------
+#                                         PARTS
+# -------------------------------------------------------------------------------------------
+# region PARTS
+
+def create_base_parts(base_product):
+    # Sets parts variables
+    base_product_parts = []
+    product_designation = product.metadata["designation"]
+    # [ ] FIX HERE LATER
+    #product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
+    PARTS_CATEGORIES = DESIGNATIONS[product_designation]["Parts"]
+
+    # 3a. Creates parts
+    for part_category, part_list in PARTS_CATEGORIES.items():
+
+        # According to the inputdata.json list of desired parts for that product
+        for part_type in part_list:
+
+            # Assigns part name
+            part_name = f"{part} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}"
+
+            # Assigns part manufacturer and manufacturer location
+            part_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
+            part_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[part_manufacturer])
+
+            # Creates part node
+            part = Component(
+                name=part_name, 
+                full_product=False,
+                manufacturer=part_manufacturer,
+                location=part_manufacturer_location, 
+                # variant=True,
+                category=part_category,
+                type=part_type
+                )
+
+            # Appends part to the overall list of parts for this product
+            parts.append(part)
+            product_parts.append(part.id)
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
 #                                   GET_NEXT_LETTER
 # -------------------------------------------------------------------------------------------
 # region GET_NEXT_LETTER
@@ -166,6 +209,8 @@ def get_next_letter(current_letter):
 # -------------------------------------------------------------------------------------------
 # region MAIN_FUNCTION
 
+ # [ ] not a dict
+
 def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     """
     Main Function to generate a fake supply chain for model aircrafts.
@@ -183,59 +228,22 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     base_products = create_base_products(num_base_products)
     variant_products = create_variant_products(base_products, num_variants)
 
+    for base_product in base_products:
+
+        assert isinstance(base_product, Component) 
+
     # Combines all products together as equals
     # [ ] FIX HERE LATER
     products = base_products + variant_products
 
-    # -------------------------------------------------------------------------------------------
-    #                                         PARTS
-    # -------------------------------------------------------------------------------------------
-    # region PARTS
+
 
     parts = []
 
     # 3. Creates parts and sprues
-    for product in base_products:
-        # Sets parts variables
-        product_parts = []
-        product_designation = product.metadata["designation"]
-        # product_num_parts = DESIGNATIONS[product_designation]["Number of Parts"]
-        PARTS_CATEGORIES = DESIGNATIONS[product_designation]["Parts"]
 
-        # 3a. Creates parts
-        for category, part_list in PARTS_CATEGORIES.items():
-            # According to the inputdata.json list of desired parts for that product
-            for part in part_list:
-                # Assigns part id
-                part_id = str(uuid.uuid4())
 
-                # Assigns part name
-                part_name = f"{part} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}"
-
-                # Assigns part manufacturer and manufacturer location
-                part_manufacturer = faker_gen.random_element(
-                    elements=list(MANUFACTURERS.keys())
-                )
-                part_manufacturer_location = faker_gen.random_element(
-                    elements=MANUFACTURERS[part_manufacturer]
-                )
-
-                # Creates part node
-                part = Component(
-                    name=part_name, 
-                    full_product=False,
-                    manufacturer=part_manufacturer,
-                    location=part_manufacturer_location, 
-                    # variant=True,
-                    category=part_category,
-                    type=part_type
-                    )
-
-                # Appends part to the overall list of parts for this product
-                parts.append(part)
-                product_parts.append(part.id)
-    
-    # endregion
+        
 
         # [ ] Interconnect Locations
         # Components are manufactured at multiple locatios
