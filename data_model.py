@@ -31,6 +31,41 @@ class Component(Node):
     Includes attributes like dimensions and cost, as well as reliability metrics.
     """
 
+    def _validate_metadata_entry(self, key: str, value):
+        """
+        Internal method to validate a single metadata key-value pair.
+
+        Raises:
+            ValueError, TypeError, or KeyError if validation fails.
+        """
+        if key == "dimensions":
+            if not (
+                isinstance(value, list)
+                and len(value) == 3
+                and all(isinstance(x, int) for x in value)
+            ):
+                raise ValueError("dimensions must be a list of 3 integers")
+        elif key == "cost":
+            if not (isinstance(value, (int, float)) and value >= 0):
+                raise ValueError("cost must be a non-negative number")
+        elif key == "criticality":
+            if not (0 <= value <= 1):
+                raise ValueError("criticality must be between 0 and 1")
+        elif key == "failure_rate":
+            if not (isinstance(value, (int, float)) and value >= 0):
+                raise ValueError("failure_rate must be a non-negative number")
+        elif key == "substitutions":
+            if not (isinstance(value, list) and all(isinstance(x, str) for x in value)):
+                raise TypeError("substitutions must be a list of strings")
+        elif key == "breakability":
+            if not (0 <= value <= 1):
+                raise ValueError("breakability must be between 0 and 1")
+        elif key == "year_range":
+            if not (isinstance(value, list) and all(isinstance(x, int) for x in value)):
+                raise TypeError("year_range must be a list of integers")
+        else:
+            raise KeyError(f"Unsupported metadata key: '{key}'")
+
     def __init__(
         self,
         name: str,
@@ -42,7 +77,7 @@ class Component(Node):
         designation: Optional[str] = None,
         popular_name: Optional[str] = None,
         category: Optional[str] = None,
-        type: Optional[str] = None,
+        part_type: Optional[str] = None,
         dimensions: Optional[List[int]] = None,
         cost: Optional[float] = None,
         criticality: Optional[float] = None,
@@ -62,8 +97,8 @@ class Component(Node):
         :param variant_base_product: The base_product that the variant is a subset of.
         :param designation: A specific designation of the component used for any external purposes.
         :param popular_name: The popular name, or more generally used name, of this component.
-        :param category: The category of plan parts (e.g., Airframe, Propulsion, etc.).
-        :param type: The general type of the part (e.g. Wing, Propeller, etc.)
+        :param category: The category of this component. Definition of category determined by user.
+        :param type: The general type of the component. Specific definition of part type is determined by user.
         :param dimensions: A list of three integers [length, width, height]. Dimensions are determined by user.
         :param cost: Monetary cost of the component (float). Currency used determined by user.
         :param criticality: Value (0–1) indicating component importance.
@@ -87,48 +122,25 @@ class Component(Node):
         # All metadata is completely OPTIONAL
         # Include runtime validation for supported arguments
         self.metadata = {}
-        if variant is not None:
-            self.metadata["variant"] = variant
-        if variant_base_product is not None:
-            self.metadata["variant_base_product"] = variant_base_product
-        if designation is not None:
-            self.metadata["designation"] = designation
-        if popular_name is not None:
-            self.metadata["popular_name"] = popular_name
-        if category is not None:
-            self.metadata["category"] = category
-        if type is not None:
-            self.metadata["type"] = type
-        if dimensions is not None:
-            if len(dimensions) != 3:
-                raise ValueError(
-                    "dimensions must be a list of three integers [L, W, H]"
-                )
-            if not all(isinstance(x, int) for x in dimensions):
-                raise TypeError("each dimension must be an integer")
-            self.metadata["dimensions"] = dimensions
-        if cost is not None:
-            if cost < 0:
-                raise ValueError("cost must be non-negative")
-            self.metadata["cost"] = cost
-        if criticality is not None:
-            if not (0 <= criticality <= 1):
-                raise ValueError("criticality must be in [0, 1]")
-            self.metadata["criticality"] = criticality
-        if failure_rate is not None:
-            if not (0 <= failure_rate):
-                raise ValueError("failure_rate must be non-negative")
-            self.metadata["failure_rate"] = failure_rate
-        if substitutions is not None:
-            if not all(isinstance(sub_id, str) for sub_id in substitutions):
-                raise TypeError("substitutions must be a list of strings (IDs)")
-            self.metadata["substitutions"] = substitutions
-        if breakability is not None:
-            if not (0 <= breakability <= 1):
-                raise ValueError("breakability must be in [0, 1]")
-            self.metadata["breakability"] = breakability
-        if year_range is not None:
-            self.metadata["year_range"] = year_range
+
+        for k, v in {
+            "variant": variant,
+            "variant_base_product": variant_base_product,
+            "designation": designation,
+            "popular_name": popular_name,
+            "category": category,
+            "type": part_type,
+            "dimensions": dimensions,
+            "cost": cost,
+            "criticality": criticality,
+            "failure_rate": failure_rate,
+            "substitutions": substitutions,
+            "breakability": breakability,
+            "year_range": year_range,
+        }.items():
+            if v is not None:
+                self._validate_metadata_entry(k, v)
+                self.metadata[k] = v
 
 
 # class Manufacturer(Node):
