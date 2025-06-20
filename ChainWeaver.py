@@ -108,7 +108,8 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
 
             # Creates base_product_sprue node
             base_product_sprue = Component(
-                name=f"{manufacturer} {base_product.name} Sprue", 
+                name=f"Sprue {str(faker_gen.random_letter().upper())}{str(faker_gen.random_letter().upper())}\
+                    {str(faker_gen.random_letter().upper())}{str(faker_gen.random_int(10, 1000000000))}", 
                 full_product=False,
                 manufacturer=manufacturer,
                 location=faker_gen.random_element(elements=MANUFACTURERS[manufacturer]), 
@@ -162,7 +163,7 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
 
                 # Creates part node
                 base_product_part = Component(
-                    name=f"{part_type} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 1000))}", 
+                    name=f"{part_type} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 10000))}", 
                     full_product=False,
                     manufacturer=part_manufacturer,
                     location=part_manufacturer_location, 
