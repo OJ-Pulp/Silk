@@ -38,6 +38,7 @@ INPUTDATA = json.load(open(f"{WeaverDir}/Chain/inputdata.json", "r"))
 DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
 MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
 faker_gen = faker.Faker()
+random_uppercase = {str(faker_gen.random_letter().upper())}
 
 # -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCTS
@@ -71,18 +72,16 @@ def create_base_products(num_base_products) -> List[Component]:
 
         # Assigns base_product manufacturer and manufacturer_location
         base_product_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
-        base_product_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[base_product_manufacturer])
 
         # Creates base_product node
         base_product = Component(
             name=f"{base_product_popular_name} {base_product_designation}", 
             full_product=True,
             manufacturer=base_product_manufacturer,
-            locations=base_product_manufacturer_location,
-            variant=False,
-            designation=base_product_designation,
-            popular_name=base_product_popular_name,
-        )
+            location=faker_gen.random_element(elements=MANUFACTURERS[base_product_manufacturer]), 
+            designation=base_product_designation, 
+            popular_name=base_product_popular_name
+            )
 
         # Appends base_product to the overall list of base_products
         base_products.append(base_product)
@@ -108,8 +107,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
 
             # Creates base_product_sprue node
             base_product_sprue = Component(
-                name=f"Sprue {str(faker_gen.random_letter().upper())}{str(faker_gen.random_letter().upper())}\
-                    {str(faker_gen.random_letter().upper())}{str(faker_gen.random_int(10, 1000000000))}", 
+                name=f"Sprue {random_uppercase}{random_uppercase}{random_uppercase}{str(faker_gen.random_int(10, 1000000000))}", 
                 full_product=False,
                 manufacturer=manufacturer,
                 location=faker_gen.random_element(elements=MANUFACTURERS[manufacturer]), 
@@ -158,22 +156,32 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
             for part_type in part_list:
 
                 # Assigns part manufacturer and manufacturer location
-                part_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
-                part_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[part_manufacturer])
+                base_product_part_manufacturer = faker_gen.random_element(elements=list(MANUFACTURERS.keys()))
 
                 # Creates part node
                 base_product_part = Component(
-                    name=f"{part_type} {str(faker_gen.random_letter())} {str(faker_gen.random_int(10, 10000))}", 
+                    name=f"{part_type} {random_uppercase}{random_uppercase}{random_uppercase}{str(faker_gen.random_int(10, 10000))}",
                     full_product=False,
-                    manufacturer=part_manufacturer,
-                    location=part_manufacturer_location, 
+                    manufacturer=base_product_part_manufacturer,
+                    location=faker_gen.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]), 
                     variant=False,
                     category=part_category,
                     part_type=part_type
                     )
 
                 # Appends part to the overall list of parts for this product
-                base_product_parts.append(part)
+                base_product_parts.append(base_product_part)
+
+                # Creates base_product to base_product_sprue edge
+                base_product_part_edge = Requires(
+                    start_node=base_product_sprue_edges.,
+                    end_node=base_product_sprue,
+                    base_model=True,
+                    # In Business Days
+                    lead_time=faker_gen.random_int(1, 1000)
+                )
+
+                base_product_part_edges.append(base_product_part_edge)
 
     return base_product_parts, 
 
