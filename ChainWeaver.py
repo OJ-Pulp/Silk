@@ -39,6 +39,11 @@ DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
 MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
 faker_gen = faker.Faker()
 
+# -------------------------------------------------------------------------------------------
+#                                       BASE_PRODUCTS
+# -------------------------------------------------------------------------------------------
+# region BASE_PRODUCTS
+
 def create_base_products(num_products: int = 40, variant_distribution: float = 0.25) -> Tuple[List[Component], int]:
 
     """
@@ -54,16 +59,11 @@ def create_base_products(num_products: int = 40, variant_distribution: float = 0
     num_variants = int(num_products * variant_distribution)
     num_base_products = num_products - num_variants
 
-    # -------------------------------------------------------------------------------------------
-    #                                       BASE_PRODUCTS
-    # -------------------------------------------------------------------------------------------
-    # region BASE_PRODUCTS
-
     # Sets base_product variables
     base_products = []
     designation_num = {designation_type: 0 for designation_type in DESIGNATIONS.keys()}
 
-    # 1. Create list of base products
+    # Creates a list of Components that are base_products
     for i in range(num_base_products):
         # Assigns base_product designation
         designation_mm = faker_gen.random_element(elements=list(DESIGNATIONS.keys()))
@@ -92,9 +92,9 @@ def create_base_products(num_products: int = 40, variant_distribution: float = 0
         # Appends base_product to the overall list of base_products
         base_products.append(base_product)
 
-    # endregion
-
     return base_products, num_variants
+
+    # endregion
 
 def create_variant_products(base_products, num_variants: int = 10):
     # -------------------------------------------------------------------------------------------
