@@ -34,9 +34,9 @@ from config import WeaverDir
 from data_model import Component, Requires
 
 INPUTDATA = json.load(open(f"{WeaverDir}/Chain/inputdata.json", "r"))
-DESIGNATIONS = INPUTDATA["Designations"]  # List of Dicts
-MANUFACTURERS = INPUTDATA["Manufacturers"]  # List of Dicts
-
+DESIGNATIONS = INPUTDATA["Designations"] # List of Dicts
+MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
+faker_gen = faker.Faker()
 
 def get_next_letter(current_letter):
     """
@@ -54,21 +54,9 @@ def get_next_letter(current_letter):
     # Converts back to chr and outputs as a string of a standard capital letter
     return chr(next_char_code)
 
-# -------------------------------------------------------------------------------------------
-#                                    MAIN_FUNCTION
-# -------------------------------------------------------------------------------------------
+def weave_products(num_products: int = 40, variant_distribution: float = 0.25):
 
-def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
-    """
-    Main Function to generate a fake supply chain for model aircrafts.
-    :param num_products: The total number of unique model aircraft products to include in the supply chain.
-                         Defaults to 40.
-    :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
-                         Defaults to 0.25, meaning roughly 25% of products will be variations.
-    :return: A dictionary representing the supply chain.
-    """
     # Sets overall variables
-    faker_gen = faker.Faker()
     num_variants = int(num_products * variant_distribution)
     num_base_products = num_products - num_variants
 
@@ -157,6 +145,27 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
         variant_products.append(variant_product)
 
     # endregion
+    
+    return base_products, variant_products
+
+
+
+# -------------------------------------------------------------------------------------------
+#                                    MAIN_FUNCTION
+# -------------------------------------------------------------------------------------------
+
+def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
+    """
+    Main Function to generate a fake supply chain for model aircrafts.
+    :param num_products: The total number of unique model aircraft products to include in the supply chain.
+                         Defaults to 40.
+    :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
+                         Defaults to 0.25, meaning roughly 25% of products will be variations.
+    :return: A dictionary representing the supply chain.
+    """
+
+    base_products, variant_products = weave_products(num_products, variant_distribution)
+
     # -------------------------------------------------------------------------------------------
     #                                    MAIN_FUNCTION
     # -------------------------------------------------------------------------------------------
