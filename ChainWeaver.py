@@ -92,53 +92,6 @@ def create_base_products(num_base_products) -> List[Component]:
     # endregion
 
 # -------------------------------------------------------------------------------------------
-#                                       VARIANT_PRODUCTS
-# -------------------------------------------------------------------------------------------
-# region VARIANT_PRODUCTS
-
-def create_variant_products(base_products, num_variants: int = 10)  -> List[Component]:
-
-    # Sets variant variables
-    variant_products = []
-
-    # 2. Create list of variants
-    for i in range(num_variants):
-        # Assigns variant base_product
-        variant_base_product = faker_gen.random_element(elements=base_products)
-        assert isinstance(variant_base_product, Component) 
-
-        # Assigns variant designation
-        variant_base_designation = variant_base_product.metadata["designation"]
-        if variant_base_designation[-1].isdigit():
-            variant_designation_letter = "A"
-        else:
-            variant_designation_letter = get_next_letter(variant_base_designation[-1])
-        variant_designation = f"{variant_base_designation}{variant_designation_letter}"
-
-        # Assigns variant manufacturer and manufacturer_location
-        variant_manufacturer = variant_base_product.manufacturer
-        variant_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[variant_manufacturer])
-
-        # Creates variant_product node
-        variant_product = Component(
-            name=f"{variant_base_product.metadata["popular_name"]} {variant_designation}", 
-            full_product=True,
-            manufacturer=variant_manufacturer,
-            location=variant_manufacturer_location, 
-            variant=True,
-            variant_base_product=variant_base_product,
-            designation=variant_designation, 
-            popular_name=variant_base_product.metadata["popular_name"]
-            )
-
-        # Appends variant_product to the overall list of variant_products
-        variant_products.append(variant_product)
-    
-    return variant_products
-
-    # endregion
-
-# -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCT_SPRUES
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCT_SPRUES
@@ -224,6 +177,54 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
     return base_product_parts, 
 
 # endregion
+
+# -------------------------------------------------------------------------------------------
+#                                       VARIANT_PRODUCTS
+# -------------------------------------------------------------------------------------------
+# region VARIANT_PRODUCTS
+
+def create_variant_products(base_products, num_variants: int = 10)  -> List[Component]:
+
+    # Sets variant variables
+    variant_products = []
+
+    # 2. Create list of variants
+    for i in range(num_variants):
+
+        # Assigns variant base_product
+        variant_base_product = faker_gen.random_element(elements=base_products)
+        assert isinstance(variant_base_product, Component) 
+
+        # Assigns variant designation
+        variant_base_designation = variant_base_product.metadata["designation"]
+        if variant_base_designation[-1].isdigit():
+            variant_designation_letter = "A"
+        else:
+            variant_designation_letter = get_next_letter(variant_base_designation[-1])
+        variant_designation = f"{variant_base_designation}{variant_designation_letter}"
+
+        # Assigns variant manufacturer and manufacturer_location
+        variant_manufacturer = variant_base_product.manufacturer
+        variant_manufacturer_location = faker_gen.random_element(elements=MANUFACTURERS[variant_manufacturer])
+
+        # Creates variant_product node
+        variant_product = Component(
+            name=f"{variant_base_product.metadata["popular_name"]} {variant_designation}", 
+            full_product=True,
+            manufacturer=variant_manufacturer,
+            location=variant_manufacturer_location, 
+            variant=True,
+            variant_base_product=variant_base_product,
+            designation=variant_designation, 
+            popular_name=variant_base_product.metadata["popular_name"]
+            )
+
+        # Appends variant_product to the overall list of variant_products
+        variant_products.append(variant_product)
+    
+    return variant_products
+
+    # endregion
 
 # -------------------------------------------------------------------------------------------
 #                                   GET_NEXT_LETTER
