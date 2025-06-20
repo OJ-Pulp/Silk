@@ -37,9 +37,12 @@ class Component(Node):
         full_product: bool,
         manufacturer: str,
         location: str,
-        variant: Optional[str] = None,
+        variant: Optional[bool] = None,
+        variant_base_product: Optional[str] = None,
         designation: Optional[str] = None,
         popular_name: Optional[str] = None,
+        category: Optional[str] = None,
+        type: Optional[str] = None,
         dimensions: Optional[List[int]] = None,
         cost: Optional[float] = None,
         criticality: Optional[float] = None,
@@ -56,8 +59,11 @@ class Component(Node):
         :param manufacturer: The manufacturer that produces this component.
         :param locations: The locations that this component is produced in.
         :param variant: Whether or not this component is a variant of another or is the base_model.
+        :param variant_base_product: The base_product that the variant is a subset of.
         :param designation: A specific designation of the component used for any external purposes.
         :param popular_name: The popular name, or more generally used name, of this component.
+        :param category: The category of plan parts (e.g., Airframe, Propulsion, etc.).
+        :param type: The general type of the part (e.g. Wing, Propeller, etc.)
         :param dimensions: A list of three integers [length, width, height]. Dimensions are determined by user.
         :param cost: Monetary cost of the component (float). Currency used determined by user.
         :param criticality: Value (0–1) indicating component importance.

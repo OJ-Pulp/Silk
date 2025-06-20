@@ -213,7 +213,6 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
                 # Assigns part
                 part = {
-                    "ID": part_id,
                     "Name": part_name,
                     "Full_Product": False,
                     "Manufacturer": part_manufacturer,
@@ -221,6 +220,17 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                     "Metadata": {"Category": category, "Type": part},
                     "Parts": [],
                 }
+
+                # Creates part node
+                part = Component(
+                    name=part_name, 
+                    full_product=False,
+                    manufacturer=part_manufacturer,
+                    location=part_manufacturer_location, 
+                    # variant=True,
+                    category=part_category
+
+                    )
 
                 # Appends part to the overall list of parts for this product
                 parts.append(part)
