@@ -44,7 +44,7 @@ faker_gen = faker.Faker()
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCTS
 
-def create_base_products(num_products: int = 40, variant_distribution: float = 0.25) -> Tuple[List[Component], int]:
+def create_base_products(num_base_products) -> Tuple[List[Component], int]:
 
     """
     Minor Function to generate a fake set of base_products.
@@ -55,11 +55,6 @@ def create_base_products(num_products: int = 40, variant_distribution: float = 0
     :return: A an integer defining the number of variants and a list of Components representing all base_products.
     """
 
-    # Sets overall variables
-    num_variants = int(num_products * variant_distribution)
-    num_base_products = num_products - num_variants
-
-    # Sets base_product variables
     base_products = []
     designation_num = {designation_type: 0 for designation_type in DESIGNATIONS.keys()}
 
@@ -92,15 +87,16 @@ def create_base_products(num_products: int = 40, variant_distribution: float = 0
         # Appends base_product to the overall list of base_products
         base_products.append(base_product)
 
-    return base_products, num_variants
+    return base_products
 
     # endregion
 
+# -------------------------------------------------------------------------------------------
+#                                       VARIANT_PRODUCTS
+# -------------------------------------------------------------------------------------------
+# region VARIANT_PRODUCTS
+
 def create_variant_products(base_products, num_variants: int = 10):
-    # -------------------------------------------------------------------------------------------
-    #                                       VARIANT_PRODUCTS
-    # -------------------------------------------------------------------------------------------
-    # region VARIANT_PRODUCTS
 
     # Sets variant variables
     variant_products = []
@@ -137,10 +133,15 @@ def create_variant_products(base_products, num_variants: int = 10):
 
         # Appends variant_product to the overall list of variant_products
         variant_products.append(variant_product)
+    
+    return variant_products
 
     # endregion
-    
-    return base_products, variant_products
+
+# -------------------------------------------------------------------------------------------
+#                                   GET_NEXT_LETTER
+# -------------------------------------------------------------------------------------------
+# region GET_NEXT_LETTER
 
 def get_next_letter(current_letter):
     """
@@ -158,6 +159,8 @@ def get_next_letter(current_letter):
     # Converts back to chr and outputs as a string of a standard capital letter
     return chr(next_char_code)
 
+# endregion
+
 # -------------------------------------------------------------------------------------------
 #                                    MAIN_FUNCTION
 # -------------------------------------------------------------------------------------------
@@ -173,7 +176,12 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     :return: A dictionary representing the supply chain.
     """
 
-    base_products, variant_products = weave_products(num_products, variant_distribution)
+    # Sets overall variables
+    num_variants = int(num_products * variant_distribution)
+    num_base_products = num_products - num_variants
+
+    base_products = create_base_products(num_base_products)
+    variant_products = create_variant_products(base_products, num_variants)
 
     # Combines all products together as equals
     # [ ] FIX HERE LATER
