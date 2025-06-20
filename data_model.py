@@ -142,6 +142,27 @@ class Component(Node):
                 self._validate_metadata_entry(k, v)
                 self.metadata[k] = v
 
+    def set_metadata(self, key: str, value):
+        """
+        Add or update a metadata entry for the component.
+
+        Valid keys:
+            - "dimensions": List[int] of length 3
+            - "cost": float >= 0
+            - "criticality": float in [0, 1]
+            - "failure_rate": float >= 0
+            - "substitutions": List[str]
+            - "breakability": float in [0, 1]
+            - "year_range": List[int]
+
+        :param key: The metadata key to add or update.
+        :param value: The value to assign for the given key.
+        :raises ValueError, TypeError: If the value is invalid for the given key.
+        """
+
+        self._validate_metadata_entry(key, value)
+        self.metadata[key] = value
+
 
 # class Manufacturer(Node):
 #     """
