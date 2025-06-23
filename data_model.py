@@ -192,17 +192,27 @@ class Component(Node):
         return self.metadata.get(key, default)
     
     def __repr__(self):
-        return (
-            f"Component(\n"
-            f"  name='{self.name}',\n"
-            f"  designation='{self.metadata['designation']}',\n"
-            f"  popular_name='{self.metadata['popular_name']}',\n"
-            f"  manufacturer='{self.manufacturer}',\n"
-            f"  location='{self.locations}',\n"
-            f"  full_product={self.full_product},\n"
-            f"  variant={self.metadata['variant']}\n"
-            f")"
-        )
+        lines = [
+            "Component(",
+            f"  id='{self.id}',",
+            f"  name='{self.name}',",
+            f"  manufacturer='{self.manufacturer}',",
+            f"  location='{self.locations}',",
+            f"  full_product={self.full_product},"
+        ]
+
+        # Optional metadata, only if present
+        for key in [
+            "designation", "popular_name", "variant", "product", "variant_base_product",
+            "category", "type", "dimensions", "cost", "criticality",
+            "failure_rate", "substitutions", "breakability", "year_range"
+        ]:
+            value = self.metadata.get(key)
+            if value is not None:
+                lines.append(f"  {key}={repr(value)},")
+
+        lines.append(")")
+        return "\n".join(lines)
 
 
 # class Manufacturer(Node):
