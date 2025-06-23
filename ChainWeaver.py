@@ -322,15 +322,15 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     base_product_parts, base_product_part_edges = create_base_product_parts(base_products, base_product_sprues)
     base_product_sprues, base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
     
-    variant_products = create_variant_products(base_products, num_variants)
+    # variant_products = create_variant_products(base_products, num_variants)
 
     # Combines all products together as equals
     # [ ] FIX HERE LATER
-    products = base_products + variant_products
+    # products = base_products + variant_products
 
 
 
-    
+    """
 
     # 3. Creates parts and sprues
 
@@ -387,13 +387,13 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
                     sub_location.append(current_part)
                     sub_sprue["Parts"].append(current_part)
 
-                    """
-                    OR
+                    
+                    # OR
 
-                    sprue["Parts"].append(current_part)
+                    # sprue["Parts"].append(current_part)
 
-                    And take out a bunch of other stuff.
-                    """
+                    # Andtake out a bunch of other stuff.
+                    
 
             # LINKAGE - Adds the current sub sprue to the parts of the current sprue for checklist
             sprue_manufacturer[current_location] = sub_location
@@ -469,63 +469,5 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
     # [ ] sprues vs kits vs parts cont.
     # Here sprues are refered to as kits, according to our current definitions.
     
-
-# Brooke + Corbin -
-# [ ] variant structure
-# Currently a variant is just the base_product going into a new product with no other changes.
-# This code looks as if the intent is to later ADD parts in conjunction with the base_product.
-# It would be more consice and more accurate to take the consistent sprues over from the base_product.
-# Then other different or replacement sprues could be added to the parts of the variant.
-# This would take away the base_product as a part of the variant.
-# It would also avoid a more tree like structure and stay consistent to the desired sprawling graph.
-# It would also be far easier to identify what parts go into multiple different products.
-# This would avoid an odd flow and interconnection of nodes.
-# This would make it consistent that a full_product could be identified by not being an input part for anything.
-# Therefore, it would likely no longer be necessary to keep the booleans signifying a full_product.
-# This could potentially save space as long as another process was in place to use these factors to identify one.
-# Brooke + Corbin -
-# [ ] sprue variant structure
-# Looking to the future, if the variant structure above is concured with, there would need to be a defined sprue variant structure.
-# Consider if there are three bottom level parts (1a, 1b, 1c,) that make up sprue 1 and similarly formatted sprues 2 + 3 that make up part Apple.
-# Variant Applex300 would have the shared sprues of 2 + 3 and a different sprue of 300 which is made up of 1a, 1b, and 300x.
-# (The congruencies with the letters and numbers of 300 and x are examples that are not inherent to the structure though their consistency is.)
-# Therefore, instead of an entirely new sprue, sprue 300 would share parts 1a and 1b with sprue 1 and have one extra part.
-# Sprue 300 would then be one of the parts for Applex300.
-# Brooke + Corbin -
-# [ ] 3 < layer part structure
-# Our data set on model airplanes will have only three functioning parts layers (parts, sprues, kits).
-# For real airplanes, there would be many more layers.
-# Therefore, throught the design process we need to keep that functionality in mind.
-# Brooke -
-# [ ] sprues vs kits vs parts
-# It may be beneficial to consolidate term usage in an opening comment.
-# Refering to them all as parts could cause confusion but would be beneficial for multi-layered use cases.
-# Brooke + Corbin -
-# [ ] linkage of parts
-# In both our and real world scale, is the linkage of parts itself considered a part?
-# Are we certain that it is best overall to define the next collection of parts through the manufacturer/company?
-# Currently our thoughts are leading to yes, as a sprue is the linkage of smaller parts.
-# However, we are linking them through manufacturer/company instead of location category.
-# Depending to the degree that this is true, different parts categories could be considered as parts themselves.
-# Brooke -
-# [x] companies vs manufacturers
-# These would be some more key terms to define in an opening comment.
-# The format of the data.json file concerning these two is particularly confusing.
-# It needs to be consolidated and better defined.
-# Both have a category of a company with manufacturing locations.
-# Capt. Terry -
-# Wanted to differentiate
-# Manufacturers have different names than companies
-# Companies - assemble the aircraft
-# Manufacturers - assemble the sprues
-# Possibly mix and match a bit
-# Derek
-# Suppliers vs Manufacturers
-# Make vocab sheet
-# Later make way to customize different stuff about data?
-# How to figure out if a thing is supplier or manufacturer?
-# We want completely random locations for the parts
-# The assumption is that while the companies assemble the kits and products, the individual parts were sourced from various manufacturing locations
-# Brooke -
-# [ ] sprues vs kits vs parts cont.
-# Here sprues are refered to as kits, according to our current definitions.
+"""
+                

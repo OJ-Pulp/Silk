@@ -190,6 +190,19 @@ class Component(Node):
         if key is None:
             return self.metadata
         return self.metadata.get(key, default)
+    
+    def __repr__(self):
+        return (
+            f"Component(\n"
+            f"  name='{self.name}',\n"
+            f"  designation='{self.metadata['designation']}',\n"
+            f"  popular_name='{self.metadata['popular_name']}',\n"
+            f"  manufacturer='{self.manufacturer}',\n"
+            f"  location='{self.locations}',\n"
+            f"  full_product={self.full_product},\n"
+            f"  variant={self.metadata['variant']}\n"
+            f")"
+        )
 
 
 # class Manufacturer(Node):
