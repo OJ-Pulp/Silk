@@ -54,7 +54,7 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
                     name=f"{part_type} {random_upper()}{random_upper()}{random_upper()}{str(faker_gen.random_int(10, 10000))}",
                     full_product=False,
                     manufacturer=base_product_part_manufacturer,
-                    location=faker_gen.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]), 
+                    locations=faker_gen.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]["Locations"]), 
                     product=base_product,
                     variant=False,
                     category=part_category,

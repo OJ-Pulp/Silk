@@ -77,7 +77,7 @@ def create_base_products(num_base_products) -> List[Component]:
             variant=False,
             manufacturer=base_product_manufacturer,
             locations=[base_product_manufacturer_location], 
-            designation=base_product_designation, 
+            designation=designation_mm, 
             popular_name=base_product_popular_name
             )
 
