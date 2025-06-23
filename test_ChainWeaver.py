@@ -255,7 +255,31 @@ def resolve_base_product_sprues(base_product_sprues: List[Component], base_produ
 
 # endregion
 
-base_products = create_base_products(500)
-base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
-base_product_parts, base_product_part_edges = create_base_product_parts(base_products, base_product_sprues)
-base_product_sprues, base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
+
+# -------------------------------------------------------------------------------------------
+#                                    MAIN_FUNCTION
+# -------------------------------------------------------------------------------------------
+# region MAIN_FUNCTION
+
+def main(num_products: int = 40, variant_distribution: float = 0.25):
+    """
+    Main Function to generate a fake supply chain for model aircrafts.
+    :param num_products: The total number of unique model aircraft products to include in the supply chain.
+                         Defaults to 40.
+    :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
+                         Defaults to 0.25, meaning roughly 25% of products will be variations.
+    :return: A dictionary representing the supply chain.
+    """
+
+    # Sets overall variables
+    num_variants = int(num_products * variant_distribution)
+    num_base_products = num_products - num_variants
+
+    base_products = create_base_products(num_base_products)
+    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
+    base_product_parts, base_product_part_edges = create_base_product_parts(base_products, base_product_sprues)
+    base_product_sprues, base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
+
+if __name__ == "__main__":
+
+    main()
