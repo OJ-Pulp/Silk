@@ -90,5 +90,5 @@ def create_base_products(num_base_products) -> List[Component]:
 
     # endregion
 
-print(f"FLAG: CREATE_BASE_PRODUCTS:")
+logger.debug(f"Create Base Products")
 print(create_base_products(5))
