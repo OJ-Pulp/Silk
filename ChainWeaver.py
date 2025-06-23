@@ -221,7 +221,7 @@ def resolve_base_product_sprues(base_product_sprues: List[Component], base_produ
 
                     base_product_sprue_edges.remove(base_product_sprue_edge)
 
-    return base_product_sprues, base_product_part_edges
+    return base_product_sprues, base_product_sprue_edges
 
 # endregion
 
@@ -319,13 +319,10 @@ def weave(num_products: int = 40, variant_distribution: float = 0.25) -> dict:
 
     base_products = create_base_products(num_base_products)
     base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
-    base_product_parts, base_product_part_edges = create_base_product_sprues(base_products, base_product_sprues)
-    variant_products = create_variant_products(base_products, num_variants)
-
+    base_product_parts, base_product_part_edges = create_base_product_parts(base_products, base_product_sprues)
+    base_product_sprues, base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
     
-    # [ ] FIX HERE LATER
-    #assert isinstance(base_product, Component) 
-    base_product_parts = create_base_product_parts(base_product)
+    variant_products = create_variant_products(base_products, num_variants)
 
     # Combines all products together as equals
     # [ ] FIX HERE LATER
