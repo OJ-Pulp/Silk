@@ -14,13 +14,13 @@ class Node(ABC):
     - Manufacturer nodes might use the name of the company (ex. "Ford Motor Company").
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, id: Optional[str] = None):
         """
         Initialize a Node with a name.
 
         :param name: The label or identifier of the node.
         """
-        self.id = str(uuid.uuid4())
+        self.id = id if id is not None else str(uuid.uuid4())
         self.name = name
 
 
@@ -75,6 +75,7 @@ class Component(Node):
         full_product: bool,
         manufacturer: str,
         locations: List[str],
+        id: Optional[str] = None,
         product: Optional[str] = None,
         variant: Optional[bool] = None,
         variant_base_product: Optional[str] = None,
@@ -112,7 +113,7 @@ class Component(Node):
         :param breakability: Value (0–1) indicating likelihood of breakage.
         :param year_range: The range of years this component was produced. Each year must be in the list.
         """
-        super().__init__(name)
+        super().__init__(name, id)
 
         # PLAIN NODE DATA
         # These attributes of each component are NOT OPTIONAL
@@ -367,6 +368,19 @@ class Requires(Edge):
         self.lead_time = lead_time
 
         self.__append_components_lists()
+
+    def __repr__(self):
+        lines = [
+            "Requires(",
+            f"  id='{self.id}',",
+            f"  start_node='{self.start_node.id}',",
+            f"  end_node='{self.end_node.id}',",
+            f"  base_model='{self.base_model}',",
+            f"  lead_time={self.lead_time},"
+        ]
+
+        lines.append(")")
+        return "\n".join(lines)
 
     def to_csv_row(self):
         """

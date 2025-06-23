@@ -90,5 +90,4 @@ def create_base_products(num_base_products) -> List[Component]:
 
     # endregion
 
-logger.debug(f"Create Base Products")
-print(create_base_products(5))
+(create_base_products(1))

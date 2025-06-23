@@ -76,7 +76,7 @@ def create_base_products(num_base_products) -> List[Component]:
             full_product=True,
             variant=False,
             manufacturer=base_product_manufacturer,
-            locations=base_product_manufacturer_location, 
+            locations=[base_product_manufacturer_location], 
             designation=base_product_designation, 
             popular_name=base_product_popular_name
             )
@@ -90,5 +90,5 @@ def create_base_products(num_base_products) -> List[Component]:
 
     # endregion
 
-logger.debug(f"Create Base Products")
-print(create_base_products(5))
+logger.debug(f"Create Base Products:")
+print(create_base_products(1))
