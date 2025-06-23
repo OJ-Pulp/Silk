@@ -12,7 +12,7 @@ MANUFACTURERS = INPUTDATA["Manufacturers"] # List of Dicts
 faker_gen = faker.Faker()
 random_uppercase = {str(faker_gen.random_letter().upper())}
 
-print("FLAG: SUCCESS: Variables Set")
+print("FLAG: SUCCESS: Opening Variables Set")
 
 # -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCTS
