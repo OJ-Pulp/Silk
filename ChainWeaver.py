@@ -109,6 +109,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
             base_product_sprue = Component(
                 name=f"Sprue {random_uppercase}{random_uppercase}{random_uppercase}{str(faker_gen.random_int(10, 1000000000))}", 
                 full_product=False,
+                product=base_product,
                 manufacturer=manufacturer,
                 location=faker_gen.random_element(elements=MANUFACTURERS[manufacturer]), 
                 variant=False
@@ -164,6 +165,7 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
                     full_product=False,
                     manufacturer=base_product_part_manufacturer,
                     location=faker_gen.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]), 
+                    product=base_product,
                     variant=False,
                     category=part_category,
                     part_type=part_type
@@ -172,18 +174,25 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
                 # Appends part to the overall list of parts for this product
                 base_product_parts.append(base_product_part)
 
-                # Creates base_product to base_product_sprue edge
-                base_product_part_edge = Requires(
-                    start_node=base_product_sprue_edges.,
-                    end_node=base_product_sprue,
-                    base_model=True,
-                    # In Business Days
-                    lead_time=faker_gen.random_int(1, 1000)
-                )
+                for base_product_sprue in base_product_sprues:
+
+                    assert isinstance(base_product_part, Component) 
+                    assert isinstance(base_product_sprue, Component) 
+
+                    if base_product_part.product == base_product_sprue.product:
+
+                        # Creates base_product to base_product_sprue edge
+                        base_product_part_edge = Requires(
+                            start_node=base_product_sprue,
+                            end_node=base_product_part,
+                            base_model=True,
+                            # In Business Days
+                            lead_time=faker_gen.random_int(1, 1000)
+                        )
 
                 base_product_part_edges.append(base_product_part_edge)
 
-    return base_product_parts, 
+    return base_product_parts, base_product_part_edges
 
 # endregion
 

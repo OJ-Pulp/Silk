@@ -75,6 +75,7 @@ class Component(Node):
         full_product: bool,
         manufacturer: str,
         locations: List[str],
+        product: Optional[str] = None,
         variant: Optional[bool] = None,
         variant_base_product: Optional[str] = None,
         designation: Optional[str] = None,
@@ -96,6 +97,7 @@ class Component(Node):
         :param full_product: Whether or not this component is a full product to be sold to customers.
         :param manufacturer: The manufacturer that produces this component.
         :param locations: The locations that this component is produced in.
+        :param product: The product that the non full_product component is a component of.
         :param variant: Whether or not this component is a variant of another or is the base_model.
         :param variant_base_product: The base_product that the variant is a subset of.
         :param designation: A specific designation of the component used for any external purposes.
@@ -127,6 +129,7 @@ class Component(Node):
         self.metadata = {}
 
         for k, v in {
+            "product": product,
             "variant": variant,
             "variant_base_product": variant_base_product,
             "designation": designation,
@@ -150,6 +153,7 @@ class Component(Node):
         Add or update a metadata entry for the component.
 
         Valid keys:
+            - "product": str
             - "variant": bool
             - "variant_base_product": str
             - "designation": str
