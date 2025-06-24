@@ -23,6 +23,12 @@ class Node(ABC):
         self.id = id if id is not None else str(uuid.uuid4())
         self.name = name
 
+    def __eq__(self, other):
+        return isinstance(other, Node) and self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
+
 
 class Component(Node):
     """
@@ -284,6 +290,12 @@ class Edge(ABC):
         self.id = str(uuid.uuid4())
         self.start_node = start_node
         self.end_node = end_node
+
+    def __eq__(self, other):
+        return isinstance(other, Component) and self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
 
 # class Produces(Edge):
