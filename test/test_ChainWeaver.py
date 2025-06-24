@@ -20,9 +20,10 @@ logger = logging.getLogger(__name__)
 
 logger.info("Program Start")
 
-INPUTDATA = json.load(open("./inputdata.json", "r"))
-DESIGNATIONS = INPUTDATA["Designations"]  # List of Dicts
-MANUFACTURERS = INPUTDATA["Manufacturers"]  # List of Dicts
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "inputdata.json"), "r") as f:
+    INPUTDATA = json.load(f)
+DESIGNATIONS = INPUTDATA["Designations"]
+MANUFACTURERS = INPUTDATA["Manufacturers"]
 faker_gen = faker.Faker()
 logger.info("Opening Variables Set")
 
