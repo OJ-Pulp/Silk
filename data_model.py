@@ -277,7 +277,7 @@ class Edge(ABC):
         self.end_node = end_node
 
     def __eq__(self, other):
-        return isinstance(other, Component) and self.id == other.id
+        return isinstance(other, Edge) and self.id == other.id
 
     def __hash__(self):
         return hash(self.id)
