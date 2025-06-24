@@ -290,7 +290,7 @@ def component_to_row(component: Component) -> dict:
         "year_range": metadata.get("year_range", ""),
     }
 
-def edge_to_row(edge: Requires) -> dict:
+def requires_to_row(edge: Requires) -> dict:
     return {
         "start_node": edge.start_node.id,
         "end_node": edge.end_node.id,
@@ -305,13 +305,13 @@ def edge_to_row(edge: Requires) -> dict:
 # -------------------------------------------------------------------------------------------
 # region NODES_AND_EDGES_TO_CSV
 
-def write_components_to_csv(components: List[Component], filename: str):
-    rows = [component_to_row(c) for c in components]
+def write_nodes_to_csv(nodes: List[Component], filename: str):
+    rows = [component_to_row(c) for c in nodes]
     df = pd.DataFrame(rows)
     df.to_csv(filename, index=False)
 
 def write_edges_to_csv(edges: List[Requires], filename: str):
-    rows = [edge_to_row(e) for e in edges]
+    rows = [requires_to_row(e) for e in edges]
     df = pd.DataFrame(rows)
     df.to_csv(filename, index=False)
 
@@ -346,7 +346,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     base_edges = base_product_sprue_edges + base_product_part_edges
 
     # Write to CSV
-    write_components_to_csv(base_components, "base_components.csv")
+    write_nodes_to_csv(base_components, "base_components.csv")
     write_edges_to_csv(base_edges, "base_edges.csv")
 
 if __name__ == "__main__":
