@@ -1,10 +1,14 @@
+import sys
+import os
 import json
 import uuid
 import faker
 import logging
 import pandas as pd # type: ignore
-from data_model import Component, Requires
 from typing import List, Tuple, Optional
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from data_model import Component, Requires # type: ignore
 
 logging.basicConfig(
     level=logging.DEBUG,  # Show DEBUG and above messages
