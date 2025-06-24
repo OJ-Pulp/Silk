@@ -375,9 +375,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     base_edges = base_product_sprue_edges + base_product_part_edges
 
     # Write to CSV
-    write_nodes_to_csv(base_components, "base_components.csv")
-    write_edges_to_csv(base_edges, "base_edges.csv")
-
+    write_nodes_to_csv(base_components, "output/test5_base_components.csv")
+    write_edges_to_csv(base_edges, "output/test5_base_edges.csv")
 
 if __name__ == "__main__":
     main()
