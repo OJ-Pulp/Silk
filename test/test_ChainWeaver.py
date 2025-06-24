@@ -37,10 +37,15 @@ MANUFACTURERS = INPUTDATA["Manufacturers"]  # List of Dicts
 faker_gen = faker.Faker()
 logger.info("Opening Variables Set")
 
+# -------------------------------------------------------------------------------------------
+#                                      MISCELLANEOUS
+# -------------------------------------------------------------------------------------------
+# region MISCELLANEOUS
 
 def random_upper():
     return str(faker_gen.random_letter().upper())
 
+# endregion
 
 # -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCTS
@@ -388,6 +393,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     write_nodes_to_csv(base_components, "output/test8_base_components.csv")
     write_edges_to_csv(base_edges, "output/test8_base_edges.csv")
 
+# endregion
 
 if __name__ == "__main__":
     main()
