@@ -4,7 +4,7 @@ import json
 import uuid
 import faker
 import logging
-import pandas as pd # type: ignore
+import pandas as pd
 from typing import List, Tuple, Optional
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
