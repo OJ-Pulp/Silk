@@ -6,30 +6,29 @@ import logging
 import pandas as pd
 from typing import List, Tuple
 
+# Imports data_model from its location outside of /test
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from data_model import Component, Requires
 
+# Config for logging showing messages level DEBUG and above
 logging.basicConfig(
-    level=logging.DEBUG,  # Show DEBUG and above messages
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
-# Suppress debug messages from Faker library
+
+# Suppress debug messages from faker library
 logging.getLogger("faker").setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 logger.info("Program Start")
 
 try:
-    with open(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "..", "inputdata.json"
-        ),
-        "r",
-    ) as f:
+    json_path = os.path.join(os.path.dirname(__file__), "..", "inputdata.json")
+    with open(json_path, "r") as f:
         INPUTDATA = json.load(f)
 except FileNotFoundError:
-    logger.error("inputdata.json not found. Exiting.")
+    logger.error("inputdata.json not found -- Exiting")
     sys.exit(1)
 
 DESIGNATIONS = INPUTDATA["Designations"]  # List of Dicts
