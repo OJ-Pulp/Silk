@@ -12,7 +12,7 @@ from data_model import Component, Requires
 
 # Config for logging showing messages level DEBUG and above
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
@@ -46,6 +46,8 @@ def random_upper():
     return str(faker_gen.random_letter().upper())
 
 # endregion
+
+logger.info("Miscellaneous Functions Set")
 
 # -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCTS
@@ -371,29 +373,30 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     # Sets overall variables
     num_variants = int(num_products * variant_distribution)
     num_base_products = num_products - num_variants
+    logger.info("Opening Inputs Set")
 
     base_products = create_base_products(num_base_products)
-    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(
-        base_products
-    )
-    base_product_parts, base_product_part_edges = create_base_product_parts(
-        base_products, base_product_sprues
-    )
-    resolved_base_product_sprues, resolved_base_product_sprue_edges = (
-        resolve_base_product_sprues(
-            base_product_sprues, base_product_sprue_edges, base_product_part_edges
-        )
-    )
+    logger.info("Base Products Created")
+    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
+    logger.info("Base Product Sprues Created")
+    base_product_parts, base_product_part_edges = create_base_product_parts(base_products, base_product_sprues)
+    logger.info("Base Product Parts Created")
+    resolved_base_product_sprues, resolved_base_product_sprue_edges = (resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges))
+    logger.info("Base Product Sprues Resolved")
 
     # Collect all components and edges
     base_components = base_products + resolved_base_product_sprues + base_product_parts
     base_edges = resolved_base_product_sprue_edges + base_product_part_edges
+    logger.info("Lists Consolidated")
 
     # Write to CSV
     write_nodes_to_csv(base_components, "output/test8_base_components.csv")
     write_edges_to_csv(base_edges, "output/test8_base_edges.csv")
+    logger.info("CSV Files Created")
 
 # endregion
 
 if __name__ == "__main__":
     main()
+
+logger.info("Program End")
