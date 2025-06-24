@@ -1,5 +1,6 @@
 """
-This module provides the Manager class for connecting the Spider Backend to the GUI.
+This module provides the Agent class for connecting the Spider Backend.
+It is responsible for answering user queries about the web database using the tools provided by the Spider class.
 """
 
 import re
@@ -8,10 +9,10 @@ from jinja2 import Environment, FileSystemLoader
 from typing import Dict
 from spider import Spider
 
-class Manager:
+class Agent:
     def __init__(self, db_name: str = "web.db", db_path: str = None):
         """
-        Initialize the Manager for connecting the Spider Backend to the GUI.
+        Initialize the Agent for connecting the Spider Backend.
         Args:
             db_name (str): The name of the database file. Defaults to "web.db".
             db_path (str): The path to the database save file directory. If None, uses the current working directory.
@@ -20,7 +21,7 @@ class Manager:
         self.preprocessor = Preprocessor(edge_entities=self.spider.web.edge_entities,
                                          node_entities=self.spider.web.node_entities)
 
-    def create_prompt(self, query: str) -> str:
+    def create_filter_prompt(self, query: str) -> str:
         """
         Create a prompt for the query using the preprocessor.
         

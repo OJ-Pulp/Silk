@@ -10,7 +10,6 @@ from config import DEFAULT_PATH, SCHEMA_FILE, join_paths
 from Web.db import WebDB
 from Web.webmath import markov_chain, max_profit_route, mcl, mcc
 import numpy as np
-from typing import Dict
 
 class Spider:
     def __init__(self, db_name: str, db_path: str = None):
