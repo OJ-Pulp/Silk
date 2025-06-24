@@ -196,7 +196,7 @@ class Component(Node):
         if key is None:
             return self.metadata
         return self.metadata.get(key, default)
-    
+
     def __repr__(self):
         lines = [
             "Component(",
@@ -204,14 +204,25 @@ class Component(Node):
             f"  name='{self.name}',",
             f"  manufacturer='{self.manufacturer}',",
             f"  location='{self.locations}',",
-            f"  full_product={self.full_product},"
+            f"  full_product={self.full_product},",
         ]
 
         # Optional metadata, only if present
         for key in [
-            "component_type", "product", "variant", "variant_base_product", "designation", 
-            "popular_name", "category", "part_type", "dimensions", "cost", "criticality", 
-            "failure_rate", "substitutions", "breakablility", "year_range"
+            "designation",
+            "popular_name",
+            "variant",
+            "product",
+            "variant_base_product",
+            "category",
+            "type",
+            "dimensions",
+            "cost",
+            "criticality",
+            "failure_rate",
+            "substitutions",
+            "breakability",
+            "year_range",
         ]:
             value = self.metadata.get(key)
             if value is not None:
@@ -381,7 +392,7 @@ class Requires(Edge):
             f"  start_node='{self.start_node.id}',",
             f"  end_node='{self.end_node.id}',",
             f"  base_model='{self.base_model}',",
-            f"  lead_time={self.lead_time},"
+            f"  lead_time={self.lead_time},",
         ]
 
         lines.append(")")
