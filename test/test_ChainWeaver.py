@@ -20,10 +20,21 @@ logger = logging.getLogger(__name__)
 
 logger.info("Program Start")
 
-with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "inputdata.json"), "r") as f:
-    INPUTDATA = json.load(f)
-DESIGNATIONS = INPUTDATA["Designations"]
-MANUFACTURERS = INPUTDATA["Manufacturers"]
+try:
+    with open(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "..", "inputdata.json"
+        ),
+        "r",
+    ) as f:
+        INPUTDATA = json.load(f)
+except FileNotFoundError:
+    logger.error("inputdata.json not found. Exiting.")
+    sys.exit(1)
+
+DESIGNATIONS = INPUTDATA["Designations"]  # List of Dicts
+MANUFACTURERS = INPUTDATA["Manufacturers"]  # List of Dicts
+
 faker_gen = faker.Faker()
 logger.info("Opening Variables Set")
 
@@ -377,6 +388,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     # Write to CSV
     write_nodes_to_csv(base_components, "output/test6_base_components.csv")
     write_edges_to_csv(base_edges, "output/test6_base_edges.csv")
+
 
 if __name__ == "__main__":
     main()
