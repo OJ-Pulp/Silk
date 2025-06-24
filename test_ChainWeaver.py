@@ -2,6 +2,7 @@ import json
 import uuid
 import faker
 import logging
+import pandas as pd # type: ignore
 from data_model import Component, Requires
 from typing import List, Tuple, Optional
 
@@ -119,7 +120,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
             base_product_sprue = Component(
                 name=f"Sprue {random_upper()}{random_upper()}{random_upper()}{str(faker_gen.random_int(10, 1000000000))}", 
                 full_product=False,
-                product=base_product,
+                product=base_product.id,
                 manufacturer=manufacturer,
                 locations=faker_gen.random_element(elements=MANUFACTURERS[manufacturer]["Locations"]), 
                 variant=False
@@ -179,7 +180,7 @@ def create_base_product_parts(base_products: List[Component], base_product_sprue
                     full_product=False,
                     manufacturer=base_product_part_manufacturer,
                     locations=faker_gen.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]["Locations"]), 
-                    product=base_product,
+                    product=base_product.id,
                     variant=False,
                     category=part_category,
                     part_type=part_type
@@ -255,6 +256,66 @@ def resolve_base_product_sprues(base_product_sprues: List[Component], base_produ
 
 # endregion
 
+# -------------------------------------------------------------------------------------------
+#                                NODES_AND_EDGES_TO_ROWS
+# -------------------------------------------------------------------------------------------
+# region NODES_AND_EDGES_TO_ROWS
+
+def component_to_row(component: Component) -> dict:
+    metadata = component.metadata
+    return {
+        "id": component.id,
+        "name": component.name,
+        "manufacturer": component.manufacturer,
+        "locations": component.locations,
+        "components": ";".join(component.components) if component.components else "",
+        "full_product": component.full_product,
+        "component_type": (
+            "Product" if component.full_product
+            else "Sprue" if metadata.get("category") is None
+            else "Part"
+        ),
+        "variant": metadata.get("variant", ""),
+        "variant_base_product": metadata.get("variant_base_product", ""),
+        "designation": metadata.get("designation", ""),
+        "popular_name": metadata.get("popular_name", ""),
+        "category": metadata.get("category", ""),
+        "part_type": metadata.get("part_type", ""),
+        "dimensions": metadata.get("dimensions", ""),
+        "cost": metadata.get("cost", ""),
+        "criticality": metadata.get("criticality", ""),
+        "failure_rate": metadata.get("failure_rate", ""),
+        "substitutions": metadata.get("substitutions", ""),
+        "breakability": metadata.get("breakability", ""),
+        "year_range": metadata.get("year_range", ""),
+    }
+
+def edge_to_row(edge: Requires) -> dict:
+    return {
+        "start_node": edge.start_node.id,
+        "end_node": edge.end_node.id,
+        "lead_time": edge.lead_time,
+        "base_model": edge.base_model
+    }
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
+#                                NODES_AND_EDGES_TO_CSV
+# -------------------------------------------------------------------------------------------
+# region NODES_AND_EDGES_TO_CSV
+
+def write_components_to_csv(components: List[Component], filename: str):
+    rows = [component_to_row(c) for c in components]
+    df = pd.DataFrame(rows)
+    df.to_csv(filename, index=False)
+
+def write_edges_to_csv(edges: List[Requires], filename: str):
+    rows = [edge_to_row(e) for e in edges]
+    df = pd.DataFrame(rows)
+    df.to_csv(filename, index=False)
+
+# endregion
 
 # -------------------------------------------------------------------------------------------
 #                                    MAIN_FUNCTION
@@ -279,6 +340,14 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
     base_product_parts, base_product_part_edges = create_base_product_parts(base_products, base_product_sprues)
     base_product_sprues, base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
+
+    # Collect all components and edges
+    base_components = base_products + base_product_sprues + base_product_parts
+    base_edges = base_product_sprue_edges + base_product_part_edges
+
+    # Write to CSV
+    write_components_to_csv(base_components, "base_components.csv")
+    write_edges_to_csv(base_edges, "base_edges.csv")
 
 if __name__ == "__main__":
 

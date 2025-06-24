@@ -72,10 +72,11 @@ class Component(Node):
     def __init__(
         self,
         name: str,
-        full_product: bool,
         manufacturer: str,
         locations: List[str],
+        full_product: bool,
         id: Optional[str] = None,
+        component_type: Optional[str] = None,
         product: Optional[str] = None,
         variant: Optional[bool] = None,
         variant_base_product: Optional[str] = None,
@@ -95,9 +96,11 @@ class Component(Node):
         Initialize a Component with specific attributes.
 
         :param name: Name of the component.
-        :param full_product: Whether or not this component is a full product to be sold to customers.
         :param manufacturer: The manufacturer that produces this component.
         :param locations: The locations that this component is produced in.
+        :param full_product: Whether or not this component is a full product to be sold to customers.
+        :param id: If the user wants to input an id instead of having a randomly generated one.
+        :param component_type: Level of the component in relation to other components.
         :param product: The product that the non full_product component is a component of.
         :param variant: Whether or not this component is a variant of another or is the base_model.
         :param variant_base_product: The base_product that the variant is a subset of.
@@ -130,13 +133,14 @@ class Component(Node):
         self.metadata = {}
 
         for k, v in {
+            "component_type": component_type,
             "product": product,
             "variant": variant,
             "variant_base_product": variant_base_product,
             "designation": designation,
             "popular_name": popular_name,
             "category": category,
-            "type": part_type,
+            "part_type": part_type,
             "dimensions": dimensions,
             "cost": cost,
             "criticality": criticality,
@@ -154,13 +158,14 @@ class Component(Node):
         Add or update a metadata entry for the component.
 
         Valid keys:
+            - "component_type": str
             - "product": str
             - "variant": bool
             - "variant_base_product": str
             - "designation": str
             - "popular_name": str
             - "category": str
-            - "type": str
+            - "part_type": str
             - "dimensions": List[int] of length 3
             - "cost": float >= 0
             - "criticality": float in [0, 1]
@@ -204,9 +209,9 @@ class Component(Node):
 
         # Optional metadata, only if present
         for key in [
-            "designation", "popular_name", "variant", "product", "variant_base_product",
-            "category", "type", "dimensions", "cost", "criticality",
-            "failure_rate", "substitutions", "breakability", "year_range"
+            "component_type", "product", "variant", "variant_base_product", "designation", 
+            "popular_name", "category", "part_type", "dimensions", "cost", "criticality", 
+            "failure_rate", "substitutions", "breakablility", "year_range"
         ]:
             value = self.metadata.get(key)
             if value is not None:
