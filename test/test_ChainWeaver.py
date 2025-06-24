@@ -56,7 +56,7 @@ def create_base_products(num_base_products) -> List[Component]:
                          Defaults to 40.
     :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
                          Defaults to 0.25, meaning roughly 25% of products will be variations.
-    :return: A an integer defining the number of variants and a list of Components representing all base_products.
+    :return: List of Components representing base products.
     """
 
     base_products = []
@@ -65,12 +65,8 @@ def create_base_products(num_base_products) -> List[Component]:
 
     designation_num = {designation_type: 0 for designation_type in designation_keys}
 
-    logger_count = 0
-
-    # Creates a list of Components that are base_products
-    for _ in range(num_base_products):
-        logger_count += 1
-        logger.debug(f"Base Product {logger_count}:")
+    for i in range(num_base_products):
+        logger.debug(f"Base Product {i}:\n")
 
         # Assigns base_product designation
         designation_mm = faker_gen.random_element(elements=designation_keys)
@@ -127,11 +123,8 @@ def create_base_product_sprues(
     base_product_sprues = []
     base_product_sprue_edges = []
 
-    logger_count = 0
-
-    for base_product in base_products:
-        logger_count += 1
-        logger.debug(f"Base Product {logger_count}:\n")
+    for i, base_product in enumerate(base_products, start=1):
+        logger.debug(f"Base Product {i}:\n")
 
         for manufacturer in MANUFACTURERS:
             # Creates base_product_sprue node
