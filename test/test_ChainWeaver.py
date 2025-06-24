@@ -126,7 +126,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
         for manufacturer in MANUFACTURERS:
             # Creates base_product_sprue node
             base_product_sprue = Component(
-                name=f"Sprue {random_upper()}{random_upper()}{random_upper()}{str(faker_gen.random_int(10, 1000000000))}",
+                name=f"Sprue {random_upper()}{random_upper()}{random_upper()}{str(faker_gen.random_int(99999999, 1000000000))}",
                 full_product=False,
                 product=base_product.id,
                 manufacturer=manufacturer,
@@ -241,38 +241,6 @@ def create_base_product_parts(
 # region RESOLVE_SPRUES
 
 
-# def resolve_base_product_sprues(
-#     base_product_sprues: List[Component],
-#     base_product_sprue_edges: List[Requires],
-#     base_product_part_edges: List[Requires],
-# ):
-#     for base_product_sprue in base_product_sprues:
-#         edge_count = 0
-#
-#         for base_product_part_edge in base_product_part_edges:
-#             assert isinstance(base_product_part_edge, Requires)
-#
-#             if base_product_part_edge.start_node == base_product_sprue:
-#                 edge_count += 1
-#
-#         if edge_count == 0:
-#             base_product_sprues.remove(base_product_sprue)
-#
-#             logger.debug("Removed Sprue:")
-#             logger.debug(base_product_sprue)
-#             logger.debug("")
-#
-#             for base_product_sprue_edge in base_product_sprue_edges:
-#                 if base_product_sprue_edge.end_node == base_product_sprue:
-#                     base_product_sprue_edges.remove(base_product_sprue_edge)
-#
-#                     logger.debug("Removed Sprue Edge:")
-#                     logger.debug(base_product_sprue)
-#                     logger.debug("")
-#
-#     return base_product_sprues, base_product_sprue_edges
-
-
 def resolve_base_product_sprues(
     base_product_sprues: List[Component],
     base_product_sprue_edges: List[Requires],
@@ -364,12 +332,14 @@ def requires_to_row(edge: Requires) -> dict:
 
 
 def write_nodes_to_csv(nodes: List[Component], filename: str):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     rows = [component_to_row(c) for c in nodes]
     df = pd.DataFrame(rows)
     df.to_csv(filename, index=False)
 
 
 def write_edges_to_csv(edges: List[Requires], filename: str):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     rows = [requires_to_row(e) for e in edges]
     df = pd.DataFrame(rows)
     df.to_csv(filename, index=False)
