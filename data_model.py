@@ -188,21 +188,6 @@ class Component(Node):
         self._validate_metadata_entry(key, value)
         self.metadata[key] = value
 
-    def get_metadata(self, key: Optional[str] = None, default=None):
-        """
-        Retrieve metadata from the component.
-
-        If a key is provided, return the corresponding value or a default if the key is missing.
-        If no key is provided, return the entire metadata dictionary.
-
-        :param key: Optional metadata key to look up.
-        :param default: Value to return if the key is not found (only used if key is given).
-        :return: Metadata value, full metadata dict, or default fallback.
-        """
-        if key is None:
-            return self.metadata
-        return self.metadata.get(key, default)
-
     def __repr__(self):
         lines = [
             "Component(",
