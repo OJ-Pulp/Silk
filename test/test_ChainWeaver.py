@@ -115,9 +115,7 @@ def create_base_products(num_base_products) -> List[Component]:
 # region BASE_PRODUCT_SPRUES
 
 
-def create_base_product_sprues(
-    base_products: List[Component],
-) -> Tuple[List[Component], List[Requires]]:
+def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
     # Sets base_product_sprues variables
     base_product_sprues = []
     base_product_sprue_edges = []
@@ -167,8 +165,10 @@ def create_base_product_sprues(
 
 
 def create_base_product_parts(
-    base_products: List[Component], base_product_sprues: List[Component]
+    base_products: List[Component], 
+    base_product_sprues: List[Component]
 ) -> Tuple[List[Component], List[Requires]]:
+    
     # Sets base_product_parts variables
     base_product_parts = []
     base_product_part_edges = []
@@ -415,8 +415,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     base_edges = resolved_base_product_sprue_edges + base_product_part_edges
 
     # Write to CSV
-    write_nodes_to_csv(base_components, "output/test7_base_components.csv")
-    write_edges_to_csv(base_edges, "output/test7_base_edges.csv")
+    write_nodes_to_csv(base_components, "output/test8_base_components.csv")
+    write_edges_to_csv(base_edges, "output/test8_base_edges.csv")
 
 
 if __name__ == "__main__":
