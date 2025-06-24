@@ -73,7 +73,7 @@ class Component(Node):
         self,
         name: str,
         manufacturer: str,
-        locations: List[str],
+        locations: str | List[str],
         full_product: bool,
         id: Optional[str] = None,
         component_type: Optional[str] = None,
@@ -97,7 +97,7 @@ class Component(Node):
 
         :param name: Name of the component.
         :param manufacturer: The manufacturer that produces this component.
-        :param locations: The locations that this component is produced in.
+        :param locations: The location(s) that this component is produced in.
         :param full_product: Whether or not this component is a full product to be sold to customers.
         :param id: If the user wants to input an id instead of having a randomly generated one.
         :param component_type: Level of the component in relation to other components.
@@ -215,7 +215,7 @@ class Component(Node):
             "product",
             "variant_base_product",
             "category",
-            "type",
+            "part_type",
             "dimensions",
             "cost",
             "criticality",
@@ -413,7 +413,7 @@ class Requires(Edge):
         """
 
         return {
-            ":START_ID(Plant)": self.start_node.id,
+            ":START_ID(Component)": self.start_node.id,
             ":END_ID(Component)": self.end_node.id,
             ":TYPE": "REQUIRES",
             "base_model": self.base_model,
