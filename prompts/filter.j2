@@ -1,0 +1,19 @@
+Node Table: {{ node_entities_str }}  
+Edge Table: {{ edge_entities_str }}  
+
+User Query: "{{ query }}"  
+
+Node Table: SELECT Index FROM Nodes WHERE <conditions>;  
+Edge Table: SELECT SourceID, TargetID FROM Edges WHERE <conditions>;  
+
+Return the completed SQL SELECT statements that retreive the relevant Nodes and edges to the user query.
+
+Each statement must include only filtering conditions based on the column names in the respective table.  
+Do not perform joins, transformations, or aggregations.  
+
+If no filters are needed for the Nodes table, use:  
+SELECT Index FROM Nodes;
+If no filters are needed for the Edges table, use:  
+SELECT SourceID, TargetID FROM Edges;
+
+Only return the SQL statements. No explanation or formatting.

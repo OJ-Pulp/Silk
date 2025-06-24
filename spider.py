@@ -26,7 +26,7 @@ class Spider:
     # For the tool functions, I need to use the get node and get edge functions to make sure that the data and not the index
     # are returned.
 
-    def get_web(self, node_filter: Dict = None, edge_filter: Dict = None):
+    def get_web(self, node_filter: str, edge_filter: str):
         """
         Get a subgraph from the web database based on node and edge filters.
         Args:
@@ -43,8 +43,8 @@ class Spider:
         return edge_matrix, node_vector, index_keys
 
     def weight_nodes(self, 
-                     node_filter: Dict = None, 
-                     edge_filter: Dict = None) -> np.ndarray:
+                     node_filter: str, 
+                     edge_filter: str) -> np.ndarray:
         """Implement a node weighting algorithm (PageRank) and return the weighted node array."""
 
         # Create a subgraph based on the filters provided.
@@ -61,8 +61,8 @@ class Spider:
 
 
     def weight_edges(self, 
-                     node_filter: Dict = None, 
-                     edge_filter: Dict = None) -> np.ndarray:
+                     node_filter: str, 
+                     edge_filter: str) -> np.ndarray:
         """Implement an edge weighting algorithm (betweenness/gravity) and return the weighted edge array."""
         # Create a subgraph based on the filters provided.
         edge_matrix, node_vector, index_keys = self.get_web(node_filter, edge_filter)
@@ -80,8 +80,8 @@ class Spider:
         
 
     def cluster(self, 
-                node_filter: Dict = None, 
-                edge_filter: Dict = None) -> list:
+                node_filter: str, 
+                edge_filter: str) -> list:
         """Implement a graph clustering algorithm and return the index of the clusters."""
         # Create a subgraph based on the filters provided.
         edge_matrix, node_vector, index_keys = self.get_web(node_filter, edge_filter)
@@ -100,8 +100,8 @@ class Spider:
 
     def traverse(self, 
                   start: int, end: int, 
-                  node_filter: Dict = None, 
-                  edge_filter: Dict = None,
+                  node_filter: str, 
+                  edge_filter: str,
                   num_hops: int = None) -> list:
         """Implement a cost-benefit analysis algorithm to find the best path."""
         # Create a subgraph based on the filters provided.

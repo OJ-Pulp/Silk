@@ -22,16 +22,6 @@ class WebDB:
             # Load the existing network from the pickle file
             with open(self.network_path, 'rb') as f:
                 self.network = pickle.load(f)
-
-        # Define the filter operations for the web database
-        self.filter_ops = {
-            "==": "!=",
-            "!=": "==",
-            ">=": "<",
-            "<=": ">",
-            ">": "<=",
-            "<": ">="
-        }
         self.nodes_entities = {col[1]: col[2] for col in self.cursor.execute("PRAGMA table_info(Nodes)")}
         self.edges_entities = {col[1]: col[2] for col in self.cursor.execute("PRAGMA table_info(Edges)")}
 
@@ -156,86 +146,29 @@ class WebDB:
         )
         row = self.cursor.fetchone()
         return np.array(row, dtype=object) if row else None
-        
-    def _build_conditions(self, filter_dict, valid_cols):
-        conditions = []
-        values = []
-
-        for column, filters in filter_dict.items():
-            if column not in valid_cols:
-                raise ValueError(f"Invalid column name: '{column}'")
-
-            if isinstance(filters, tuple):
-                filters = [filters]
-
-            for op, val in filters:
-                if op not in self.filter_ops:
-                    raise ValueError(f"Unsupported operator '{op}' for column '{column}'")
-
-                inverse_op = self.filter_ops[op]
-                conditions.append(f"{column} {inverse_op} ?")
-                values.append(val)
-
-        return conditions, values
-        
-    def _filter_nodes(self, node_filter: dict):
-        """
-        Returns a list of valid nodes based on the node_filter conditions.
-
-        Parameters:
-            node_filter (dict): {column_name: (operator, value) or list of such tuples}
-                                Conditions for filtering nodes.
-
-        Returns:
-            List[tuple]: A list of nodes that meet the node_filter conditions.
-        """
-        node_conditions, node_values = self._build_conditions(node_filter, self.nodes_entities) if node_filter else ([], [])
-        node_sql = "SELECT Index FROM Nodes"
-        if node_conditions:
-            node_sql += " WHERE " + " AND ".join(node_conditions)
-
-        self.cursor.execute(node_sql, node_values)
-        valid_nodes = [row[0] for row in self.cursor.fetchall()]
-
-        return valid_nodes
     
-    def _filter_edges(self, edge_filter: dict):
-        """
-        Returns a list of valid edges (SourceID, TargetID) based on the edge_filter conditions.
-
-        Parameters:
-            edge_filter (dict): {column_name: (operator, value) or list of such tuples}
-                                Conditions for filtering edges.
-
-        Returns:
-            List[tuple]: A list of edges (SourceID, TargetID) that meet the edge_filter conditions.
-        """
-        edge_conditions, edge_values = self._build_conditions(edge_filter, self.edges_entities) if edge_filter else ([], [])
-        edge_sql = "SELECT SourceID, TargetID FROM Edges"
-        if edge_conditions:
-            edge_sql += " WHERE " + " AND ".join(edge_conditions)
-
-        self.cursor.execute(edge_sql, edge_values)
-        valid_edges = [(row[0], row[1]) for row in self.cursor.fetchall()]
-
-        return valid_edges
-    
-    def get_web(self, node_filter: dict = None, edge_filter: dict = None) -> np.ndarray:
+    def get_web(self, node_filter_sql: str, edge_filter_sql: str) -> np.ndarray:
         """
         Returns a subgraph as an adjacency matrix based on the provided node and edge filters.
 
         Parameters:
-            node_filter (dict): {column_name: (operator, value) or list of such tuples}
-                                Conditions for filtering nodes.
-            edge_filter (dict): {column_name: (operator, value) or list of such tuples}
-                                Conditions for filtering edges.
-
+            node_filter_sql (str): SQL query to filter nodes e.g. "SELECT Index FROM Nodes WHERE <conditions>".
+            edge_filter_sql (str): SQL query to filter edges e.g. "SELECT SourceID, TargetID FROM Edges WHERE <conditions>".
+            
+            Note: If no filter is provided, the default query will return all nodes and edges i.e. 
+                  "SELECT Index FROM Nodes;" and "SELECT SourceID, TargetID FROM Edges;"
+                  
         Returns:
             np.ndarray: Adjacency matrix of the filtered subgraph.
         """
-        # Filter nodes and edges
-        node_indicies = self._filter_nodes(node_filter)
-        edge_indicies = self._filter_edges(edge_filter)
+        # Get Node Indicies
+        self.cursor.execute(node_filter_sql)
+        node_indicies = [row[0] for row in self.cursor.fetchall()]
+
+        # Get Edge Indicies
+        self.cursor.execute(edge_filter_sql)
+        edge_indicies = [(row[0], row[1]) for row in self.cursor.fetchall()] 
+                         
         # Get Sub-Network
         edge_matrix, node_weights = self.network.filtered_subgraph(node_indicies, edge_indicies)
         # Return the network edge matrix, node weights, and node indicies (keys)

@@ -19,4 +19,5 @@ def join_paths(path1: str, path2: str) -> str:
 
 DEFAULT_PATH = os.getcwd()
 WEAVER_DIR = join_paths(get_dir_path(), "Weavers/Chain")
-SCHEMA_FILE = join_paths(get_dir_path(), "Web/schema.json")
+SCHEMA_FILE = join_paths(get_dir_path(), "Web/schema.sql")
+PROMPT_DIR = join_paths(get_dir_path(), "prompts")
