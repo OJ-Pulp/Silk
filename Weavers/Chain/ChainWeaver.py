@@ -93,7 +93,7 @@ INPUTDATA_SCHEMA = {
                             }
                         }
                     },
-                    "required": ["Parts"],
+                    "required": ["Vital Parts", "Parts"],
                     "additionalProperties": False
                 }
             }

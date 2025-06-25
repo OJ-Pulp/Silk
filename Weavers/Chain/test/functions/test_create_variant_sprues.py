@@ -27,13 +27,24 @@ logger.info("Opening Variables Set")
 # -------------------------------------------------------------------------------------------
 # region variant_SPRUES
 
-def create_variant_sprues(variant_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
+def create_variant_sprues(base_product_sprues: List[Component], vital_base_product_sprues: List[Component], variant_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
     # Sets variant_sprues variables
     variant_sprues = []
     variant_sprue_edges = []
 
     for i, variant_product in enumerate(variant_products, start=1):
         logger.debug(f"Variant Product {i}:\n")
+
+        for base_product_sprue in base_product_sprues:
+            if variant_product.metadata["variant_base_product"] == base_product_sprue.metadata["product"]:
+                if base_product_sprue in vital_base_product_sprues:
+                    variant_sprue_edge = Requires(
+                        start_node=variant_product,
+                        end_node=base_product_sprue,
+                        base_model=True,
+                        # In Business Days
+                        lead_time=FAKER_GEN.random_int(1, 1000),
+                    )
 
         for manufacturer in MANUFACTURERS:
             # Creates variant_sprue node
