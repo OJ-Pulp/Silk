@@ -42,8 +42,7 @@ logger.info("Opening Variables Set")
 # -------------------------------------------------------------------------------------------
 # region MISCELLANEOUS
 
-def random_upper():
-    return str(faker_gen.random_letter().upper())
+
 
 # endregion
 
@@ -88,12 +87,8 @@ def create_base_products(num_base_products) -> List[Component]:
         # Assigns base_product manufacturer and manufacturer_location
         base_product_manufacturer = faker_gen.random_element(elements=manufacturer_keys)
         logger.debug(f"Base Product Manufacturer:       {base_product_manufacturer}")
-        possible_manufacturer_locations = list(
-            MANUFACTURERS[base_product_manufacturer]["Locations"]
-        )
-        base_product_manufacturer_location = faker_gen.random_element(
-            elements=possible_manufacturer_locations
-        )
+        possible_manufacturer_locations = list(MANUFACTURERS[base_product_manufacturer]["Locations"])
+        base_product_manufacturer_location = faker_gen.random_element(elements=possible_manufacturer_locations)
 
         # Creates base_product node
         base_product = Component(
@@ -133,7 +128,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
         for manufacturer in MANUFACTURERS:
             # Creates base_product_sprue node
             base_product_sprue = Component(
-                name=f"Sprue {random_upper()}{random_upper()}{random_upper()}{str(faker_gen.random_int(99999999, 1000000000))}",
+                name=f"Sprue {faker_gen.bothify(text="???########")}",
                 full_product=False,
                 product=base_product.id,
                 manufacturer=manufacturer,
@@ -142,7 +137,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
                 ),
                 variant=False,
             )
-            logger.debug(f"Base Product Sprue:{base_product_sprue}\n")
+            logger.debug(f"Base Product Sprue: {base_product_sprue}\n")
 
             # Appends part to the overall list of parts for this product
             base_product_sprues.append(base_product_sprue)
@@ -156,7 +151,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
                 lead_time=faker_gen.random_int(1, 1000),
             )
 
-            logger.debug(f"Base Product Sprue Edge:{base_product_sprue_edge}\n")
+            logger.debug(f"Base Product Sprue Edge: {base_product_sprue_edge}\n")
 
             base_product_sprue_edges.append(base_product_sprue_edge)
 
@@ -193,23 +188,17 @@ def create_base_product_parts(
 
                 # Creates part node
                 base_product_part = Component(
-                    name=f"{part_type} {random_upper()}{random_upper()}{random_upper()}{str(faker_gen.random_int(10, 10000))}",
+                    name=f"{part_type} {faker_gen.bothify(text="???#####")}",
                     full_product=False,
                     manufacturer=base_product_part_manufacturer,
-                    locations=faker_gen.random_element(
-                        elements=MANUFACTURERS[base_product_part_manufacturer][
-                            "Locations"
-                        ]
-                    ),
+                    locations=faker_gen.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]["Locations"]),
                     product=base_product.id,
                     variant=False,
                     category=part_category,
                     part_type=part_type,
                 )
 
-                logger.debug("Base Product Part:")
-                logger.debug(base_product_part)
-                logger.debug("")
+                logger.debug(f"Base Product Part: {base_product_part}/n")
 
                 # Appends part to the overall list of parts for this product
                 base_product_parts.append(base_product_part)
@@ -230,9 +219,7 @@ def create_base_product_parts(
                             lead_time=faker_gen.random_int(1, 1000),
                         )
 
-                        logger.debug("Base Product Part Edge:")
-                        logger.debug(base_product_part_edge)
-                        logger.debug("")
+                        logger.debug(f"Base Product Part Edge: {base_product_part_edge}/n")
 
                         base_product_part_edges.append(base_product_part_edge)
 
