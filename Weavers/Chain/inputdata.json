@@ -1269,10 +1269,8 @@
                 "Frame Rib",
                 "Doppler Radar",
                 "Dropwindsonde Launcher",
-                "Microwave Radiometer",
                 "Scientific Instrument Rack",
                 "Mission Specialist Station",
-                "Weather Station",
                 "Pressurized Cabin"
             ],
             "Parts": {
@@ -1365,6 +1363,15 @@
         "S": {
             "Type": "Anti-Submarine Warfare",
             "Number of Parts": "78",
+            "Vital Parts": [
+                "Wing",
+                "Jet Engine",
+                "Frame Rib",
+                "Magnetic Anomaly Detector",
+                "Sonobuoy Launcher",
+                "Torpedo Launch Tubes",
+                "Acoustic Processor"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
