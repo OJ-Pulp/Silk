@@ -334,7 +334,6 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
 
     return base_product_sprues, base_product_sprue_edges
 
-
 # endregion
 
 # -------------------------------------------------------------------------------------------

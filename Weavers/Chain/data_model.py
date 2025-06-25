@@ -83,6 +83,7 @@ class Component(Node):
         product: Optional[str] = None,
         variant: Optional[bool] = None,
         variant_base_product: Optional[str] = None,
+        vital: Optional[bool] = None,
         designation: Optional[str] = None,
         popular_name: Optional[str] = None,
         category: Optional[str] = None,
@@ -106,6 +107,7 @@ class Component(Node):
         :param product: The product that the non full_product component is a component of.
         :param variant: Whether or not this component is a variant of another or is the base_model.
         :param variant_base_product: The base_product that the variant is a subset of.
+        :param vital: Indicates whether or not the component is vital for a variant.
         :param designation: A specific designation of the component used for any external purposes.
         :param popular_name: The popular name, or more generally used name, of this component.
         :param category: The category of this component. Definition of category determined by user.
@@ -138,6 +140,7 @@ class Component(Node):
             "product": product,
             "variant": variant,
             "variant_base_product": variant_base_product,
+            "vital": vital,
             "designation": designation,
             "popular_name": popular_name,
             "category": category,
@@ -162,6 +165,7 @@ class Component(Node):
             - "product": str
             - "variant": bool
             - "variant_base_product": str
+            -"vital": bool,
             - "designation": str
             - "popular_name": str
             - "category": str
@@ -198,6 +202,7 @@ class Component(Node):
             "variant",
             "product",
             "variant_base_product",
+            "vital",
             "category",
             "part_type",
             "dimensions",
