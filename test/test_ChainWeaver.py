@@ -188,11 +188,12 @@ def resolve_inputdata(inputdata):
 # endregion
 
 RESOLVED_INPUTDATA = resolve_inputdata(INPUTDATA)
+logger.info("Inputs Accepted")
+
 DESIGNATIONS = RESOLVED_INPUTDATA["Designations"]
 MANUFACTURERS = RESOLVED_INPUTDATA["Manufacturers"]
-
-faker_gen = faker.Faker()
-logger.info("Opening Variables Set")
+FAKER_GEN = faker.Faker()
+logger.info("Global Variables Set")
 
 # -------------------------------------------------------------------------------------------
 #                                      MISCELLANEOUS
@@ -231,21 +232,21 @@ def create_base_products(num_base_products) -> List[Component]:
         logger.debug(f"Base Product {i}:\n")
 
         # Assigns base_product designation
-        designation_mm = faker_gen.random_element(elements=designation_keys)
+        designation_mm = FAKER_GEN.random_element(elements=designation_keys)
         designation_num[designation_mm] += 1
         base_product_designation_num = designation_num[designation_mm]
         base_product_designation = f"{designation_mm}-{base_product_designation_num}"
         logger.debug(f"Base Product Designation:        {base_product_designation}")
 
         # Assigns base_product popular_name and name
-        base_product_popular_name = faker_gen.word(part_of_speech="noun").capitalize()
+        base_product_popular_name = FAKER_GEN.word(part_of_speech="noun").capitalize()
         logger.debug(f"Base Product Popular Name:       {base_product_popular_name}")
 
         # Assigns base_product manufacturer and manufacturer_location
-        base_product_manufacturer = faker_gen.random_element(elements=manufacturer_keys)
+        base_product_manufacturer = FAKER_GEN.random_element(elements=manufacturer_keys)
         logger.debug(f"Base Product Manufacturer:       {base_product_manufacturer}")
         possible_manufacturer_locations = list(MANUFACTURERS[base_product_manufacturer]["Locations"])
-        base_product_manufacturer_location = faker_gen.random_element(elements=possible_manufacturer_locations)
+        base_product_manufacturer_location = FAKER_GEN.random_element(elements=possible_manufacturer_locations)
 
         # Creates base_product node
         base_product = Component(
@@ -285,11 +286,11 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
         for manufacturer in MANUFACTURERS:
             # Creates base_product_sprue node
             base_product_sprue = Component(
-                name=f"Sprue {faker_gen.bothify(text='???########')}",
+                name=f"Sprue {FAKER_GEN.bothify(text='???########')}",
                 full_product=False,
                 product=base_product.id,
                 manufacturer=manufacturer,
-                locations=faker_gen.random_element(
+                locations=FAKER_GEN.random_element(
                     elements=MANUFACTURERS[manufacturer]["Locations"]
                 ),
                 variant=False,
@@ -305,7 +306,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
                 end_node=base_product_sprue,
                 base_model=True,
                 # In Business Days
-                lead_time=faker_gen.random_int(1, 1000),
+                lead_time=FAKER_GEN.random_int(1, 1000),
             )
 
             logger.debug(f"Base Product Sprue Edge: {base_product_sprue_edge}\n")
@@ -339,16 +340,16 @@ def create_base_product_parts(
             # According to the inputdata.json list of desired parts for that product
             for part_type in part_list:
                 # Assigns part manufacturer and manufacturer location
-                base_product_part_manufacturer = faker_gen.random_element(
+                base_product_part_manufacturer = FAKER_GEN.random_element(
                     elements=list(MANUFACTURERS.keys())
                 )
 
                 # Creates part node
                 base_product_part = Component(
-                    name=f"{part_type} {faker_gen.bothify(text='???#####')}",
+                    name=f"{part_type} {FAKER_GEN.bothify(text='???#####')}",
                     full_product=False,
                     manufacturer=base_product_part_manufacturer,
-                    locations=faker_gen.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]["Locations"]),
+                    locations=FAKER_GEN.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]["Locations"]),
                     product=base_product.id,
                     variant=False,
                     category=part_category,
@@ -373,7 +374,7 @@ def create_base_product_parts(
                             end_node=base_product_part,
                             base_model=True,
                             # In Business Days
-                            lead_time=faker_gen.random_int(1, 1000),
+                            lead_time=FAKER_GEN.random_int(1, 1000),
                         )
 
                         logger.debug(f"Base Product Part Edge: {base_product_part_edge}/n")
