@@ -57,9 +57,6 @@ class Component(Node):
         elif key == "cost":
             if not (isinstance(value, (int, float)) and value >= 0):
                 raise ValueError("cost must be a non-negative number")
-        elif key == "criticality":
-            if not (0 <= value <= 1):
-                raise ValueError("criticality must be between 0 and 1")
         elif key == "failure_rate":
             if not (isinstance(value, (int, float)) and value >= 0):
                 raise ValueError("failure_rate must be a non-negative number")
@@ -92,7 +89,6 @@ class Component(Node):
         part_type: Optional[str] = None,
         dimensions: Optional[List[int]] = None,
         cost: Optional[float] = None,
-        criticality: Optional[float] = None,
         failure_rate: Optional[float] = None,
         substitutions: Optional[List[str]] = None,
         breakability: Optional[float] = None,
@@ -116,7 +112,6 @@ class Component(Node):
         :param part_type: The general type of the component. Specific definition of part type is determined by user.
         :param dimensions: A list of three integers [length, width, height]. Dimensions are determined by user.
         :param cost: Monetary cost of the component (float). Currency used determined by user.
-        :param criticality: Value (0–1) indicating component importance.
         :param failure_rate: Expected failure rate (e.g., failures/hour). Rate determined by user.
         :param substitutions: List of substitute component IDs.
         :param breakability: Value (0–1) indicating likelihood of breakage.
@@ -149,7 +144,6 @@ class Component(Node):
             "part_type": part_type,
             "dimensions": dimensions,
             "cost": cost,
-            "criticality": criticality,
             "failure_rate": failure_rate,
             "substitutions": substitutions,
             "breakability": breakability,
@@ -174,7 +168,6 @@ class Component(Node):
             - "part_type": str
             - "dimensions": List[int] of length 3
             - "cost": float >= 0
-            - "criticality": float in [0, 1]
             - "failure_rate": float >= 0
             - "substitutions": List[str]
             - "breakability": float in [0, 1]
@@ -209,7 +202,6 @@ class Component(Node):
             "part_type",
             "dimensions",
             "cost",
-            "criticality",
             "failure_rate",
             "substitutions",
             "breakability",
@@ -431,7 +423,6 @@ def main():
         name = f"Component-{i}"
         dims = [random.randint(1, 10) for _ in range(3)]
         cost = random.uniform(10, 100)
-        criticality = random.uniform(0, 1)
         failure_rate = random.uniform(0.001, 0.1)
         substitutions = []
         breakability = random.uniform(0, 1)
@@ -443,7 +434,6 @@ def main():
             locations=["Singapore", "New York City, USA"],
             dimensions=dims,
             cost=cost,
-            criticality=criticality,
             failure_rate=failure_rate,
             substitutions=substitutions,
             breakability=breakability,
@@ -451,7 +441,7 @@ def main():
         components.append(comp)
 
         print(
-            f"{components[i].name} has ID: {components[i].id} and criticality of {components[i].metadata['criticality']} and costs {components[i].metadata['cost']}"
+            f"{components[i].name} has ID: {components[i].id} and costs {components[i].metadata['cost']}"
         )
 
 
