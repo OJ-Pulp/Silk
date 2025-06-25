@@ -41,9 +41,9 @@ def find_directory_named(name: str, start_path: Path) -> Path:
     raise FileNotFoundError(f"'{name}/' not found -- Exiting")
 
 try:
-    silk_path = find_directory_named("Silk", Path(__file__).resolve().parent)
-    logger.info(f"Found /Silk/ at: {silk_path}")
-    sys.path.append(str(silk_path))
+    SILK_PATH = find_directory_named("Silk", Path(__file__).resolve().parent)
+    logger.info(f"Found /Silk/ at: {SILK_PATH}")
+    sys.path.append(str(SILK_PATH))
 except FileNotFoundError as e:
     logger.error(e)
     sys.exit(1)
@@ -53,13 +53,12 @@ except FileNotFoundError as e:
 # Imports data_model from /Silk/
 from data_model import Component, Requires
 
-
 # -------------------------------------------------------------------------------------------
 #                                   INPUTDATA_SCHEMA
 # -------------------------------------------------------------------------------------------
 # region INPUTDATA_SCHEMA
 
-inputdata_schema = {
+INPUTDATA_SCHEMA = {
     "type": "object",
     "properties": {
         "Designations": {
@@ -100,6 +99,7 @@ inputdata_schema = {
         },
         "Manufacturers": {
             "type": "object",
+            "minProperties": 1,
             "patternProperties": {
                 ".*": {
                     "type": "object",
@@ -126,14 +126,14 @@ inputdata_schema = {
 # endregion
 
 # -------------------------------------------------------------------------------------------
-#                                    INPUTDATA.JSON
+#                                VALIDATE_INPUTDATA.JSON
 # -------------------------------------------------------------------------------------------
-# region INPUTDATA.JSON
+# region VALIDATE_INPUTDATA.JSON
 
-def validate_inputdata(inputdata_schema) -> bool:
+def validate_inputdata() -> dict:
     try:
-        with (silk_path / "inputdata.json").open("r", encoding="utf-8") as f:
-            INPUTDATA = json.load(f)
+        with (SILK_PATH / "inputdata.json").open("r", encoding="utf-8") as f:
+            inputdata = json.load(f)
     except FileNotFoundError:
         logger.error("inputdata.json Not Found -- Exiting")
         sys.exit(1)
@@ -142,10 +142,16 @@ def validate_inputdata(inputdata_schema) -> bool:
         sys.exit(1)
 
     try:
-        validate(INPUTDATA, inputdata_schema)
+        validate(inputdata, INPUTDATA_SCHEMA)
     except ValidationError as e:
         logger.error(f"Invalid inputdata.json structure -- {e.message} -- Exiting")
         sys.exit(1)
+
+    return inputdata
+
+# endregion
+
+INPUTDATA = validate_inputdata()
 
 for designation, data in INPUTDATA["Designations"].items():
     parts_count = str(sum(len(part_list) for part_list in data["Parts"].values()))
@@ -162,10 +168,9 @@ for name, data in INPUTDATA["Manufacturers"].items():
         data["ID"] = generated_id
         logger.debug(f"{name} ID Missing -- Generated New ID:       {generated_id}")
 
-with (silk_path / "inputdata.json").open("w", encoding="utf-8") as f:
+with (SILK_PATH / "inputdata.json").open("w", encoding="utf-8") as f:
     json.dump(INPUTDATA, f, indent=4)
 
-# endregion
 
 DESIGNATIONS = INPUTDATA["Designations"]
 MANUFACTURERS = INPUTDATA["Manufacturers"]
@@ -513,8 +518,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(base_components, "output/test9_base_components.csv")
-    write_edges_to_csv(base_edges, "output/test9_base_edges.csv")
+    write_nodes_to_csv(base_components, "output/test10_base_components.csv")
+    write_edges_to_csv(base_edges, "output/test10_base_edges.csv")
     logger.info("CSV Files Created")
 
 # endregion
