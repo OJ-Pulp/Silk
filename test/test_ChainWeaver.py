@@ -181,7 +181,7 @@ def resolve_inputdata(inputdata):
             logger.info(f"{name} ID Missing -- Generated New ID:       {generated_id}")
 
     with (SILK_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
-        json.dump(INPUTDATA, f, indent=4)
+        json.dump(resolved_inputdata, f, indent=4)
 
 resolve_inputdata(INPUTDATA)
 

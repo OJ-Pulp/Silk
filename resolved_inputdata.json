@@ -92,7 +92,8 @@
                     "Mounting Bracket",
                     "Assembly Jig"
                 ]
-            }
+            },
+            "Number of Parts": "69"
         },
         "F": {
             "Type": "Fighter",
@@ -1343,7 +1344,8 @@
                 "Hannover, Germany",
                 "Basingstoke, UK",
                 "Singapore"
-            ]
+            ],
+            "ID": "b2d4b7b8-035f-473e-aba5-953b2944bae2"
         },
         "Moog Inc.": {
             "ID": "e1c99d53-d046-401d-9c20-4eb33745a6e1",
