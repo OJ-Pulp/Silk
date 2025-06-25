@@ -2,7 +2,6 @@
     "Designations": {
         "B": {
             "Type": "Bomber",
-            "Number of Parts": "69",
             "Vital Parts": [
                 "Wing",
                 "Jet Engine"
@@ -1339,7 +1338,6 @@
     },
     "Manufacturers": {
         "Parker Hannifin": {
-            "ID": "f9f23e9d-bd4b-4942-81ca-68c0f339c4e1",
             "Locations": [
                 "Cleveland, : Ohio, USA",
                 "Hannover, Germany",

@@ -178,7 +178,7 @@ def resolve_inputdata(inputdata):
         if "ID" not in data:
             generated_id = str(uuid.uuid4())
             data["ID"] = generated_id
-            logger.debug(f"{name} ID Missing -- Generated New ID:       {generated_id}")
+            logger.info(f"{name} ID Missing -- Generated New ID:       {generated_id}")
 
     with (SILK_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
         json.dump(INPUTDATA, f, indent=4)
@@ -531,8 +531,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(base_components, "output/test11_base_components.csv")
-    write_edges_to_csv(base_edges, "output/test11_base_edges.csv")
+    write_nodes_to_csv(base_components, "output/test12_base_components.csv")
+    write_edges_to_csv(base_edges, "output/test12_base_edges.csv")
     logger.info("CSV Files Created")
 
 # endregion
