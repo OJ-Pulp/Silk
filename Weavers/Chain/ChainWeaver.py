@@ -345,7 +345,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
 def create_base_product_parts(
     base_products: List[Component], 
     base_product_sprues: List[Component]
-) -> Tuple[List[Component], List[Requires]]:
+) -> Tuple[List[Component], List[Requires], List[Component]]:
     
     # Sets base_product_parts variables
     base_product_parts = []
@@ -407,8 +407,7 @@ def create_base_product_parts(
                         if base_product_part_vital == True:
                             vital_base_product_sprues.append(base_product_sprue)
 
-    return base_product_parts, base_product_part_edges
-
+    return base_product_parts, base_product_part_edges, vital_base_product_sprues
 
 # endregion
 
@@ -599,7 +598,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Base Products Created")
     base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
     logger.info("Base Product Sprues Created")
-    base_product_parts, base_product_part_edges = create_base_product_parts(base_products, base_product_sprues)
+    base_product_parts, base_product_part_edges, vital_base_product_sprues = create_base_product_parts(base_products, base_product_sprues)
     logger.info("Base Product Parts Created")
     resolved_base_product_sprues, resolved_base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
     logger.info("Base Product Sprues Resolved")
