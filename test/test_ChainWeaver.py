@@ -183,10 +183,13 @@ def resolve_inputdata(inputdata):
     with (SILK_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
         json.dump(resolved_inputdata, f, indent=4)
 
-resolve_inputdata(INPUTDATA)
+    return resolved_inputdata
 
-DESIGNATIONS = INPUTDATA["Designations"]
-MANUFACTURERS = INPUTDATA["Manufacturers"]
+# endregion
+
+RESOLVED_INPUTDATA = resolve_inputdata(INPUTDATA)
+DESIGNATIONS = RESOLVED_INPUTDATA["Designations"]
+MANUFACTURERS = RESOLVED_INPUTDATA["Manufacturers"]
 
 faker_gen = faker.Faker()
 logger.info("Opening Variables Set")
@@ -531,8 +534,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(base_components, "output/test12_base_components.csv")
-    write_edges_to_csv(base_edges, "output/test12_base_edges.csv")
+    write_nodes_to_csv(base_components, "output/test13_base_components.csv")
+    write_edges_to_csv(base_edges, "output/test13_base_edges.csv")
     logger.info("CSV Files Created")
 
 # endregion
