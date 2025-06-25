@@ -598,8 +598,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(components, "output/test16_components.csv")
-    write_edges_to_csv(base_edges, "output/test16_base_edges.csv")
+    write_nodes_to_csv(components, "output/test17_components.csv")
+    write_edges_to_csv(base_edges, "output/test17_edges.csv")
     logger.info("CSV Files Created")
 
     logger.info("Main End")
