@@ -196,10 +196,32 @@ FAKER_GEN = faker.Faker()
 logger.info("Global Variables Set")
 
 # -------------------------------------------------------------------------------------------
+#                                   NAMING_CONVENTIONS
+# -------------------------------------------------------------------------------------------
+# region NAMING_CONVENTIONS
+
+def get_next_letter(current_letter):
+    """
+    Minor Function to get the variant_designation_letter of multi-layer variants.
+    :param current_letter: The variant_designation_letter of the variant on its last variation.
+    :return: A string of one capital letter to be the next variant_designation_letter.
+    """
+    # Get the ASCII value of the current letter and adds 1 to get the ASCII of the next
+    next_char_code = ord(current_letter) + 1
+    
+    # If it goes past "Z", wrap around to "A"
+    if next_char_code > ord("Z"):
+        next_char_code = ord("A")
+    
+    # Converts back to chr and outputs as a string of a standard capital letter
+    return chr(next_char_code)
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCTS
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCTS
-
 
 def create_base_products(num_base_products) -> List[Component]:
     """
@@ -255,7 +277,7 @@ def create_base_products(num_base_products) -> List[Component]:
 
     return base_products
 
-    # endregion
+# endregion
 
 # -------------------------------------------------------------------------------------------
 #                                   BASE_PRODUCT_SPRUES
@@ -376,7 +398,7 @@ def create_base_product_parts(
 # -------------------------------------------------------------------------------------------
 #                               RESOLVE_BASE_PRODUCT_SPRUES
 # -------------------------------------------------------------------------------------------
-# region RESOLVE_SPRUES
+# region RESOLVE_BASE_PRODUCT_SPRUES
 
 def resolve_base_product_sprues(
     base_product_sprues: List[Component],
@@ -410,6 +432,60 @@ def resolve_base_product_sprues(
 
     return base_sprues_keep, base_sprue_edges_keep
 
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
+#                                   VARIANT_PRODUCTS
+# -------------------------------------------------------------------------------------------
+# region VARIANT_PRODUCTS
+
+def create_variant_products(base_products, num_variants: int = 10)  -> List[Component]:
+
+    # Sets variant variables
+    variant_products = []
+
+    # 2. Create list of variants
+    for i in range(num_variants):
+        logger.debug(f"Variant Product {i}:\n")
+
+        # Assigns variant base_product
+        variant_base_product = FAKER_GEN.random_element(elements=base_products)
+        assert isinstance(variant_base_product, Component) 
+
+        # Assigns variant designation
+        variant_base_designation = variant_base_product.metadata["designation"]
+        if variant_base_designation[-1].isdigit():
+            variant_designation_letter = "A"
+        else:
+            variant_designation_letter = get_next_letter(variant_base_designation[-1])
+        variant_designation = f"{variant_base_designation}{variant_designation_letter}"
+        logger.debug(f"Variant Designation:        {variant_designation}")
+
+        # Assigns variant manufacturer and manufacturer_location
+        variant_manufacturer = variant_base_product.manufacturer
+        possible_manufacturer_locations = list(MANUFACTURERS[variant_manufacturer]["Locations"])
+        variant_manufacturer_location = FAKER_GEN.random_element(elements=possible_manufacturer_locations)
+        logger.debug(f"Variant Manufacturer:       {variant_manufacturer}")
+
+        # Creates variant_product node
+        variant_product = Component(
+            name=f"{variant_base_product.metadata['popular_name']} {variant_designation}", 
+            manufacturer=variant_manufacturer,
+            locations=variant_manufacturer_location, 
+            full_product=True,
+            variant=True,
+            variant_base_product=variant_base_product,
+            designation=variant_designation, 
+            popular_name=variant_base_product.metadata["popular_name"]
+            )
+
+        # Appends variant_product to the overall list of variant_products
+        variant_products.append(variant_product)
+
+        logger.debug("/n")
+    
+    return variant_products
 
 # endregion
 
@@ -510,17 +586,21 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Base Product Sprues Created")
     base_product_parts, base_product_part_edges = create_base_product_parts(base_products, base_product_sprues)
     logger.info("Base Product Parts Created")
-    resolved_base_product_sprues, resolved_base_product_sprue_edges = (resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges))
+    resolved_base_product_sprues, resolved_base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
     logger.info("Base Product Sprues Resolved")
+    variant_products = create_variant_products(base_products, num_variants)
+    logger.info("Variant Products Created")
 
     # Collect all components and edges
     base_components = base_products + resolved_base_product_sprues + base_product_parts
+    variant_components = variant_products
+    components = base_components + variant_components
     base_edges = resolved_base_product_sprue_edges + base_product_part_edges
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(base_components, "output/test14_base_components.csv")
-    write_edges_to_csv(base_edges, "output/test14_base_edges.csv")
+    write_nodes_to_csv(components, "output/test15_components.csv")
+    write_edges_to_csv(base_edges, "output/test15_base_edges.csv")
     logger.info("CSV Files Created")
 
     logger.info("Main End")
