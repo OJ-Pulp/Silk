@@ -349,17 +349,21 @@ def create_base_product_parts(
     # Sets base_product_parts variables
     base_product_parts = []
     base_product_part_edges = []
+    vital_base_product_sprues = []
 
     for base_product in base_products:
-        PARTS_CATEGORIES = DESIGNATIONS[base_product.metadata["designation"]]["Parts"]
+        parts_categories = DESIGNATIONS[base_product.metadata["designation"]]["Parts"]
 
-        for part_category, part_list in PARTS_CATEGORIES.items():
+        for part_category, part_list in parts_categories.items():
             # According to the inputdata.json list of desired parts for that product
             for part_type in part_list:
                 # Assigns part manufacturer and manufacturer location
-                base_product_part_manufacturer = FAKER_GEN.random_element(
-                    elements=list(MANUFACTURERS.keys())
-                )
+                base_product_part_manufacturer = FAKER_GEN.random_element(elements=list(MANUFACTURERS.keys()))
+
+                if part_type in DESIGNATIONS[base_product.metadata["designation"]]["Vital Parts"]:
+                    base_product_part_vital = True
+                else:
+                    base_product_part_vital = False
 
                 # Creates part node
                 base_product_part = Component(
@@ -369,6 +373,7 @@ def create_base_product_parts(
                     locations=FAKER_GEN.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]["Locations"]),
                     product=base_product.id,
                     variant=False,
+                    vital=base_product_part_vital,
                     category=part_category,
                     part_type=part_type,
                 )
@@ -397,6 +402,9 @@ def create_base_product_parts(
                         logger.debug(f"Base Product Part Edge: {base_product_part_edge}/n")
 
                         base_product_part_edges.append(base_product_part_edge)
+
+                        if base_product_part_vital == True:
+                            vital_base_product_sprues.append(base_product_sprue)
 
     return base_product_parts, base_product_part_edges
 
