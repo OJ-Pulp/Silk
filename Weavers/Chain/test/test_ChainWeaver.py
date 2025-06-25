@@ -284,7 +284,6 @@ def create_base_products(num_base_products) -> List[Component]:
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCT_SPRUES
 
-
 def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
     # Sets base_product_sprues variables
     base_product_sprues = []
