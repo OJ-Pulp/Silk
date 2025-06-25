@@ -153,24 +153,37 @@ def validate_inputdata() -> dict:
 
 INPUTDATA = validate_inputdata()
 
-for designation, data in INPUTDATA["Designations"].items():
-    parts_count = str(sum(len(part_list) for part_list in data["Parts"].values()))
-    if "Number of Parts" in data:
-        if data["Number of Parts"] != parts_count:
-            logger.warning(f"{designation} Number of Parts Mismatch:        manual={data['Number of Parts']}, computed={parts_count}")
-    else:
-        data["Number of Parts"] = parts_count
-        logger.debug(f"{designation} Number of Parts Added:      {parts_count}")
+# -------------------------------------------------------------------------------------------
+#                                RESOLVE_INPUTDATA.JSON
+# -------------------------------------------------------------------------------------------
+# region RESOLVE_INPUTDATA.JSON
 
-for name, data in INPUTDATA["Manufacturers"].items():
-    if "ID" not in data:
-        generated_id = str(uuid.uuid4())
-        data["ID"] = generated_id
-        logger.debug(f"{name} ID Missing -- Generated New ID:       {generated_id}")
+def resolve_inputdata(inputdata):
 
-with (SILK_PATH / "inputdata.json").open("w", encoding="utf-8") as f:
-    json.dump(INPUTDATA, f, indent=4)
+    with (SILK_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
+        json.dump(INPUTDATA, f, indent=4)
+    with (SILK_PATH / "resolved_inputdata.json").open("r", encoding="utf-8") as f:
+            resolved_inputdata = json.load(f)
 
+    for designation, data in resolved_inputdata["Designations"].items():
+        parts_count = str(sum(len(part_list) for part_list in data["Parts"].values()))
+        if "Number of Parts" in data:
+            if data["Number of Parts"] != parts_count:
+                logger.warning(f"{designation} Number of Parts Mismatch:        manual={data['Number of Parts']}, computed={parts_count}")
+        else:
+            data["Number of Parts"] = parts_count
+            logger.info(f"{designation} Number of Parts Added:      {parts_count}")
+
+    for name, data in resolved_inputdata["Manufacturers"].items():
+        if "ID" not in data:
+            generated_id = str(uuid.uuid4())
+            data["ID"] = generated_id
+            logger.debug(f"{name} ID Missing -- Generated New ID:       {generated_id}")
+
+    with (SILK_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
+        json.dump(INPUTDATA, f, indent=4)
+
+resolve_inputdata(INPUTDATA)
 
 DESIGNATIONS = INPUTDATA["Designations"]
 MANUFACTURERS = INPUTDATA["Manufacturers"]
@@ -518,8 +531,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(base_components, "output/test10_base_components.csv")
-    write_edges_to_csv(base_edges, "output/test10_base_edges.csv")
+    write_nodes_to_csv(base_components, "output/test11_base_components.csv")
+    write_edges_to_csv(base_edges, "output/test11_base_edges.csv")
     logger.info("CSV Files Created")
 
 # endregion
