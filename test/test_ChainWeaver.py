@@ -29,6 +29,11 @@ logger = logging.getLogger(__name__)
 
 logger.info("Program Start")
 
+# -------------------------------------------------------------------------------------------
+#                                    PATH_SETTINGS
+# -------------------------------------------------------------------------------------------
+# region PATH_SETTINGS
+
 def find_directory_named(name: str, start_path: Path) -> Path:
     for parent in [start_path, *start_path.parents]:
         if parent.name == name:
@@ -42,6 +47,8 @@ try:
 except FileNotFoundError as e:
     logger.error(e)
     sys.exit(1)
+
+# endregion
 
 # Imports data_model from /Silk/
 from data_model import Component, Requires
@@ -123,21 +130,22 @@ inputdata_schema = {
 # -------------------------------------------------------------------------------------------
 # region INPUTDATA.JSON
 
-try:
-    with (silk_path / "inputdata.json").open("r", encoding="utf-8") as f:
-        INPUTDATA = json.load(f)
-except FileNotFoundError:
-    logger.error("inputdata.json Not Found -- Exiting")
-    sys.exit(1)
-except json.JSONDecodeError as e:
-    logger.error(f"Error decoding JSON: {e}")
-    sys.exit(1)
+def validate_inputdata(inputdata_schema) -> bool:
+    try:
+        with (silk_path / "inputdata.json").open("r", encoding="utf-8") as f:
+            INPUTDATA = json.load(f)
+    except FileNotFoundError:
+        logger.error("inputdata.json Not Found -- Exiting")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        logger.error(f"Error decoding JSON: {e}")
+        sys.exit(1)
 
-try:
-    validate(INPUTDATA, inputdata_schema)
-except ValidationError as e:
-    logger.error(f"Invalid inputdata.json structure -- {e.message} -- Exiting")
-    sys.exit(1)
+    try:
+        validate(INPUTDATA, inputdata_schema)
+    except ValidationError as e:
+        logger.error(f"Invalid inputdata.json structure -- {e.message} -- Exiting")
+        sys.exit(1)
 
 for designation, data in INPUTDATA["Designations"].items():
     parts_count = str(sum(len(part_list) for part_list in data["Parts"].values()))
