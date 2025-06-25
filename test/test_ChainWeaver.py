@@ -196,17 +196,6 @@ FAKER_GEN = faker.Faker()
 logger.info("Global Variables Set")
 
 # -------------------------------------------------------------------------------------------
-#                                      MISCELLANEOUS
-# -------------------------------------------------------------------------------------------
-# region MISCELLANEOUS
-
-
-
-# endregion
-
-logger.info("Miscellaneous Functions Set")
-
-# -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCTS
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCTS
@@ -268,7 +257,6 @@ def create_base_products(num_base_products) -> List[Component]:
 
     # endregion
 
-
 # -------------------------------------------------------------------------------------------
 #                                   BASE_PRODUCT_SPRUES
 # -------------------------------------------------------------------------------------------
@@ -322,7 +310,6 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
 #                                   BASE_PRODUCT_PARTS
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCT_PARTS
-
 
 def create_base_product_parts(
     base_products: List[Component], 
@@ -386,12 +373,10 @@ def create_base_product_parts(
 
 # endregion
 
-
 # -------------------------------------------------------------------------------------------
 #                               RESOLVE_BASE_PRODUCT_SPRUES
 # -------------------------------------------------------------------------------------------
 # region RESOLVE_SPRUES
-
 
 def resolve_base_product_sprues(
     base_product_sprues: List[Component],
@@ -432,7 +417,6 @@ def resolve_base_product_sprues(
 #                                NODES_AND_EDGES_TO_ROWS
 # -------------------------------------------------------------------------------------------
 # region NODES_AND_EDGES_TO_ROWS
-
 
 def component_to_row(component: Component) -> dict:
     metadata = component.metadata
@@ -482,7 +466,6 @@ def requires_to_row(edge: Requires) -> dict:
 # -------------------------------------------------------------------------------------------
 # region NODES_AND_EDGES_TO_CSV
 
-
 def write_nodes_to_csv(nodes: List[Component], filename: str):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     rows = [component_to_row(c) for c in nodes]
@@ -504,7 +487,6 @@ def write_edges_to_csv(edges: List[Requires], filename: str):
 # -------------------------------------------------------------------------------------------
 # region MAIN_FUNCTION
 
-
 def main(num_products: int = 40, variant_distribution: float = 0.25):
     """
     Main Function to generate a fake supply chain for model aircrafts.
@@ -515,10 +497,12 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     :return: A dictionary representing the supply chain.
     """
 
+    logger.info("Main Start")
+
     # Sets overall variables
     num_variants = int(num_products * variant_distribution)
     num_base_products = num_products - num_variants
-    logger.info("Opening Inputs Set")
+    logger.info("Main Variables Set")
 
     base_products = create_base_products(num_base_products)
     logger.info("Base Products Created")
@@ -535,9 +519,11 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(base_components, "output/test13_base_components.csv")
-    write_edges_to_csv(base_edges, "output/test13_base_edges.csv")
+    write_nodes_to_csv(base_components, "output/test14_base_components.csv")
+    write_edges_to_csv(base_edges, "output/test14_base_edges.csv")
     logger.info("CSV Files Created")
+
+    logger.info("Main End")
 
 # endregion
 
