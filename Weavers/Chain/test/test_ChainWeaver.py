@@ -216,6 +216,16 @@ def get_next_letter(current_letter):
     # Converts back to chr and outputs as a string of a standard capital letter
     return chr(next_char_code)
 
+def get_next_test_output_filename(base_name: str, extension: str, output_dir: Path = CHAIN_PATH / "test" / "output") -> Path:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    index = 1
+    while True:
+        filename = output_dir / f"test{index}_{base_name}.{extension}"
+        if not filename.exists():
+            logger.warning(index)
+            return filename
+        index += 1
+
 # endregion
 
 # -------------------------------------------------------------------------------------------
@@ -541,19 +551,17 @@ def requires_to_row(edge: Requires) -> dict:
 # -------------------------------------------------------------------------------------------
 # region NODES_AND_EDGES_TO_CSV
 
-def write_nodes_to_csv(nodes: List[Component], filename: str):
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+def write_nodes_to_csv(nodes: List[Component], filename: Path):
+    filename.parent.mkdir(parents=True, exist_ok=True)
     rows = [component_to_row(c) for c in nodes]
     df = pd.DataFrame(rows)
     df.to_csv(filename, index=False)
 
-
-def write_edges_to_csv(edges: List[Requires], filename: str):
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+def write_edges_to_csv(edges: List[Requires], filename: Path):
+    filename.parent.mkdir(parents=True, exist_ok=True)
     rows = [requires_to_row(e) for e in edges]
     df = pd.DataFrame(rows)
     df.to_csv(filename, index=False)
-
 
 # endregion
 
@@ -598,8 +606,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(components, "output/test17_components.csv")
-    write_edges_to_csv(base_edges, "output/test17_edges.csv")
+    write_nodes_to_csv(components, get_next_test_output_filename("components", "csv"))
+    write_edges_to_csv(base_edges, get_next_test_output_filename("edges", "csv"))
     logger.info("CSV Files Created")
 
     logger.info("Main End")
