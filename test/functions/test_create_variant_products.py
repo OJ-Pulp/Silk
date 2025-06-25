@@ -103,7 +103,7 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
             locations=variant_manufacturer_location, 
             full_product=True,
             variant=True,
-            variant_base_product=variant_base_product,
+            variant_base_product=variant_base_product.id,
             designation=variant_designation, 
             popular_name=variant_base_product.metadata["popular_name"]
             )
@@ -111,11 +111,21 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
         # Appends variant_product to the overall list of variant_products
         variant_products.append(variant_product)
 
-        logger.debug("/n")
+        logger.debug("")
     
     return variant_products
 
     # endregion
 
-base_products = ["insert here"]
+base_products = [Component(
+  id='f3c9ad85-a2c3-47fb-930e-48f3ae34482d',
+  name='Health K-1',
+  manufacturer='Parker Hannifin',
+  locations='Basingstoke, UK',
+  full_product=True,
+  designation='K-1',
+  popular_name='Health',
+  variant=False,
+)]
+
 logger.debug(create_variant_products(base_products, 1))

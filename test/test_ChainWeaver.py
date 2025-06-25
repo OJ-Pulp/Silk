@@ -475,7 +475,7 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
             locations=variant_manufacturer_location, 
             full_product=True,
             variant=True,
-            variant_base_product=variant_base_product,
+            variant_base_product=variant_base_product.id,
             designation=variant_designation, 
             popular_name=variant_base_product.metadata["popular_name"]
             )
@@ -599,8 +599,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(components, "output/test15_components.csv")
-    write_edges_to_csv(base_edges, "output/test15_base_edges.csv")
+    write_nodes_to_csv(components, "output/test16_components.csv")
+    write_edges_to_csv(base_edges, "output/test16_base_edges.csv")
     logger.info("CSV Files Created")
 
     logger.info("Main End")
