@@ -1,32 +1,32 @@
 {
-
-"Designations": {
-    "B": {"Type": "Bomber",
-        "Number of Parts": "69",
-        "Vital Parts": [
-            "Wing",
-            "Jet Engine"
-            ],
-        "Parts": {
-            "Airframe": [
-                "Fuselage",
-                "Nose Cone",
-                "Canopy",
-                "Cockpit Cover",
+    "Designations": {
+        "B": {
+            "Type": "Bomber",
+            "Number of Parts": "69",
+            "Vital Parts": [
                 "Wing",
-                "Wing Spar",
-                "Aileron",
-                "Flap",
-                "Winglet",
-                "Vertical Stabilizer",
-                "Rudder",
-                "Horizontal Stabilizer",
-                "Elevator",
-                "Landing Gear",
-                "Main Gear",
-                "Nose Gear",
-                "Tail Wheel",
-                "Gear Door"
+                "Jet Engine"
+            ],
+            "Parts": {
+                "Airframe": [
+                    "Fuselage",
+                    "Nose Cone",
+                    "Canopy",
+                    "Cockpit Cover",
+                    "Wing",
+                    "Wing Spar",
+                    "Aileron",
+                    "Flap",
+                    "Winglet",
+                    "Vertical Stabilizer",
+                    "Rudder",
+                    "Horizontal Stabilizer",
+                    "Elevator",
+                    "Landing Gear",
+                    "Main Gear",
+                    "Nose Gear",
+                    "Tail Wheel",
+                    "Gear Door"
                 ],
                 "Propulsion": [
                     "Jet Engine",
@@ -486,7 +486,7 @@
         },
         "R": {
             "Type": "Reconnaissance",
-            "Number of Parts": "85",
+            "Number of Parts": "70",
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -576,7 +576,7 @@
         },
         "T": {
             "Type": "Trainer",
-            "Number of Parts": "88",
+            "Number of Parts": "77",
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -675,7 +675,7 @@
         },
         "K": {
             "Type": "Tanker",
-            "Number of Parts": "77",
+            "Number of Parts": "66",
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -763,7 +763,7 @@
         },
         "O": {
             "Type": "Observation",
-            "Number of Parts": "79",
+            "Number of Parts": "68",
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -853,7 +853,7 @@
         },
         "H": {
             "Type": "MEDEVAC",
-            "Number of Parts": "92",
+            "Number of Parts": "78",
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -953,7 +953,7 @@
         },
         "L": {
             "Type": "Cold Weather",
-            "Number of Parts": "52",
+            "Number of Parts": "43",
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -1016,7 +1016,7 @@
         },
         "M": {
             "Type": "Multimission",
-            "Number of Parts": "60",
+            "Number of Parts": "50",
             "Parts": {
                 "Airframe": [
                     "Modular Fuselage Sections",
@@ -1088,7 +1088,7 @@
         },
         "U": {
             "Type": "Utility",
-            "Number of Parts": "50",
+            "Number of Parts": "40",
             "Parts": {
                 "Airframe": [
                     "High-Wing Design",
@@ -1148,7 +1148,7 @@
         },
         "W": {
             "Type": "Weather",
-            "Number of Parts": "88",
+            "Number of Parts": "68",
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -1238,7 +1238,7 @@
         },
         "S": {
             "Type": "Anti-Submarine Warfare",
-            "Number of Parts": "93",
+            "Number of Parts": "78",
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -1411,7 +1411,7 @@
             "ID": "8e84b095-d725-4a8a-bbe1-df229e2f15e5",
             "Locations": [
                 "Fort Collins, Colorado, USA",
-                "Norrköping, Sweden",
+                "Norrk\u00c3\u00b6ping, Sweden",
                 "Basingstoke, UK",
                 "Shanghai, China"
             ]

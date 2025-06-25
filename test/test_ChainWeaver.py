@@ -2,15 +2,19 @@ import sys
 import os
 import json
 import faker
+import uuid
 import logging
 import pandas as pd
 from typing import List, Tuple
+from jsonschema import validate, ValidationError
+from pathlib import Path
 
-# Imports data_model from its location outside of /test
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from data_model import Component, Requires
+# -------------------------------------------------------------------------------------------
+#                                   LOGGING_SETTINGS
+# -------------------------------------------------------------------------------------------
+# region LOGGING_SETTINGS
 
-# Config for logging showing messages level DEBUG and above
+# Config for logging showing messages level INFO and above
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -21,18 +25,142 @@ logging.basicConfig(
 logging.getLogger("faker").setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
+# endregion
+
 logger.info("Program Start")
 
+def find_directory_named(name: str, start_path: Path) -> Path:
+    for parent in [start_path, *start_path.parents]:
+        if parent.name == name:
+            return parent
+    raise FileNotFoundError(f"'{name}/' not found -- Exiting")
+
 try:
-    json_path = os.path.join(os.path.dirname(__file__), "..", "inputdata.json")
-    with open(json_path, "r") as f:
-        INPUTDATA = json.load(f)
-except FileNotFoundError:
-    logger.error("inputdata.json not found -- Exiting")
+    silk_path = find_directory_named("Silk", Path(__file__).resolve().parent)
+    logger.info(f"Found /Silk/ at: {silk_path}")
+    sys.path.append(str(silk_path))
+except FileNotFoundError as e:
+    logger.error(e)
     sys.exit(1)
 
-DESIGNATIONS = INPUTDATA["Designations"]  # List of Dicts
-MANUFACTURERS = INPUTDATA["Manufacturers"]  # List of Dicts
+# Imports data_model from /Silk/
+from data_model import Component, Requires
+
+
+# -------------------------------------------------------------------------------------------
+#                                   INPUTDATA_SCHEMA
+# -------------------------------------------------------------------------------------------
+# region INPUTDATA_SCHEMA
+
+inputdata_schema = {
+    "type": "object",
+    "properties": {
+        "Designations": {
+            "type": "object",
+            "patternProperties": {
+                "^[A-Z]$": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {
+                            "anyOf": [
+                                {"type": "string"},
+                                {"type": "null"}
+                            ]
+                        },
+                        "Number of Parts": {
+                            "anyOf": [
+                                {"type": "string"},
+                                {"type": "null"}
+                            ]
+                        },
+                        "Vital Parts": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                        "Parts": {
+                            "type": "object",
+                            "minProperties": 1,
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                            }
+                        }
+                    },
+                    "required": ["Parts"],
+                    "additionalProperties": False
+                }
+            }
+        },
+        "Manufacturers": {
+            "type": "object",
+            "patternProperties": {
+                ".*": {
+                    "type": "object",
+                    "properties": {
+                        "ID": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                        },
+                        "Locations": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        }
+                    },
+                    "required": ["Locations"],
+                    "additionalProperties": False
+                }
+            }
+        }
+    },
+    "required": ["Designations", "Manufacturers"],
+    "additionalProperties": False
+}
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
+#                                    INPUTDATA.JSON
+# -------------------------------------------------------------------------------------------
+# region INPUTDATA.JSON
+
+try:
+    with (silk_path / "inputdata.json").open("r", encoding="utf-8") as f:
+        INPUTDATA = json.load(f)
+except FileNotFoundError:
+    logger.error("inputdata.json Not Found -- Exiting")
+    sys.exit(1)
+except json.JSONDecodeError as e:
+    logger.error(f"Error decoding JSON: {e}")
+    sys.exit(1)
+
+try:
+    validate(INPUTDATA, inputdata_schema)
+except ValidationError as e:
+    logger.error(f"Invalid inputdata.json structure -- {e.message} -- Exiting")
+    sys.exit(1)
+
+for designation, data in INPUTDATA["Designations"].items():
+    parts_count = str(sum(len(part_list) for part_list in data["Parts"].values()))
+    if "Number of Parts" in data:
+        if data["Number of Parts"] != parts_count:
+            logger.warning(f"{designation} Number of Parts Mismatch:        manual={data['Number of Parts']}, computed={parts_count}")
+    else:
+        data["Number of Parts"] = parts_count
+        logger.debug(f"{designation} Number of Parts Added:      {parts_count}")
+
+for name, data in INPUTDATA["Manufacturers"].items():
+    if "ID" not in data:
+        generated_id = str(uuid.uuid4())
+        data["ID"] = generated_id
+        logger.debug(f"{name} ID Missing -- Generated New ID:       {generated_id}")
+
+with (silk_path / "inputdata.json").open("w", encoding="utf-8") as f:
+    json.dump(INPUTDATA, f, indent=4)
+
+# endregion
+
+DESIGNATIONS = INPUTDATA["Designations"]
+MANUFACTURERS = INPUTDATA["Manufacturers"]
 
 faker_gen = faker.Faker()
 logger.info("Opening Variables Set")
@@ -128,7 +256,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
         for manufacturer in MANUFACTURERS:
             # Creates base_product_sprue node
             base_product_sprue = Component(
-                name=f"Sprue {faker_gen.bothify(text="???########")}",
+                name=f"Sprue {faker_gen.bothify(text='???########')}",
                 full_product=False,
                 product=base_product.id,
                 manufacturer=manufacturer,
@@ -188,7 +316,7 @@ def create_base_product_parts(
 
                 # Creates part node
                 base_product_part = Component(
-                    name=f"{part_type} {faker_gen.bothify(text="???#####")}",
+                    name=f"{part_type} {faker_gen.bothify(text='???#####')}",
                     full_product=False,
                     manufacturer=base_product_part_manufacturer,
                     locations=faker_gen.random_element(elements=MANUFACTURERS[base_product_part_manufacturer]["Locations"]),
