@@ -41,9 +41,9 @@ def find_directory_named(name: str, start_path: Path) -> Path:
     raise FileNotFoundError(f"'{name}/' not found -- Exiting")
 
 try:
-    SILK_PATH = find_directory_named("Silk", Path(__file__).resolve().parent)
-    logger.info(f"Found /Silk/ at: {SILK_PATH}")
-    sys.path.append(str(SILK_PATH))
+    CHAIN_PATH = find_directory_named("Chain", Path(__file__).resolve().parent)
+    logger.info(f"Found /Chain/ at: {CHAIN_PATH}")
+    sys.path.append(str(CHAIN_PATH))
 except FileNotFoundError as e:
     logger.error(e)
     sys.exit(1)
@@ -132,7 +132,7 @@ INPUTDATA_SCHEMA = {
 
 def validate_inputdata() -> dict:
     try:
-        with (SILK_PATH / "inputdata.json").open("r", encoding="utf-8") as f:
+        with (CHAIN_PATH / "inputdata.json").open("r", encoding="utf-8") as f:
             inputdata = json.load(f)
     except FileNotFoundError:
         logger.error("inputdata.json Not Found -- Exiting")
@@ -160,9 +160,9 @@ INPUTDATA = validate_inputdata()
 
 def resolve_inputdata(inputdata):
 
-    with (SILK_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
+    with (CHAIN_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
         json.dump(INPUTDATA, f, indent=4)
-    with (SILK_PATH / "resolved_inputdata.json").open("r", encoding="utf-8") as f:
+    with (CHAIN_PATH / "resolved_inputdata.json").open("r", encoding="utf-8") as f:
             resolved_inputdata = json.load(f)
 
     for designation, data in resolved_inputdata["Designations"].items():
@@ -180,7 +180,7 @@ def resolve_inputdata(inputdata):
             data["ID"] = generated_id
             logger.info(f"{name} ID Missing -- Generated New ID:       {generated_id}")
 
-    with (SILK_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
+    with (CHAIN_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
         json.dump(resolved_inputdata, f, indent=4)
 
     return resolved_inputdata
