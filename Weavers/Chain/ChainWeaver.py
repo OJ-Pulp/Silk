@@ -1,5 +1,4 @@
 import sys
-import os
 import json
 import faker
 import uuid
@@ -8,6 +7,7 @@ import pandas as pd
 from typing import List, Tuple
 from jsonschema import validate, ValidationError
 from pathlib import Path
+from data_model import Component, Requires
 
 # -------------------------------------------------------------------------------------------
 #                                   LOGGING_SETTINGS
@@ -34,11 +34,13 @@ logger.info("Program Start")
 # -------------------------------------------------------------------------------------------
 # region PATH_SETTINGS
 
+
 def find_directory_named(name: str, start_path: Path) -> Path:
     for parent in [start_path, *start_path.parents]:
         if parent.name == name:
             return parent
     raise FileNotFoundError(f"'{name}/' not found -- Exiting")
+
 
 try:
     CHAIN_PATH = find_directory_named("Chain", Path(__file__).resolve().parent)
@@ -51,7 +53,6 @@ except FileNotFoundError as e:
 # endregion
 
 # Imports data_model from /Silk/
-from data_model import Component, Requires
 
 # -------------------------------------------------------------------------------------------
 #                                   INPUTDATA_SCHEMA
