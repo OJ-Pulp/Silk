@@ -10,3 +10,18 @@ except Exception as e:
 # [ ] Add Local inputdata?
 
 # [ ] Add Dict?
+
+5. Use of Faker
+FAKER_GEN.random_element(elements=designation_keys) is fine but consider:
+
+Faker has random_element that accepts lists or dicts — you could optimize if needed.
+
+Check if FAKER_GEN.word(part_of_speech="noun") is consistent and deterministic enough for your use case.
+
+4. Data Structure Mutability
+designation_num is used to track counts per designation — good usage.
+
+You create designation_keys and manufacturer_keys as lists — no problem but consider if these could be generator expressions if large.
+
+8. Code Simplification
+You could use collections.defaultdict(int) for designation_num to avoid pre-initializing counts.

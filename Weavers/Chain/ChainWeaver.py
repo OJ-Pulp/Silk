@@ -65,74 +65,6 @@ class InputError(Exception):
 # -------------------------------------------------------------------------------------------
 # region INPUTDATA.JSON
 
-# -------------------------------------------------------------------------------------------
-#                                   INPUTDATA_SCHEMA
-# -------------------------------------------------------------------------------------------
-# region INPUTDATA_SCHEMA
-
-# Defines the schema for the desired structure of 'inputdata.json'
-INPUTDATA_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-        "Designations": {
-            "type": "object",
-            "minProperties": 1,
-            "patternProperties": {
-                "^[A-Z]$": {
-                    "type": "object",
-                    "properties": {
-                        "Type": {"type": ["string", "null"]},
-                        "Number of Parts": {"type": ["integer", "null"]},
-                        "Vital Parts": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "minItems": 1
-                        },
-                        "Parts": {
-                            "type": "object",
-                            "minProperties": 1,
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {"type": "string"},
-                                "minItems": 1
-                            }
-                        }
-                    },
-                    "required": ["Vital Parts", "Parts"],
-                    "additionalProperties": False
-                }
-            }
-        },
-        "Manufacturers": {
-            "type": "object",
-            "minProperties": 1,
-            "patternProperties": {
-                ".*": {
-                    "type": "object",
-                    "properties": {
-                        "ID": {
-                            "type": "string",
-                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
-                        },
-                        "Locations": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "minItems": 1
-                        }
-                    },
-                    "required": ["Locations"],
-                    "additionalProperties": False
-                }
-            }
-        }
-    },
-    "required": ["Designations", "Manufacturers"],
-    "additionalProperties": False
-}
-
-# endregion
-
 def validate_inputdata() -> dict:
     """
     Validates that the required input file of 'inputdata.json' is present, decoded correctly, and matching the desired structure of the schema.
@@ -211,7 +143,7 @@ def resolve_inputdata(inputdata):
 
 def create_base_products(num_base_products: int, designations_dict: dict, manufacturers_dict: dict) -> List[Component]:
     """
-    Generates a fake set of base products including all their data.
+    Generates a fake dataset of base products and their data.
 
     :param `num_base_products`: The total number of unique base products to include in the supply chain.
     :type `num_base_products`: int
@@ -220,7 +152,7 @@ def create_base_products(num_base_products: int, designations_dict: dict, manufa
     :param `manufacturers_dict`: The 'Manufacturer' category of 'resolved_inputdata'.
     :type `manufacturers_dict`: dict
 
-    :return: A list of base_products.
+    :return: A list of base products.
     :rtype: List[Component]
     """
 
@@ -267,7 +199,20 @@ def create_base_products(num_base_products: int, designations_dict: dict, manufa
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCT_SPRUES
 
-def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Component], List[Requires]]:
+def create_base_product_sprues(base_products: List[Component], designations_dict: dict, manufacturers_dict: dict) -> Tuple[List[Component], List[Requires]]:
+    """
+    Generates a fake dataset of base product sprues and their data.
+
+    :param `base_products`: A list of base products and their data.
+    :type `base_products`: List[Component]
+    :param `designations_dict`: The 'Designation' category of 'resolved_inputdata'.
+    :type `designations_dict`: dict
+    :param `manufacturers_dict`: The 'Manufacturer' category of 'resolved_inputdata'.
+    :type `manufacturers_dict`: dict
+
+    :return: .
+    :rtype: List[Component]
+    """
     # Sets base_product_sprues variables
     base_product_sprues = []
     base_product_sprue_edges = []
