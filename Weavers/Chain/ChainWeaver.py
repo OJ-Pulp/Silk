@@ -163,9 +163,9 @@ def validate_inputdata() -> dict:
 
 def resolve_inputdata(inputdata):
     """
-    Summary here.
+    Resolves the input file of 'inputdata.json' by filling the 'Number of Parts' and 'ID' fields.
 
-    :raises InputError: If 'inputdata.json' is not found, decoded incorrectly, not matching the desired structure of the schema.
+    :raises WARNING: If manual 'Number of Parts' and computer 'Number of Parts' do not match.
 
     :return: The resolved information of 'inputdata.json'.
     :rtype: dict
@@ -573,7 +573,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     except Exception as e:
         logger.critical(f"{type(e).__name__}: {e}")
         sys.exit(1)
-        
+
     resolved_inputdata = resolve_inputdata(inputdata)
     logger.info("Inputs Accepted")
 
