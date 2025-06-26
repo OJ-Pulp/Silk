@@ -48,6 +48,9 @@ except ModuleNotFoundError as e:
 
 logger.info("Program Start")
 
+FAKER_GEN = faker.Faker()
+logger.info("Global Variables Set")
+
 # -------------------------------------------------------------------------------------------
 #                                        INPUTS
 # -------------------------------------------------------------------------------------------
@@ -188,7 +191,7 @@ def resolve_inputdata(inputdata):
             data["ID"] = generated_id
             logger.info(f"{manufacturer} ID Missing -- Generated New ID:       {generated_id}")
 
-    # 
+    # Writes resolved_inputdata to 'resolved_inputdata.json' so the user can see both inputdata files
     with Path("resolved_inputdata.json").open("w", encoding="utf-8") as f:
         json.dump(resolved_inputdata, f, indent=4)
 
@@ -196,17 +199,9 @@ def resolve_inputdata(inputdata):
 
 # endregion
 
-RESOLVED_INPUTDATA = resolve_inputdata()
-logger.info("Inputs Accepted")
-
 # endregion
 
 # endregion
-
-DESIGNATIONS = RESOLVED_INPUTDATA["Designations"]
-MANUFACTURERS = RESOLVED_INPUTDATA["Manufacturers"]
-FAKER_GEN = faker.Faker()
-logger.info("Global Variables Set")
 
 # -------------------------------------------------------------------------------------------
 #                                   NAMING_CONVENTIONS
@@ -572,16 +567,27 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
 
     logger.info("Main Start")
 
+    # Validates and resolves 'inputdata.json'
     try:
         inputdata = validate_inputdata()
     except Exception as e:
         logger.critical(f"{type(e).__name__}: {e}")
         sys.exit(1)
+        
+    resolved_inputdata = resolve_inputdata(inputdata)
+    logger.info("Inputs Accepted")
 
     # Sets overall variables
+    logger.debug("Local Main Variables: ")
+    logger.debug(f"Num_Products:        {num_products}")
+    logger.debug(f"Variant_Distribution:        {variant_distribution}")
     num_variants = int(num_products * variant_distribution)
+    logger.debug(f"Num_Variants:        {num_variants}")
     num_base_products = num_products - num_variants
-    logger.info("Main Variables Set")
+    logger.debug(f"Num_Base_Products:        {num_base_products}")
+    designations_dict = resolved_inputdata["Designations"]
+    manufacturers_dict = resolved_inputdata["Manufacturers"]
+    logger.info("Local Main Variables Set")
 
     base_products = create_base_products(num_base_products)
     logger.info("Base Products Created")
