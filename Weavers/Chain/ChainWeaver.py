@@ -8,14 +8,6 @@ import uuid
 from pathlib import Path
 from typing import List, Tuple
 
-# Third-Party
-import faker
-import pandas as pd
-from jsonschema import validate, ValidationError
-
-# Local
-from data_model import Component, Requires
-
 # -------------------------------------------------------------------------------------------
 #                                   LOGGING_SETTINGS
 # -------------------------------------------------------------------------------------------
@@ -33,6 +25,22 @@ logging.getLogger("faker").setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 # endregion
+
+# Third-Party
+try:
+    import faker
+    import pandas as pd
+    from jsonschema import validate, ValidationError
+except ModuleNotFoundError as e:
+    logger.critical(f"{type(e).__name__}: Missing Required Module '{e.name}' -- Try 'python -m pip install {e.name}' -- Exiting")
+    sys.exit(1)
+
+# Local
+try:
+    from data_model import Component, Requires
+except ModuleNotFoundError as e:
+    logger.critical(f"{type(e).__name__}: Missing Required Local Module '{e.name}' -- Check that '{e.name}.py' is in the Same Directory as 'ChainWeaver.py' -- Exiting")
+    sys.exit(1)
 
 logger.info("Program Start")
 
@@ -116,14 +124,14 @@ def validate_inputdata() -> dict:
         with Path("inputdata.json").open("r", encoding="utf-8") as f:
             inputdata = json.load(f)
     except FileNotFoundError as e:
-        raise InputDataError(f"{type(e).__name__}: inputdata.json Not Found -- Exiting") from e
+        raise InputDataError(f"{type(e).__name__}: 'inputdata.json' Not Found -- Check that 'inputdata.json' is in the Same Directory as 'ChainWeaver.py' -- Exiting") from e
     except json.JSONDecodeError as e:
         raise InputDataError(f"{type(e).__name__}: Error Decoding JSON: {e} -- Exiting") from e
 
     try:
         validate(inputdata, INPUTDATA_SCHEMA)
     except ValidationError as e:
-        raise InputDataError(f"{type(e).__name__}: Invalid inputdata.json Structure -- {e.message} -- Exiting -- {traceback.format_exc()}")
+        raise InputDataError(f"{type(e).__name__}: Invalid 'inputdata.json' Structure -- {e.message} -- Exiting -- {traceback.format_exc()}")
 
     return inputdata
 
