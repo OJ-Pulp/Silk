@@ -302,13 +302,6 @@ class Edge(ABC):
     Used to define directional links in the graph.
     """
 
-    __csv_fields__ = [
-        "start_id",
-        "end_id",
-        "base_model",
-        "lead_time",
-    ]
-
     def __init__(self, start_node: Node, end_node: Node):
         """
         Create a directed edge from one node to another.
@@ -347,6 +340,28 @@ class Edge(ABC):
         If __csv_fields__ is defined, it controls which fields are exported.
         Otherwise, export all simple attributes.
         """
+        # Get instance dict without private/internal
+        base_attrs = {
+            k: v
+            for k, v in self.__dict__.items()
+            if not k.startswith("_") and k not in {"start_node", "end_node"}
+        }
+
+        # Start with start_id, end_id (omit 'id')
+        row = {
+            "start_id": getattr(self.start_node, "id", None),
+            "end_id": getattr(self.end_node, "id", None),
+        }
+
+        for k, v in base_attrs.items():
+            row[k] = v
+
+        # Optionally prune to __csv_fields__
+        if hasattr(self, "__csv_fields__") and getattr(self, "__csv_fields__"):
+            row = {k: row.get(k, "") for k in getattr(self, "__csv_fields__")}
+
+        return row
+
 
 class Requires(Edge):
     """
@@ -361,12 +376,6 @@ class Requires(Edge):
     Includes if a component is a part of the base model of another component.
     Additionally includes lead time variable, specific use case determined by the user.
     """
-        # Get instance dict without private/internal
-        base_attrs = {
-            k: v
-            for k, v in self.__dict__.items()
-            if not k.startswith("_") and k not in {"id", "start_node", "end_node"}
-        }
 
     __csv_fields__ = [
         "start_id",
@@ -374,14 +383,6 @@ class Requires(Edge):
         "base_model",
         "lead_time",
     ]
-        for k, v in base_attrs.items():
-            row[k] = v
-
-        # Optionally prune to __csv_fields__
-        if hasattr(self, "__csv_fields__") and self.__csv_fields__:
-            row = {k: row.get(k, "") for k in self.__csv_fields__}
-
-        return row
 
     def __append_components_lists(self):
         """
