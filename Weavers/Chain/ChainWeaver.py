@@ -1,4 +1,5 @@
 # Standard
+import copy
 import json
 import logging
 import sys
@@ -13,6 +14,7 @@ import pandas as pd
 from jsonschema import validate, ValidationError
 
 # Local
+from data_model import Component, Requires
 
 # -------------------------------------------------------------------------------------------
 #                                   LOGGING_SETTINGS
@@ -21,7 +23,7 @@ from jsonschema import validate, ValidationError
 
 # Config for logging showing messages level INFO and above
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
@@ -33,32 +35,6 @@ logger = logging.getLogger(__name__)
 # endregion
 
 logger.info("Program Start")
-
-# -------------------------------------------------------------------------------------------
-#                                    PATH_SETTINGS
-# -------------------------------------------------------------------------------------------
-# region PATH_SETTINGS
-
-
-def find_directory_named(name: str, start_path: Path) -> Path:
-    for parent in [start_path, *start_path.parents]:
-        if parent.name == name:
-            return parent
-    raise FileNotFoundError(f"'{name}/' not found -- Exiting")
-
-
-try:
-    CHAIN_PATH = find_directory_named("Chain", Path(__file__).resolve().parent)
-    logger.info(f"Found /Chain/ at: {CHAIN_PATH}")
-    sys.path.append(str(CHAIN_PATH))
-except FileNotFoundError as e:
-    logger.error(e)
-    sys.exit(1)
-
-# endregion
-
-# Imports data_model from /Silk/
-from data_model import Component, Requires
 
 # -------------------------------------------------------------------------------------------
 #                                   INPUTDATA_SCHEMA
@@ -137,7 +113,7 @@ class InputDataError(Exception):
 
 def validate_inputdata() -> dict:
     try:
-        with (CHAIN_PATH / "inputdata.json").open("r", encoding="utf-8") as f:
+        with Path("inputdata.json").open("r", encoding="utf-8") as f:
             inputdata = json.load(f)
     except FileNotFoundError as e:
         raise InputDataError(f"{type(e).__name__}: inputdata.json Not Found -- Exiting") from e
@@ -164,18 +140,17 @@ except Exception as e:
 # -------------------------------------------------------------------------------------------
 # region RESOLVE_INPUTDATA.JSON
 
-def resolve_inputdata(inputdata):
+# [ ] Add Local inputdata?
 
-    with (CHAIN_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
-        json.dump(INPUTDATA, f, indent=4)
-    with (CHAIN_PATH / "resolved_inputdata.json").open("r", encoding="utf-8") as f:
-            resolved_inputdata = json.load(f)
+def resolve_inputdata():
+
+    resolved_inputdata = copy.deepcopy(INPUTDATA)
 
     for designation, data in resolved_inputdata["Designations"].items():
         parts_count = sum(len(part_list) for part_list in data["Parts"].values())
         if "Number of Parts" in data:
             if data["Number of Parts"] != parts_count:
-                logger.warning(f"{designation} Number of Parts Mismatch:        manual={str(data['Number of Parts'])}, computed={str(parts_count)}")
+                logger.warning(f"{designation} Number of Parts Mismatch:        manual={data['Number of Parts']}, computed={parts_count}")
         else:
             data["Number of Parts"] = parts_count
             logger.info(f"{designation} Number of Parts Added:      {parts_count}")
@@ -186,14 +161,14 @@ def resolve_inputdata(inputdata):
             data["ID"] = generated_id
             logger.info(f"{name} ID Missing -- Generated New ID:       {generated_id}")
 
-    with (CHAIN_PATH / "resolved_inputdata.json").open("w", encoding="utf-8") as f:
+    with Path("resolved_inputdata.json").open("w", encoding="utf-8") as f:
         json.dump(resolved_inputdata, f, indent=4)
 
     return resolved_inputdata
 
 # endregion
 
-RESOLVED_INPUTDATA = resolve_inputdata(INPUTDATA)
+RESOLVED_INPUTDATA = resolve_inputdata()
 logger.info("Inputs Accepted")
 
 DESIGNATIONS = RESOLVED_INPUTDATA["Designations"]
@@ -222,11 +197,13 @@ def get_next_letter(current_letter):
     # Converts back to chr and outputs as a string of a standard capital letter
     return chr(next_char_code)
 
-def get_next_test_output_filename(base_name: str, extension: str, output_dir: Path = CHAIN_PATH / "test" / "output") -> Path:
+def get_next_test_output_filename(base_name: str, extension: str, output_dir: Path = Path("output")) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     index = 1
+    if not extension.startswith("."):
+        extension = "." + extension
     while True:
-        filename = output_dir / f"test{index}_{base_name}.{extension}"
+        filename = output_dir / f"test{index}_{base_name}{extension}"
         if not filename.exists():
             logger.warning(index)
             return filename
