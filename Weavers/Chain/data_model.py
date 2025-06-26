@@ -1,7 +1,6 @@
 from abc import ABC
 from typing import List, Optional
 import uuid
-import random
 
 
 class Node(ABC):
@@ -70,7 +69,7 @@ class Component(Node):
     """
     Represents a physical component in the system.
 
-    Includes attributes like dimensions and cost, as well as reliability metrics.
+    Includes attributes like dimensions, cost, failure rate, and more. Required attributes are defined in the constructor. Class attribute csv fields define the fields to be exported to CSV.
     """
 
     __csv_fields__ = [
@@ -89,7 +88,6 @@ class Component(Node):
         "part_type",
         "dimensions",
         "cost",
-        "criticality",
         "failure_rate",
         "substitutions",
         "breakability",
@@ -106,6 +104,24 @@ class Component(Node):
         if key == "variant":
             if not (isinstance(value, bool)):
                 raise ValueError("variant must be boolean data type")
+        elif key == "variant_base_product":
+            if not (isinstance(value, str) and value):
+                raise ValueError("variant_base_product must be a non-empty string")
+        elif key == "vital":
+            if not (isinstance(value, bool)):
+                raise ValueError("vital must be boolean data type")
+        elif key == "designation":
+            if not (isinstance(value, str) and value):
+                raise ValueError("designation must be a non-empty string")
+        elif key == "popular_name":
+            if not isinstance(value, str):
+                raise ValueError("popular_name must be a string")
+        elif key == "category":
+            if not (isinstance(value, str) and value):
+                raise ValueError("category must be a non-empty string")
+        elif key == "part_type":
+            if not (isinstance(value, str) and value):
+                raise ValueError("part_type must be a non-empty string")
         elif key == "dimensions":
             if not (
                 isinstance(value, list)
@@ -313,6 +329,13 @@ class Requires(Edge):
     Includes if a component is a part of the base model of another component.
     Additionally includes lead time variable, specific use case determined by the user.
     """
+
+    __csv_fields__ = [
+        "start_id",
+        "end_id",
+        "base_model",
+        "lead_time",
+    ]
 
     def __append_components_lists(self):
         """
