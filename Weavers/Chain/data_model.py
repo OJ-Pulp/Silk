@@ -31,9 +31,9 @@ class Node(ABC):
     def __hash__(self):
         return hash(self.id)
 
-    def to_csv_row(self) -> dict:
+    def to_dict(self) -> dict:
         """
-        Convert any Node subclass to a flat CSV row.
+        Convert any Node subclass to a flat dictionary.
         If __csv_fields__ is defined, it controls which fields are exported.
         Otherwise, export all simple attributes + metadata.
         """
@@ -75,10 +75,11 @@ class Component(Node):
     __csv_fields__ = [
         "id",
         "name",
-        "company",
+        "manufacturer",
         "locations",
         "components",
         "full_product",
+        "component_type",
         "variant",
         "variant_base_product",
         "vital",

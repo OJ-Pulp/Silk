@@ -524,37 +524,6 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
 # -------------------------------------------------------------------------------------------
 # region NODES_AND_EDGES_TO_ROWS
 
-def component_to_row(component: Component) -> dict:
-    metadata = component.metadata
-    return {
-        "id": component.id,
-        "name": component.name,
-        "manufacturer": component.manufacturer,
-        "locations": component.locations,
-        "components": ";".join(component.components) if component.components else "",
-        "full_product": component.full_product,
-        "component_type": (
-            "Product"
-            if component.full_product
-            else "Sprue"
-            if metadata.get("category") is None
-            else "Part"
-        ),
-        "variant": metadata.get("variant", ""),
-        "variant_base_product": metadata.get("variant_base_product", ""),
-        "designation": metadata.get("designation", ""),
-        "popular_name": metadata.get("popular_name", ""),
-        "category": metadata.get("category", ""),
-        "part_type": metadata.get("part_type", ""),
-        "dimensions": metadata.get("dimensions", ""),
-        "cost": metadata.get("cost", ""),
-        "criticality": metadata.get("criticality", ""),
-        "failure_rate": metadata.get("failure_rate", ""),
-        "substitutions": metadata.get("substitutions", ""),
-        "breakability": metadata.get("breakability", ""),
-        "year_range": metadata.get("year_range", ""),
-    }
-
 
 def requires_to_row(edge: Requires) -> dict:
     return {
@@ -574,7 +543,7 @@ def requires_to_row(edge: Requires) -> dict:
 
 def write_nodes_to_csv(nodes: List[Component], filename: Path):
     filename.parent.mkdir(parents=True, exist_ok=True)
-    rows = [component_to_row(c) for c in nodes]
+    rows = [c.to_dict() for c in nodes]
     df = pd.DataFrame(rows)
     df.to_csv(filename, index=False)
 
