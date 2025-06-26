@@ -165,6 +165,9 @@ def resolve_inputdata(inputdata):
     """
     Resolves the input file of 'inputdata.json' by filling the 'Number of Parts' and 'ID' fields.
 
+    :param inputdata: The validated information from the 'inputdata.json' input file.
+    :type inputdata: dict
+
     :raises WARNING: If manual 'Number of Parts' and computer 'Number of Parts' do not match.
 
     :return: The resolved information of 'inputdata.json'.
@@ -201,99 +204,59 @@ def resolve_inputdata(inputdata):
 
 # endregion
 
-# endregion
-
-# -------------------------------------------------------------------------------------------
-#                                   NAMING_CONVENTIONS
-# -------------------------------------------------------------------------------------------
-# region NAMING_CONVENTIONS
-
-def get_next_letter(current_letter):
-    """
-    Minor Function to get the variant_designation_letter of multi-layer variants.
-    :param current_letter: The variant_designation_letter of the variant on its last variation.
-    :return: A string of one capital letter to be the next variant_designation_letter.
-    """
-    # Get the ASCII value of the current letter and adds 1 to get the ASCII of the next
-    next_char_code = ord(current_letter) + 1
-    
-    # If it goes past "Z", wrap around to "A"
-    if next_char_code > ord("Z"):
-        next_char_code = ord("A")
-    
-    # Converts back to chr and outputs as a string of a standard capital letter
-    return chr(next_char_code)
-
-def get_next_test_output_filename(base_name: str, extension: str, output_dir: Path = Path("output")) -> Path:
-    output_dir.mkdir(parents=True, exist_ok=True)
-    index = 1
-    if not extension.startswith("."):
-        extension = "." + extension
-    while True:
-        filename = output_dir / f"test{index}_{base_name}{extension}"
-        if not filename.exists():
-            logger.warning(index)
-            return filename
-        index += 1
-
-# endregion
-
 # -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCTS
 # -------------------------------------------------------------------------------------------
 # region BASE_PRODUCTS
 
-def create_base_products(num_base_products) -> List[Component]:
+def create_base_products(num_base_products: int, designations_dict: dict, manufacturers_dict: dict) -> List[Component]:
     """
-    Minor Function to generate a fake set of base_products.
-    :param num_products: The total number of unique model aircraft products to include in the supply chain.
-                         Defaults to 40.
-    :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
-                         Defaults to 0.25, meaning roughly 25% of products will be variations.
-    :return: List of Components representing base products.
+    Generates a fake set of base products including all their data.
+
+    :param `num_base_products`: The total number of unique base products to include in the supply chain.
+    :type `num_base_products`: int
+    :param `designations_dict`: The 'Designation' category of 'resolved_inputdata'.
+    :type `designations_dict`: dict
+    :param `manufacturers_dict`: The 'Manufacturer' category of 'resolved_inputdata'.
+    :type `manufacturers_dict`: dict
+
+    :return: A list of base_products.
+    :rtype: List[Component]
     """
 
+    # Sets empty 'base_products' list and other 'create_base_products' variables
     base_products = []
-    designation_keys = list(DESIGNATIONS.keys())
-    manufacturer_keys = list(MANUFACTURERS.keys())
+    designation_keys = list(designations_dict.keys())
+    manufacturer_keys = list(manufacturers_dict.keys())
+    designation_counter = {designation_type: 0 for designation_type in designation_keys}
 
-    designation_num = {designation_type: 0 for designation_type in designation_keys}
-
+    # Creates all base products
     for i in range(num_base_products):
-        logger.debug(f"Base Product {i}:\n")
+        logger.debug(f"Base Product {i}:")
 
-        # Assigns base_product designation
-        designation_mm = FAKER_GEN.random_element(elements=designation_keys)
-        designation_num[designation_mm] += 1
-        base_product_designation_num = designation_num[designation_mm]
-        base_product_designation = f"{designation_mm}-{base_product_designation_num}"
-        logger.debug(f"Base Product Designation:        {base_product_designation}")
+        # Generates base product data
+        selected_designation = FAKER_GEN.random_element(elements=designation_keys)
+        designation_counter[selected_designation] += 1
+        designation = f"{selected_designation}-{designation_counter[selected_designation]}"
+        popular_name = FAKER_GEN.word(part_of_speech="noun").capitalize()
+        manufacturer = FAKER_GEN.random_element(elements=manufacturer_keys)
 
-        # Assigns base_product popular_name and name
-        base_product_popular_name = FAKER_GEN.word(part_of_speech="noun").capitalize()
-        logger.debug(f"Base Product Popular Name:       {base_product_popular_name}")
-
-        # Assigns base_product manufacturer and manufacturer_location
-        base_product_manufacturer = FAKER_GEN.random_element(elements=manufacturer_keys)
-        logger.debug(f"Base Product Manufacturer:       {base_product_manufacturer}")
-        possible_manufacturer_locations = list(MANUFACTURERS[base_product_manufacturer]["Locations"])
-        base_product_manufacturer_location = FAKER_GEN.random_element(elements=possible_manufacturer_locations)
-
-        # Creates base_product node
+        # Creates 'base_product' Component(Node)
         base_product = Component(
-            name=f"{base_product_popular_name} {base_product_designation}",
+            name=f"{popular_name} {designation}",
             full_product=True,
             variant=False,
-            manufacturer=base_product_manufacturer,
-            locations=base_product_manufacturer_location,
-            designation=designation_mm,
-            popular_name=base_product_popular_name,
+            manufacturer=manufacturer,
+            locations=FAKER_GEN.random_element(elements=list(manufacturers_dict[manufacturer]["Locations"])),
+            designation=selected_designation,
+            popular_name=popular_name,
         )
 
         # Appends base_product to the overall list of base_products
         base_products.append(base_product)
 
-        logger.debug("\n")
+        logger.debug(base_product)
+        logger.debug("")
 
     return base_products
 
@@ -310,7 +273,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
     base_product_sprue_edges = []
 
     for i, base_product in enumerate(base_products, start=1):
-        logger.debug(f"Base Product {i}:\n")
+        logger.debug(f"Base Product {i}:")
 
         for manufacturer in MANUFACTURERS:
             # Creates base_product_sprue node
@@ -324,7 +287,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
                 ),
                 variant=False,
             )
-            logger.debug(f"Base Product Sprue: {base_product_sprue}\n")
+            logger.debug(f"Base Product Sprue: {base_product_sprue}")
 
             # Appends part to the overall list of parts for this product
             base_product_sprues.append(base_product_sprue)
@@ -338,7 +301,7 @@ def create_base_product_sprues(base_products: List[Component]) -> Tuple[List[Com
                 lead_time=FAKER_GEN.random_int(1, 1000),
             )
 
-            logger.debug(f"Base Product Sprue Edge: {base_product_sprue_edge}\n")
+            logger.debug(f"Base Product Sprue Edge: {base_product_sprue_edge}")
 
             base_product_sprue_edges.append(base_product_sprue_edge)
 
@@ -461,6 +424,41 @@ def resolve_base_product_sprues(
 # endregion
 
 # -------------------------------------------------------------------------------------------
+#                                   NAMING_CONVENTIONS
+# -------------------------------------------------------------------------------------------
+# region NAMING_CONVENTIONS
+
+def get_next_letter(current_letter):
+    """
+    Minor Function to get the variant_designation_letter of multi-layer variants.
+    :param current_letter: The variant_designation_letter of the variant on its last variation.
+    :return: A string of one capital letter to be the next variant_designation_letter.
+    """
+    # Get the ASCII value of the current letter and adds 1 to get the ASCII of the next
+    next_char_code = ord(current_letter) + 1
+    
+    # If it goes past "Z", wrap around to "A"
+    if next_char_code > ord("Z"):
+        next_char_code = ord("A")
+    
+    # Converts back to chr and outputs as a string of a standard capital letter
+    return chr(next_char_code)
+
+def get_next_test_output_filename(base_name: str, extension: str, output_dir: Path = Path("output")) -> Path:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    index = 1
+    if not extension.startswith("."):
+        extension = "." + extension
+    while True:
+        filename = output_dir / f"test{index}_{base_name}{extension}"
+        if not filename.exists():
+            logger.warning(index)
+            return filename
+        index += 1
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
 #                                   VARIANT_PRODUCTS
 # -------------------------------------------------------------------------------------------
 # region VARIANT_PRODUCTS
@@ -557,7 +555,8 @@ def write_edges_to_csv(edges: List[Requires], filename: Path):
 
 def main(num_products: int = 40, variant_distribution: float = 0.25):
     """
-    Main Function to generate a fake supply chain for model aircrafts.
+    Main Function to generate a fake supply chain.
+
     :param num_products: The total number of unique model aircraft products to include in the supply chain.
                          Defaults to 40.
     :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
@@ -589,7 +588,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     manufacturers_dict = resolved_inputdata["Manufacturers"]
     logger.info("Local Main Variables Set")
 
-    base_products = create_base_products(num_base_products)
+    base_products = create_base_products(num_base_products, designations_dict, manufacturers_dict)
     logger.info("Base Products Created")
     base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
     logger.info("Base Product Sprues Created")

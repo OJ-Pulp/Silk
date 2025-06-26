@@ -8,3 +8,5 @@ except Exception as e:
     lambdas
     
 # [ ] Add Local inputdata?
+
+# [ ] Add Dict?

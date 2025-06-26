@@ -27,3 +27,12 @@ logger.info("Program started")
 logger.warning("Disk space is low")
 logger.error("Failed to open file")
 logger.critical("System crash imminent")
+
+
+
+Directive	Purpose
+:param name:	Describes what the parameter does
+:type name:	Specifies the type of the parameter
+:return:	Describes what is returned
+:rtype:	Specifies the return type
+:raises:	Lists exceptions the function may raise
