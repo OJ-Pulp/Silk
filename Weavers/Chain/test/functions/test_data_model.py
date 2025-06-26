@@ -123,3 +123,68 @@ def test_edge_equality_and_hash():
     assert hash(edge1) != hash(edge2)
     assert edge1 == edge1
     assert hash(edge1) == hash(edge1)
+
+
+def test_component_metadata_all_fields():
+    comp = Component(
+        name="MetaFull",
+        manufacturer="MetaManu",
+        locations=["MetaLoc"],
+        full_product=True,
+        variant=True,
+        variant_base_product="BaseProd",
+        vital=False,
+        designation="D-001",
+        popular_name="MetaPopular",
+        category="MetaCat",
+        part_type="MetaType",
+        dimensions=[10, 20, 30],
+        cost=100.0,
+        failure_rate=0.001,
+        substitutions=["Alt1", "Alt2"],
+        breakability=0.2,
+        year_range=[2010, 2020],
+    )
+    d = comp.to_dict()
+    assert d["variant"] is True
+    assert d["variant_base_product"] == "BaseProd"
+    assert d["vital"] is False
+    assert d["designation"] == "D-001"
+    assert d["popular_name"] == "MetaPopular"
+    assert d["category"] == "MetaCat"
+    assert d["part_type"] == "MetaType"
+    assert d["dimensions"] == [10, 20, 30]
+    assert d["cost"] == 100.0
+    assert d["failure_rate"] == 0.001
+    assert d["substitutions"] == ["Alt1", "Alt2"]
+    assert d["breakability"] == 0.2
+    assert d["year_range"] == [2010, 2020]
+
+
+def test_component_invalid_metadata_types():
+    comp = Component(
+        name="InvalidMeta",
+        manufacturer="MetaManu",
+        locations=["MetaLoc"],
+        full_product=True,
+    )
+    with pytest.raises(ValueError):
+        comp.set_metadata("cost", -100)
+    with pytest.raises(ValueError):
+        comp.set_metadata("breakability", 2)
+    with pytest.raises(ValueError):
+        comp.set_metadata("failure_rate", -0.1)
+    with pytest.raises(ValueError):
+        comp.set_metadata("dimensions", [1, 2])  # Not length 3
+    with pytest.raises(TypeError):
+        comp.set_metadata("substitutions", [1, 2, 3])  # Not all strings
+    with pytest.raises(TypeError):
+        comp.set_metadata("year_range", ["2010", "2020"])  # Not all ints
+    with pytest.raises(ValueError):
+        comp.set_metadata("variant_base_product", "")  # Empty string
+    with pytest.raises(ValueError):
+        comp.set_metadata("designation", "")  # Empty string
+    with pytest.raises(ValueError):
+        comp.set_metadata("category", "")  # Empty string
+    with pytest.raises(ValueError):
+        comp.set_metadata("part_type", "")  # Empty string
