@@ -593,6 +593,7 @@ def write_edges_to_csv(edges: List[Requires], filename: Path):
 def main(num_products: int = 40, variant_distribution: float = 0.25):
     """
     Main Function to generate a fake supply chain for model aircrafts.
+    
     :param num_products: The total number of unique model aircraft products to include in the supply chain.
                          Defaults to 40.
     :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
