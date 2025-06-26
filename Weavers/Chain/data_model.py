@@ -304,6 +304,13 @@ class Edge(ABC):
     Used to define directional links in the graph.
     """
 
+    __csv_fields__ = [
+        "start_id",
+        "end_id",
+        "base_model",
+        "lead_time",
+    ]
+
     def __init__(self, start_node: Node, end_node: Node):
         """
         Create a directed edge from one node to another.
@@ -316,20 +323,52 @@ class Edge(ABC):
         self.end_node = end_node
 
     def __eq__(self, other):
+        """
+        Check equality with another Edge instance.
+
+        Args:
+            other (object): The object to compare with.
+
+        Returns:
+            bool: True if 'other' is an Edge and has the same id, False otherwise.
+        """
         return isinstance(other, Edge) and self.id == other.id
 
     def __hash__(self):
+        """
+        Compute the hash value for the Edge instance.
+
+        Returns:
+            int: The hash of the Edge's id.
+        """
         return hash(self.id)
 
+    def to_dict(self) -> dict:
+        """
+        Convert any Edge subclass to a flat dictionary.
+        If __csv_fields__ is defined, it controls which fields are exported.
+        Otherwise, export all simple attributes.
+        """
 
 class Requires(Edge):
     """
     :REQUIRES is the relationship that relates components to components.
     It states that the source component requires the target component along the supply chain.
+        row = {
+            "id": self.id,
+            "start_id": getattr(self.start_node, "id", None),
+            "end_id": getattr(self.end_node, "id", None),
+        }
 
     Includes if a component is a part of the base model of another component.
     Additionally includes lead time variable, specific use case determined by the user.
     """
+        # Get instance dict without private/internal
+        base_attrs = {
+            k: v
+            for k, v in self.__dict__.items()
+            if not k.startswith("_") and k not in {"id", "start_node", "end_node"}
+        }
 
     __csv_fields__ = [
         "start_id",
@@ -337,6 +376,14 @@ class Requires(Edge):
         "base_model",
         "lead_time",
     ]
+        for k, v in base_attrs.items():
+            row[k] = v
+
+        # Optionally prune to __csv_fields__
+        if hasattr(self, "__csv_fields__") and self.__csv_fields__:
+            row = {k: row.get(k, "") for k in self.__csv_fields__}
+
+        return row
 
     def __append_components_lists(self):
         """
