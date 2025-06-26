@@ -418,19 +418,6 @@ class Requires(Edge):
 
         self.__append_components_lists()
 
-    def __repr__(self):
-        lines = [
-            "Requires(",
-            f"  id='{self.id}',",
-            f"  start_node='{self.start_node.id}',",
-            f"  end_node='{self.end_node.id}',",
-            f"  base_model='{self.base_model}',",
-            f"  lead_time={self.lead_time},",
-        ]
-
-        lines.append(")")
-        return "\n".join(lines)
-
 
 def main():
     """
