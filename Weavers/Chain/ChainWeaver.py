@@ -1,13 +1,18 @@
-import sys
+# Standard
 import json
-import faker
-import uuid
 import logging
+import sys
 import traceback
-import pandas as pd
-from typing import List, Tuple
-from jsonschema import validate, ValidationError
+import uuid
 from pathlib import Path
+from typing import List, Tuple
+
+# Third-Party
+import faker
+import pandas as pd
+from jsonschema import validate, ValidationError
+
+# Local
 
 # -------------------------------------------------------------------------------------------
 #                                   LOGGING_SETTINGS
