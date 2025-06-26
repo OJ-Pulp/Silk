@@ -1,0 +1,10 @@
+
+            try:
+    INPUTDATA = validate_inputdata()
+except Exception as e:
+    logger.error(f"{type(e).__name__}: {e}")
+    sys.exit(1)
+
+    lambdas
+    
+# [ ] Add Local inputdata?

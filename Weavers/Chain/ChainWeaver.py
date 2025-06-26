@@ -168,7 +168,7 @@ def resolve_inputdata(inputdata):
     :rtype: dict
     """
 
-    # Makes a new dictionary that is a copy of inputdata that is editable by the program
+    # Creates a new dictionary that is a copy of inputdata that is editable by the program
     resolved_inputdata = copy.deepcopy(inputdata)
 
     # Resolves 'Number of Parts' for each designation by adding it if missing or warning the user if incorrect
@@ -188,6 +188,7 @@ def resolve_inputdata(inputdata):
             data["ID"] = generated_id
             logger.info(f"{manufacturer} ID Missing -- Generated New ID:       {generated_id}")
 
+    # 
     with Path("resolved_inputdata.json").open("w", encoding="utf-8") as f:
         json.dump(resolved_inputdata, f, indent=4)
 
@@ -593,7 +594,6 @@ def write_edges_to_csv(edges: List[Requires], filename: Path):
 def main(num_products: int = 40, variant_distribution: float = 0.25):
     """
     Main Function to generate a fake supply chain for model aircrafts.
-    
     :param num_products: The total number of unique model aircraft products to include in the supply chain.
                          Defaults to 40.
     :param variant_distribution: A float (0.0 to 1.0) controlling the proportion of products that will have variants.
@@ -602,6 +602,12 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     """
 
     logger.info("Main Start")
+
+    try:
+        inputdata = validate_inputdata()
+    except Exception as e:
+        logger.critical(f"{type(e).__name__}: {e}")
+        sys.exit(1)
 
     # Sets overall variables
     num_variants = int(num_products * variant_distribution)
