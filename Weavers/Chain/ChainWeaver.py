@@ -1,3 +1,7 @@
+"""
+OVERALL CHAINWEAVER
+"""
+
 # Standard
 import copy
 import json
@@ -13,14 +17,14 @@ from typing import List, Tuple
 # -------------------------------------------------------------------------------------------
 # region LOGGING_SETTINGS
 
-# Config for logging showing messages level INFO and above
+# Configures for logging showing messages level INFO and above
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
+    datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-# Suppress debug messages from faker library
+# Suppresses debug messages from faker library
 logging.getLogger("faker").setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -45,10 +49,25 @@ except ModuleNotFoundError as e:
 logger.info("Program Start")
 
 # -------------------------------------------------------------------------------------------
+#                                        INPUTS
+# -------------------------------------------------------------------------------------------
+# region INPUTS
+
+# Creates an overarching error type for input data
+class InputError(Exception):
+    pass
+
+# -------------------------------------------------------------------------------------------
+#                                    INPUTDATA.JSON
+# -------------------------------------------------------------------------------------------
+# region INPUTDATA.JSON
+
+# -------------------------------------------------------------------------------------------
 #                                   INPUTDATA_SCHEMA
 # -------------------------------------------------------------------------------------------
 # region INPUTDATA_SCHEMA
 
+# Defines the schema for the desired structure of 'inputdata.json'
 INPUTDATA_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
@@ -111,49 +130,48 @@ INPUTDATA_SCHEMA = {
 
 # endregion
 
-# -------------------------------------------------------------------------------------------
-#                                VALIDATE_INPUTDATA.JSON
-# -------------------------------------------------------------------------------------------
-# region VALIDATE_INPUTDATA.JSON
-
-class InputDataError(Exception):
-    pass
-
 def validate_inputdata() -> dict:
+    """
+    Validates that the required input file of 'inputdata.json' is present, decoded correctly, and matching the desired structure of the schema.
+    
+    :raises InputError: If 'inputdata.json' is not found, decoded incorrectly, not matching the desired structure of the schema.
+
+    :return: The validated information of 'inputdata.json'.
+    :rtype: dict
+    """
+
+    # Validates that the required input file of 'inputdata.json' is present and decoded correctly
     try:
         with Path("inputdata.json").open("r", encoding="utf-8") as f:
             inputdata = json.load(f)
     except FileNotFoundError as e:
-        raise InputDataError(f"{type(e).__name__}: 'inputdata.json' Not Found -- Check that 'inputdata.json' is in the Same Directory as 'ChainWeaver.py' -- Exiting") from e
+        raise InputError(f"{type(e).__name__}: 'inputdata.json' Not Found -- Check that 'inputdata.json' is in the Same Directory as 'ChainWeaver.py' -- Exiting") from e
     except json.JSONDecodeError as e:
-        raise InputDataError(f"{type(e).__name__}: Error Decoding JSON: {e} -- Exiting") from e
+        raise InputError(f"{type(e).__name__}: Error Decoding JSON: {e} -- Exiting") from e
 
+    # Validates that the required input file of 'inputdata.json' matches the desired structure of the schema
     try:
         validate(inputdata, INPUTDATA_SCHEMA)
     except ValidationError as e:
-        raise InputDataError(f"{type(e).__name__}: Invalid 'inputdata.json' Structure -- {e.message} -- Exiting -- {traceback.format_exc()}")
+        raise InputError(f"{type(e).__name__}: Invalid 'inputdata.json' Structure -- {e.message} -- Exiting -- {traceback.format_exc()}")
 
     return inputdata
 
-# endregion
 
-try:
-    INPUTDATA = validate_inputdata()
-except Exception as e:
-    logger.error(f"{type(e).__name__}: {e}")
-    sys.exit(1)
+def resolve_inputdata(inputdata):
+    """
+    Summary here.
 
-# -------------------------------------------------------------------------------------------
-#                                RESOLVE_INPUTDATA.JSON
-# -------------------------------------------------------------------------------------------
-# region RESOLVE_INPUTDATA.JSON
+    :raises InputError: If 'inputdata.json' is not found, decoded incorrectly, not matching the desired structure of the schema.
 
-# [ ] Add Local inputdata?
+    :return: The resolved information of 'inputdata.json'.
+    :rtype: dict
+    """
 
-def resolve_inputdata():
+    # Makes a new dictionary that is a copy of inputdata that is editable by the program
+    resolved_inputdata = copy.deepcopy(inputdata)
 
-    resolved_inputdata = copy.deepcopy(INPUTDATA)
-
+    # Resolves 'Number of Parts' for each designation by adding it if missing or warning the user if incorrect
     for designation, data in resolved_inputdata["Designations"].items():
         parts_count = sum(len(part_list) for part_list in data["Parts"].values())
         if "Number of Parts" in data:
@@ -163,11 +181,12 @@ def resolve_inputdata():
             data["Number of Parts"] = parts_count
             logger.info(f"{designation} Number of Parts Added:      {parts_count}")
 
-    for name, data in resolved_inputdata["Manufacturers"].items():
+    # Resolves 'ID' for each manufacturer by adding it if it is missing
+    for manufacturer, data in resolved_inputdata["Manufacturers"].items():
         if "ID" not in data:
             generated_id = str(uuid.uuid4())
             data["ID"] = generated_id
-            logger.info(f"{name} ID Missing -- Generated New ID:       {generated_id}")
+            logger.info(f"{manufacturer} ID Missing -- Generated New ID:       {generated_id}")
 
     with Path("resolved_inputdata.json").open("w", encoding="utf-8") as f:
         json.dump(resolved_inputdata, f, indent=4)
@@ -178,6 +197,10 @@ def resolve_inputdata():
 
 RESOLVED_INPUTDATA = resolve_inputdata()
 logger.info("Inputs Accepted")
+
+# endregion
+
+# endregion
 
 DESIGNATIONS = RESOLVED_INPUTDATA["Designations"]
 MANUFACTURERS = RESOLVED_INPUTDATA["Manufacturers"]

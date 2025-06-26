@@ -1,0 +1,29 @@
+🔹 Standard Logging Levels
+Level Name	Method	Numeric Value	Purpose
+DEBUG	logger.debug()	10	Detailed diagnostic info for debugging during development
+INFO	logger.info()	20	General information about program execution (e.g., startup, progress)
+WARNING	logger.warning()	30	Something unexpected happened, but the program can continue
+ERROR	logger.error()	40	Serious problem that caused part of the program to fail
+CRITICAL	logger.critical()	50	A fatal error that may prevent the program from continuing at all
+
+🔸 Special/Utility Logging Methods
+Method	Purpose
+logger.log(level, msg)	Logs a message at an arbitrary level (custom or one of the above)
+logger.exception(msg)	Logs a message with traceback at ERROR level (only inside except blocks)
+
+🔹 Custom Logging Levels (Advanced)
+You can define your own logging level if needed:
+
+python
+Copy code
+CUSTOM_LEVEL = 25
+logging.addLevelName(CUSTOM_LEVEL, "CUSTOM")
+logger.log(CUSTOM_LEVEL, "This is a custom log level message.")
+✅ Example in Use
+python
+Copy code
+logger.debug("This is for debugging")
+logger.info("Program started")
+logger.warning("Disk space is low")
+logger.error("Failed to open file")
+logger.critical("System crash imminent")
