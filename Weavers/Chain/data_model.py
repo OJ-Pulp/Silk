@@ -14,6 +14,8 @@ class Node(ABC):
     - Manufacturer nodes might use the name of the company (ex. "Ford Motor Company").
     """
 
+    __csv_fields__: Optional[List[str]] = None  # Can (and should) be overridden
+
     def __init__(self, name: str, id: Optional[str] = None):
         """
         Initialize a Node with a name.
@@ -22,12 +24,46 @@ class Node(ABC):
         """
         self.id = id if id is not None else str(uuid.uuid4())
         self.name = name
+        self.metadata: dict
 
     def __eq__(self, other):
         return isinstance(other, Node) and self.id == other.id
 
     def __hash__(self):
         return hash(self.id)
+
+    def to_csv_row(self) -> dict:
+        """
+        Convert any Node subclass to a flat CSV row.
+        If __csv_fields__ is defined, it controls which fields are exported.
+        Otherwise, export all simple attributes + metadata.
+        """
+        row = {"id": self.id, "name": self.name}
+
+        # Get instance dict without private/internal
+        base_attrs = {
+            k: v
+            for k, v in self.__dict__.items()
+            if not k.startswith("_") and k not in {"id", "name", "metadata"}
+        }
+
+        # Flatten flat lists and basic types
+        for k, v in base_attrs.items():
+            if isinstance(v, list):
+                row[k] = ";".join(map(str, v))
+            else:
+                row[k] = v
+
+        # Add metadata
+        if hasattr(self, "metadata"):
+            for k, v in self.metadata.items():
+                row[k] = v
+
+        # Optionally prune to __csv_fields__
+        if self.__csv_fields__:
+            row = {k: row.get(k, "") for k in self.__csv_fields__}
+
+        return row
 
 
 class Component(Node):
@@ -36,6 +72,29 @@ class Component(Node):
 
     Includes attributes like dimensions and cost, as well as reliability metrics.
     """
+
+    __csv_fields__ = [
+        "id",
+        "name",
+        "company",
+        "locations",
+        "components",
+        "full_product",
+        "variant",
+        "variant_base_product",
+        "vital",
+        "designation",
+        "popular_name",
+        "category",
+        "part_type",
+        "dimensions",
+        "cost",
+        "criticality",
+        "failure_rate",
+        "substitutions",
+        "breakability",
+        "year_range",
+    ]
 
     def _validate_metadata_entry(self, key: str, value):
         """
@@ -220,40 +279,6 @@ class Component(Node):
         return "\n".join(lines)
 
 
-# class Manufacturer(Node):
-#     """
-#     Represents a manufacturer / company / supplier / etc. in the supply chain.
-#
-#     Name represents the name of the organization.
-#     """
-#
-#     def __init__(self, name: str):
-#         """
-#         Initialize a manufacturer with name attribute.
-#
-#         :param name: Name of the manufacturer.
-#         """
-#         super().__init__(name)
-
-
-# class Plant(Node):
-#     """
-#     Represents a physical plant / factory in the system.
-#
-#     Includes attributes like whether or not the plant is within restricted territory.
-#     """
-#
-#     def __init__(self, name: str, restricted_territory: bool):
-#         """
-#         Initialize a plant with specific attributes.
-#
-#         :param name: Name of the plant.
-#         :param restricted_territory: Whether or not the plant is within restricted territory (boolean). What restricted territory is considered is up to the end user.
-#         """
-#         super().__init__(name)
-#         self.restricted_territory = restricted_territory
-
-
 class Edge(ABC):
     """
     Abstract class representing a relationship (edge) between two nodes.
@@ -278,61 +303,6 @@ class Edge(ABC):
 
     def __hash__(self):
         return hash(self.id)
-
-
-# class Produces(Edge):
-#     """
-#     :PRODUCES is the relationship that relates a plant to the components it produces.
-#     This relationship should start at a plant and end at a component.
-#
-#     Includes attributes like quality grade of those components it produces, as well as the daily capacity of the plant to produce that component.
-#     """
-#
-#     def __init__(
-#         self,
-#         start_node: Plant,
-#         end_node: Component,
-#         daily_capacity: int,
-#         quality_grade: str,
-#     ):
-#         """
-#         Creates a :PRODUCES directed edge from a source Plant to a target Component.
-#
-#         :param start_node: The source node (must be a Plant).
-#         :param end_node: The target node (must be a Component).
-#         :param daily_capacity: The number of target components that the source plant can produce in a day.
-#         :param quality_grade: A letter grade given to the quality of the product. Can be determined by the source plant's quality ranking.
-#         """
-#
-#         super().__init__(start_node, end_node)
-#         self.daily_capacity = daily_capacity
-#         self.quality_grade = quality_grade
-#
-#     #   def add_to_sql(self, database):
-#
-#     def to_csv_row(self):
-#         """
-#         Convert this PRODUCES edge into a dictionary suitable for Memgraph CSV export.
-#
-#         Returns:
-#             dict: A dictionary with keys matching Memgraph's required edge format,
-#                 including start and end node IDs, relationship type, and edge properties.
-#
-#         CSV Format:
-#             :START_ID(Plant)     - The ID of the producing Plant node
-#             :END_ID(Component)   - The ID of the produced Component node
-#             :TYPE                - Always 'PRODUCES' for this edge type
-#             daily_capacity       - Number of component units the plant can produce per day
-#             quality_grade        - Letter grade (e.g., A, B) indicating quality of output
-#         """
-#
-#         return {
-#             ":START_ID(Plant)": self.start_node.id,
-#             ":END_ID(Component)": self.end_node.id,
-#             ":TYPE": "PRODUCES",
-#             "daily_capacity": self.daily_capacity,
-#             "quality_grade": self.quality_grade,
-#         }
 
 
 class Requires(Edge):
@@ -415,39 +385,56 @@ class Requires(Edge):
         }
 
 
-# class ManufacturedBy(Edge):
-#     pass
-
-
 def main():
     """
     Example generator for random components.
     """
-    components = []
-    for i in range(10):
-        name = f"Component-{i}"
-        dims = [random.randint(1, 10) for _ in range(3)]
-        cost = random.uniform(10, 100)
-        failure_rate = random.uniform(0.001, 0.1)
-        substitutions = []
-        breakability = random.uniform(0, 1)
+    # components = []
+    # for i in range(10):
+    #     name = f"Component-{i}"
+    #     dims = [random.randint(1, 10) for _ in range(3)]
+    #     cost = random.uniform(10, 100)
+    #     failure_rate = random.uniform(0.001, 0.1)
+    #     substitutions = []
+    #     breakability = random.uniform(0, 1)
+    #
+    #     comp = Component(
+    #         name=name,
+    #         full_product=False,
+    #         manufacturer="Test Inc.",
+    #         locations=["Singapore", "New York City, USA"],
+    #         dimensions=dims,
+    #         cost=cost,
+    #         failure_rate=failure_rate,
+    #         substitutions=substitutions,
+    #         breakability=breakability,
+    #     )
+    #     components.append(comp)
+    #
+    #     print(
+    #         f"{components[i].name} has ID: {components[i].id} and costs {components[i].metadata['cost']}"
+    #     )
+    comp2 = Component(
+        name="Among Us",
+        manufacturer="sussy",
+        locations=["guadalupe house", "pangaea"],
+        full_product=True,
+        component_type="Video Game",
+        variant=False,
+        vital=True,
+        designation="AU",
+        popular_name="the imposter is sus",
+        category="crewmate",
+        part_type="call meeting",
+        dimensions=[420, 420, 420],
+        cost=0.69,
+        failure_rate=0.0,
+        substitutions=["Lethal Company", "REPO"],
+        breakability=1.0,
+        year_range=[2020, 2021, 2022],
+    )
 
-        comp = Component(
-            name=name,
-            full_product=False,
-            manufacturer="Test Inc.",
-            locations=["Singapore", "New York City, USA"],
-            dimensions=dims,
-            cost=cost,
-            failure_rate=failure_rate,
-            substitutions=substitutions,
-            breakability=breakability,
-        )
-        components.append(comp)
-
-        print(
-            f"{components[i].name} has ID: {components[i].id} and costs {components[i].metadata['cost']}"
-        )
+    print(comp2.to_csv_row())
 
 
 if __name__ == "__main__":
