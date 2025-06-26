@@ -386,28 +386,6 @@ class Requires(Edge):
         lines.append(")")
         return "\n".join(lines)
 
-    def to_csv_row(self):
-        """
-        Convert this REQUIRES edge into a dictionary suitable for Memgraph CSV export.
-
-        Returns:
-            dict: A dictionary with keys matching Memgraph's required edge format,
-                including start and end node IDs, relationship type, and edge properties.
-
-        CSV Format:
-            :START_ID(Plant)     - The ID of the producing Plant node
-            :END_ID(Component)   - The ID of the produced Component node
-            :TYPE                - Always 'REQUIRES' for this edge type
-        """
-
-        return {
-            ":START_ID(Component)": self.start_node.id,
-            ":END_ID(Component)": self.end_node.id,
-            ":TYPE": "REQUIRES",
-            "base_model": self.base_model,
-            "lead_time": self.lead_time,
-        }
-
 
 def main():
     """
