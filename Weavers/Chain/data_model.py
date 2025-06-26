@@ -102,49 +102,47 @@ class Component(Node):
         Raises:
             ValueError, TypeError, or KeyError if validation fails.
         """
-        if key == "variant":
-            if not (isinstance(value, bool)):
-                raise ValueError("variant must be boolean data type")
-        elif key == "variant_base_product":
-            if not (isinstance(value, str) and value):
-                raise ValueError("variant_base_product must be a non-empty string")
-        elif key == "vital":
-            if not (isinstance(value, bool)):
-                raise ValueError("vital must be boolean data type")
-        elif key == "designation":
-            if not (isinstance(value, str) and value):
-                raise ValueError("designation must be a non-empty string")
-        elif key == "popular_name":
-            if not isinstance(value, str):
-                raise ValueError("popular_name must be a string")
-        elif key == "category":
-            if not (isinstance(value, str) and value):
-                raise ValueError("category must be a non-empty string")
-        elif key == "part_type":
-            if not (isinstance(value, str) and value):
-                raise ValueError("part_type must be a non-empty string")
-        elif key == "dimensions":
-            if not (
-                isinstance(value, list)
-                and len(value) == 3
-                and all(isinstance(x, int) for x in value)
-            ):
-                raise ValueError("dimensions must be a list of 3 integers")
-        elif key == "cost":
-            if not (isinstance(value, (int, float)) and value >= 0):
-                raise ValueError("cost must be a non-negative number")
-        elif key == "failure_rate":
-            if not (isinstance(value, (int, float)) and value >= 0):
-                raise ValueError("failure_rate must be a non-negative number")
-        elif key == "substitutions":
-            if not (isinstance(value, list) and all(isinstance(x, str) for x in value)):
-                raise TypeError("substitutions must be a list of strings")
-        elif key == "breakability":
-            if not (0 <= value <= 1):
-                raise ValueError("breakability must be between 0 and 1")
-        elif key == "year_range":
-            if not (isinstance(value, list) and all(isinstance(x, int) for x in value)):
-                raise TypeError("year_range must be a list of integers")
+        validators = {
+            "variant": lambda v: isinstance(v, bool),
+            "variant_base_product": lambda v: isinstance(v, str) and bool(v),
+            "vital": lambda v: isinstance(v, bool),
+            "designation": lambda v: isinstance(v, str) and bool(v),
+            "popular_name": lambda v: isinstance(v, str),
+            "category": lambda v: isinstance(v, str) and bool(v),
+            "part_type": lambda v: isinstance(v, str) and bool(v),
+            "dimensions": lambda v: isinstance(v, list)
+            and len(v) == 3
+            and all(isinstance(x, int) for x in v),
+            "cost": lambda v: isinstance(v, (int, float)) and v >= 0,
+            "failure_rate": lambda v: isinstance(v, (int, float)) and v >= 0,
+            "substitutions": lambda v: isinstance(v, list)
+            and all(isinstance(x, str) for x in v),
+            "breakability": lambda v: isinstance(v, (int, float)) and 0 <= v <= 1,
+            "year_range": lambda v: isinstance(v, list)
+            and all(isinstance(x, int) for x in v),
+        }
+        error_msgs = {
+            "variant": "variant must be boolean data type",
+            "variant_base_product": "variant_base_product must be a non-empty string",
+            "vital": "vital must be boolean data type",
+            "designation": "designation must be a non-empty string",
+            "popular_name": "popular_name must be a string",
+            "category": "category must be a non-empty string",
+            "part_type": "part_type must be a non-empty string",
+            "dimensions": "dimensions must be a list of 3 integers",
+            "cost": "cost must be a non-negative number",
+            "failure_rate": "failure_rate must be a non-negative number",
+            "substitutions": "substitutions must be a list of strings",
+            "breakability": "breakability must be between 0 and 1",
+            "year_range": "year_range must be a list of integers",
+        }
+        if key in validators:
+            if not validators[key](value):
+                # Use TypeError for substitutions/year_range, ValueError otherwise
+                if key in {"substitutions", "year_range"}:
+                    raise TypeError(error_msgs[key])
+                else:
+                    raise ValueError(error_msgs[key])
         else:
             return True
 
