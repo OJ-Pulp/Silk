@@ -2,10 +2,13 @@
     "Designations": {
         "B": {
             "Type": "Bomber",
-            "Number of Parts": "69",
+            "Number of Parts": 69,
             "Vital Parts": [
                 "Wing",
-                "Jet Engine"
+                "Jet Engine",
+                "Bomb Bay",
+                "Frame Rib",
+                "Landing Gear"
             ],
             "Parts": {
                 "Airframe": [
@@ -97,7 +100,15 @@
         },
         "F": {
             "Type": "Fighter",
-            "Number of Parts": "77",
+            "Number of Parts": 77,
+            "Vital Parts": [
+                "Wing",
+                "Jet Engine",
+                "Frame Rib",
+                "Landing Gear",
+                "Air-to-Air Missile",
+                "Air-to-Ground Missile"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -196,7 +207,16 @@
         },
         "C": {
             "Type": "Cargo",
-            "Number of Parts": "71",
+            "Number of Parts": 71,
+            "Vital Parts": [
+                "Wing",
+                "Turbofan Engine",
+                "Frame Rib",
+                "Cargo Ramp",
+                "Cargo Door",
+                "Cargo Floor",
+                "Roller System"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -289,7 +309,16 @@
         },
         "A": {
             "Type": "Attack",
-            "Number of Parts": "80",
+            "Number of Parts": 80,
+            "Vital Parts": [
+                "Wing",
+                "Jet Engine",
+                "Frame Rib",
+                "Armored Cockpit",
+                "Targeting Pod Mount",
+                "Weapon Release System",
+                "Internal Gun"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -391,7 +420,16 @@
         },
         "P": {
             "Type": "Patrol",
-            "Number of Parts": "73",
+            "Number of Parts": 73,
+            "Vital Parts": [
+                "Wing",
+                "Turboprop Engine",
+                "Frame Rib",
+                "Observation Window",
+                "Maritime Surveillance/Synthetic Aperture Radar",
+                "Sonobuoy Launch Tubes",
+                "Torpedo Launch Tubes"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -486,7 +524,19 @@
         },
         "R": {
             "Type": "Reconnaissance",
-            "Number of Parts": "70",
+            "Number of Parts": 70,
+            "Vital Parts": [
+                "Wing",
+                "High-Altitude Engine",
+                "Frame Rib",
+                "Observation Window",
+                "Sensor Pod Mounts",
+                "SAR/GMTI Radar",
+                "Electro-Optical/Infrared Camera",
+                "Hyperspectral Sensor",
+                "Lidar Sensor",
+                "Signals Intelligence Suite"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -576,7 +626,16 @@
         },
         "T": {
             "Type": "Trainer",
-            "Number of Parts": "77",
+            "Number of Parts": 77,
+            "Vital Parts": [
+                "Wing",
+                "Piston Engine",
+                "Frame Rib",
+                "Propeller",
+                "Tandem Cockpit",
+                "Dual Controls",
+                "Ejection Seat"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -675,7 +734,17 @@
         },
         "K": {
             "Type": "Tanker",
-            "Number of Parts": "66",
+            "Number of Parts": 66,
+            "Vital Parts": [
+                "Wing",
+                "Turbofan Engine",
+                "Frame Rib",
+                "Refueling Boom Receptacle",
+                "Refueling Boom",
+                "Hose-and-Drogue System",
+                "Wing-mounted Refueling Pod",
+                "Intertank Transfer System"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -763,7 +832,15 @@
         },
         "O": {
             "Type": "Observation",
-            "Number of Parts": "68",
+            "Number of Parts": 68,
+            "Vital Parts": [
+                "Wing",
+                "Propeller",
+                "Frame Rib",
+                "Spotting Scope Mounts",
+                "Mission Console",
+                "Data Downlink System"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -853,7 +930,17 @@
         },
         "H": {
             "Type": "MEDEVAC",
-            "Number of Parts": "78",
+            "Number of Parts": 78,
+            "Vital Parts": [
+                "Wing",
+                "Turboprop Engine",
+                "Propeller",
+                "Frame Rib",
+                "Cabin/Patient Compartment",
+                "Stretcher Loading System",
+                "Medical Oxygen System",
+                "Patient Monitoring System Integration"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -953,7 +1040,17 @@
         },
         "L": {
             "Type": "Cold Weather",
-            "Number of Parts": "43",
+            "Number of Parts": 43,
+            "Vital Parts": [
+                "Wing",
+                "Turbofan Engine (with cold-start capability)",
+                "Frame Rib",
+                "Ice Protection System",
+                "Engine Inlet Anti-ice System",
+                "Fuel System Heaters",
+                "Oil System Heaters",
+                "Reinforced Airframe"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -1016,7 +1113,16 @@
         },
         "M": {
             "Type": "Multimission",
-            "Number of Parts": "50",
+            "Number of Parts": 50,
+            "Vital Parts": [
+                "Modular Fuselage Sections",
+                "Reconfigurable Wing Hardpoints",
+                "Internal Weapons Bay",
+                "External Hardpoints",
+                "Fly-by-Wire/Light Flight Control System",
+                "Integrated Cockpit Display System",
+                "Mission Computers"
+            ],
             "Parts": {
                 "Airframe": [
                     "Modular Fuselage Sections",
@@ -1088,7 +1194,15 @@
         },
         "U": {
             "Type": "Utility",
-            "Number of Parts": "40",
+            "Number of Parts": 40,
+            "Vital Parts": [
+                "High-Wing Design",
+                "Robust Fuselage",
+                "Turboprop Engine",
+                "Propeller",
+                "Fixed Landing Gear",
+                "Short Takeoff and Landing Features"
+            ],
             "Parts": {
                 "Airframe": [
                     "High-Wing Design",
@@ -1148,7 +1262,17 @@
         },
         "W": {
             "Type": "Weather",
-            "Number of Parts": "68",
+            "Number of Parts": 68,
+            "Vital Parts": [
+                "Wing",
+                "Propeller",
+                "Frame Rib",
+                "Doppler Radar",
+                "Dropwindsonde Launcher",
+                "Scientific Instrument Rack",
+                "Mission Specialist Station",
+                "Pressurized Cabin"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",
@@ -1238,7 +1362,16 @@
         },
         "S": {
             "Type": "Anti-Submarine Warfare",
-            "Number of Parts": "78",
+            "Number of Parts": 78,
+            "Vital Parts": [
+                "Wing",
+                "Jet Engine",
+                "Frame Rib",
+                "Magnetic Anomaly Detector",
+                "Sonobuoy Launcher",
+                "Torpedo Launch Tubes",
+                "Acoustic Processor"
+            ],
             "Parts": {
                 "Airframe": [
                     "Fuselage",

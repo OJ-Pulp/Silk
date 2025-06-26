@@ -3,11 +3,11 @@ import json
 import faker
 import uuid
 import logging
+import traceback
 import pandas as pd
 from typing import List, Tuple
 from jsonschema import validate, ValidationError
 from pathlib import Path
-from data_model import Component, Requires
 
 # -------------------------------------------------------------------------------------------
 #                                   LOGGING_SETTINGS
@@ -16,7 +16,7 @@ from data_model import Component, Requires
 
 # Config for logging showing messages level INFO and above
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
@@ -53,6 +53,7 @@ except FileNotFoundError as e:
 # endregion
 
 # Imports data_model from /Silk/
+from data_model import Component, Requires
 
 # -------------------------------------------------------------------------------------------
 #                                   INPUTDATA_SCHEMA
@@ -60,29 +61,22 @@ except FileNotFoundError as e:
 # region INPUTDATA_SCHEMA
 
 INPUTDATA_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
         "Designations": {
             "type": "object",
+            "minProperties": 1,
             "patternProperties": {
                 "^[A-Z]$": {
                     "type": "object",
                     "properties": {
-                        "Type": {
-                            "anyOf": [
-                                {"type": "string"},
-                                {"type": "null"}
-                            ]
-                        },
-                        "Number of Parts": {
-                            "anyOf": [
-                                {"type": "string"},
-                                {"type": "null"}
-                            ]
-                        },
+                        "Type": {"type": ["string", "null"]},
+                        "Number of Parts": {"type": ["integer", "null"]},
                         "Vital Parts": {
                             "type": "array",
                             "items": {"type": "string"},
+                            "minItems": 1
                         },
                         "Parts": {
                             "type": "object",
@@ -90,6 +84,7 @@ INPUTDATA_SCHEMA = {
                             "additionalProperties": {
                                 "type": "array",
                                 "items": {"type": "string"},
+                                "minItems": 1
                             }
                         }
                     },
@@ -111,7 +106,8 @@ INPUTDATA_SCHEMA = {
                         },
                         "Locations": {
                             "type": "array",
-                            "items": {"type": "string"}
+                            "items": {"type": "string"},
+                            "minItems": 1
                         }
                     },
                     "required": ["Locations"],
@@ -131,28 +127,32 @@ INPUTDATA_SCHEMA = {
 # -------------------------------------------------------------------------------------------
 # region VALIDATE_INPUTDATA.JSON
 
+class InputDataError(Exception):
+    pass
+
 def validate_inputdata() -> dict:
     try:
         with (CHAIN_PATH / "inputdata.json").open("r", encoding="utf-8") as f:
             inputdata = json.load(f)
-    except FileNotFoundError:
-        logger.error("inputdata.json Not Found -- Exiting")
-        sys.exit(1)
+    except FileNotFoundError as e:
+        raise InputDataError(f"{type(e).__name__}: inputdata.json Not Found -- Exiting") from e
     except json.JSONDecodeError as e:
-        logger.error(f"Error decoding JSON: {e}")
-        sys.exit(1)
+        raise InputDataError(f"{type(e).__name__}: Error Decoding JSON: {e} -- Exiting") from e
 
     try:
         validate(inputdata, INPUTDATA_SCHEMA)
     except ValidationError as e:
-        logger.error(f"Invalid inputdata.json structure -- {e.message} -- Exiting")
-        sys.exit(1)
+        raise InputDataError(f"{type(e).__name__}: Invalid inputdata.json Structure -- {e.message} -- Exiting -- {traceback.format_exc()}")
 
     return inputdata
 
 # endregion
 
-INPUTDATA = validate_inputdata()
+try:
+    INPUTDATA = validate_inputdata()
+except Exception as e:
+    logger.error(f"{type(e).__name__}: {e}")
+    sys.exit(1)
 
 # -------------------------------------------------------------------------------------------
 #                                RESOLVE_INPUTDATA.JSON
@@ -167,10 +167,10 @@ def resolve_inputdata(inputdata):
             resolved_inputdata = json.load(f)
 
     for designation, data in resolved_inputdata["Designations"].items():
-        parts_count = str(sum(len(part_list) for part_list in data["Parts"].values()))
+        parts_count = sum(len(part_list) for part_list in data["Parts"].values())
         if "Number of Parts" in data:
             if data["Number of Parts"] != parts_count:
-                logger.warning(f"{designation} Number of Parts Mismatch:        manual={data['Number of Parts']}, computed={parts_count}")
+                logger.warning(f"{designation} Number of Parts Mismatch:        manual={str(data['Number of Parts'])}, computed={str(parts_count)}")
         else:
             data["Number of Parts"] = parts_count
             logger.info(f"{designation} Number of Parts Added:      {parts_count}")

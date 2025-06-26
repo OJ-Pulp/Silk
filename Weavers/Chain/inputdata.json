@@ -2,7 +2,7 @@
     "Designations": {
         "B": {
             "Type": "Bomber",
-            "Number of Parts": "69",
+            "Number of Parts": 69,
             "Vital Parts": [
                 "Wing",
                 "Jet Engine",
@@ -100,7 +100,7 @@
         },
         "F": {
             "Type": "Fighter",
-            "Number of Parts": "77",
+            "Number of Parts": 77,
             "Vital Parts": [
                 "Wing",
                 "Jet Engine",
@@ -207,7 +207,7 @@
         },
         "C": {
             "Type": "Cargo",
-            "Number of Parts": "71",
+            "Number of Parts": 71,
             "Vital Parts": [
                 "Wing",
                 "Turbofan Engine",
@@ -309,7 +309,7 @@
         },
         "A": {
             "Type": "Attack",
-            "Number of Parts": "80",
+            "Number of Parts": 80,
             "Vital Parts": [
                 "Wing",
                 "Jet Engine",
@@ -420,7 +420,7 @@
         },
         "P": {
             "Type": "Patrol",
-            "Number of Parts": "73",
+            "Number of Parts": 73,
             "Vital Parts": [
                 "Wing",
                 "Turboprop Engine",
@@ -524,7 +524,7 @@
         },
         "R": {
             "Type": "Reconnaissance",
-            "Number of Parts": "70",
+            "Number of Parts": 70,
             "Vital Parts": [
                 "Wing",
                 "High-Altitude Engine",
@@ -626,7 +626,7 @@
         },
         "T": {
             "Type": "Trainer",
-            "Number of Parts": "77",
+            "Number of Parts": 77,
             "Vital Parts": [
                 "Wing",
                 "Piston Engine",
@@ -734,7 +734,7 @@
         },
         "K": {
             "Type": "Tanker",
-            "Number of Parts": "66",
+            "Number of Parts": 66,
             "Vital Parts": [
                 "Wing",
                 "Turbofan Engine",
@@ -832,7 +832,7 @@
         },
         "O": {
             "Type": "Observation",
-            "Number of Parts": "68",
+            "Number of Parts": 68,
             "Vital Parts": [
                 "Wing",
                 "Propeller",
@@ -930,7 +930,7 @@
         },
         "H": {
             "Type": "MEDEVAC",
-            "Number of Parts": "78",
+            "Number of Parts": 78,
             "Vital Parts": [
                 "Wing",
                 "Turboprop Engine",
@@ -1040,7 +1040,7 @@
         },
         "L": {
             "Type": "Cold Weather",
-            "Number of Parts": "43",
+            "Number of Parts": 43,
             "Vital Parts": [
                 "Wing",
                 "Turbofan Engine (with cold-start capability)",
@@ -1113,7 +1113,7 @@
         },
         "M": {
             "Type": "Multimission",
-            "Number of Parts": "50",
+            "Number of Parts": 50,
             "Vital Parts": [
                 "Modular Fuselage Sections",
                 "Reconfigurable Wing Hardpoints",
@@ -1194,7 +1194,7 @@
         },
         "U": {
             "Type": "Utility",
-            "Number of Parts": "40",
+            "Number of Parts": 40,
             "Vital Parts": [
                 "High-Wing Design",
                 "Robust Fuselage",
@@ -1262,7 +1262,7 @@
         },
         "W": {
             "Type": "Weather",
-            "Number of Parts": "68",
+            "Number of Parts": 68,
             "Vital Parts": [
                 "Wing",
                 "Propeller",
@@ -1362,7 +1362,7 @@
         },
         "S": {
             "Type": "Anti-Submarine Warfare",
-            "Number of Parts": "78",
+            "Number of Parts": 78,
             "Vital Parts": [
                 "Wing",
                 "Jet Engine",
