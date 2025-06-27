@@ -59,13 +59,11 @@ class InputError(Exception):
 # [ ] logger.debug
 
 def sanitize(filename: str) -> Tuple[str, Path]:
-    try:
-        path = Path(filename)
-    except FileNotFoundError as e:
-        raise InputError(f"{type(e).__name__}: '{filename}' Not Found -- Exiting") from e
+    path = Path(filename)
+    if not path.exists():
+        raise InputError(f"FileNotFoundError: '{filename}' Not Found -- Exiting")
     suffix = path.suffix.lower()
-    semi_sanitized_stem = path.stem.replace(".", "_")
-    sanitized_stem = re.sub(r"[^a-zA-Z0-9_-]", "_", semi_sanitized_stem)
+    sanitized_stem = re.sub(r"[^a-zA-Z0-9_-]", "_", path.stem.replace(".", "_"))
 
     if suffix:
         if suffix not in ALLOWED_EXTENSIONS:
@@ -77,19 +75,29 @@ def sanitize(filename: str) -> Tuple[str, Path]:
     if filename != sanitized_filename:
         logger.warning(f"InputError: ValidationError: '{filename}' Not Accepted -- Renamed to '{sanitized_filename}'")
 
-    sanitized_path = Path("inputs") / sanitized_filename
+    semi_sanitized_path = Path("inputs") / sanitized_filename
+    sanitized_path = semi_sanitized_path.resolve()
 
-    if path != sanitized_path:
-        index = 1
-        while sanitized_path.exists():
-            logger.debug(f"FileExistsError: '{sanitized_path}' Already Exists")
-            sanitized_path = Path(f"{sanitized_path}{index}")
-            index += 1
-        logger.warning(f"InputError: ValidationError: '{path}' Not Accepted -- Moved to '{sanitized_path}'")
+    if path.resolve() != sanitized_path:
+        if sanitized_path.exists():
+            sanitized_path_stem = sanitized_path.stem
+            sanitized_path_suffix = sanitized_path.suffix
+            index = 1
+            while True:
+                sanitized_path = Path(f"{sanitized_path_stem}_{index}{sanitized_path_suffix}")
+                if not sanitized_path.exists():
+                    break
+                logger.debug(f"FileExistsError: '{sanitized_path}' Already Exists")
+                index += 1
+        if sanitized_filename != sanitized_path.name:
+            logger.warning(f"InputError: ValidationError: '{sanitized_path}' Not Accepted -- Renamed to '{sanitized_path.name}'")
+        logger.warning(f"InputError: ValidationError: '{path.resolve()}' Not Accepted -- Moved to '{sanitized_path}'")
 
-    path.rename(sanitized_path)
+    sanitized_path.parent.mkdir(parents=True, exist_ok=True)
 
-    return sanitized_filename, sanitized_path
+    path.rename(sanitized_path.resolve())
+
+    return sanitized_path.name, sanitized_path
 
 
 def load(filename: str) -> Union[dict, str]:
