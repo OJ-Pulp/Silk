@@ -23,10 +23,10 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
 )
+logger = logging.getLogger(__name__)
 
 # Suppresses debug messages from faker library
 logging.getLogger("faker").setLevel(logging.INFO)
-logger = logging.getLogger(__name__)
 
 # endregion
 
@@ -86,7 +86,7 @@ def validate_inputdata() -> dict:
 
     # Validates that the required input file of 'inputdata.json' matches the desired structure of the schema
     try:
-        validate(inputdata, INPUTDATA_SCHEMA)
+        validate(inputdata, inputdata_schema)
     except ValidationError as e:
         raise InputError(f"{type(e).__name__}: Invalid 'inputdata.json' Structure -- {e.message} -- Exiting -- {traceback.format_exc()}")
 
