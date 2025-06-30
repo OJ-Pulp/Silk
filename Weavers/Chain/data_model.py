@@ -18,7 +18,6 @@ class Component(Node):
         "name",
         "manufacturer",
         "locations",
-        "components",
         "full_product",
         "component_type",
         "variant",
@@ -142,9 +141,6 @@ class Component(Node):
         self.manufacturer = manufacturer
         self.locations = locations
 
-        # Empty components list that will be filled when the REQUIRES edges are created.
-        self.components = []
-
         # METADATA
         # All metadata is completely OPTIONAL
         # Include runtime validation for supported arguments
@@ -256,18 +252,6 @@ class Requires(Edge):
         "lead_time",
     ]
 
-    def __append_components_lists(self):
-        """
-        Keeps the components list of the source components up to date by appending the target component's ID into it.
-        Called upon creation of :REQUIRES edges.
-        """
-
-        # My type checker gets very angry at me if I don't do this
-        assert isinstance(self.start_node, Component), "start_node must be a Component"
-        assert isinstance(self.end_node, Component), "end_node must be a Component"
-
-        self.start_node.components.append(self.end_node.id)
-
     def __init__(
         self,
         start_node: Component,
@@ -288,5 +272,3 @@ class Requires(Edge):
         super().__init__(start_node, end_node)
         self.base_model = base_model
         self.lead_time = lead_time
-
-        self.__append_components_lists()
