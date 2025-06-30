@@ -1,22 +1,4 @@
 from typing import List, Optional
-import sys
-from pathlib import Path
-
-
-def find_directory_named(name: str, start_path: Path) -> Path:
-    for parent in [start_path, *start_path.parents]:
-        if parent.name == name:
-            return parent
-    raise FileNotFoundError(f"'{name}/' not found -- Exiting")
-
-
-try:
-    CHAIN_PATH = find_directory_named("Chain", Path(__file__).resolve().parent)
-    sys.path.append(str(CHAIN_PATH))
-except FileNotFoundError:
-    sys.exit(1)
-
-# Imports data_model from /Silk/
 from graph_model import Node, Edge
 
 """
