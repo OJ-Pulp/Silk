@@ -5,6 +5,8 @@ Graph model for representing nodes and edges in a database.
 from abc import ABC
 from typing import List, Optional
 import uuid
+from pathlib import Path
+import pandas as pd
 
 
 class Node(ABC):
@@ -67,6 +69,20 @@ class Node(ABC):
             row = {k: row.get(k, "") for k in self.__csv_fields__}
 
         return row
+
+    @staticmethod
+    def write_to_csv(nodes, filename: Path):
+        """
+        Converts the passed Nodes to a CSV file.
+
+        :param filename: The path to the CSV file to write.
+        :type filename: Path
+        :raises FileNotFoundError: If the directory for the filename does not exist.
+        """
+        filename.parent.mkdir(parents=True, exist_ok=True)
+        rows = [c.to_dict() for c in nodes]
+        df = pd.DataFrame(rows)
+        df.to_csv(filename, index=False)
 
 
 class Edge(ABC):
@@ -136,3 +152,19 @@ class Edge(ABC):
             row = {k: row.get(k, "") for k in getattr(self, "__csv_fields__")}
 
         return row
+    
+    @staticmethod
+    def write_to_csv(edges, filename: Path):
+        """
+        Converts the passed Edges to a CSV file.
+
+        :param edges: A list of Edge instances to write to CSV.
+        :type edges: List[Edge]
+        :param filename: The path to the CSV file to write.
+        :type filename: Path
+        :raises FileNotFoundError: If the directory for the filename does not exist.
+        """
+        filename.parent.mkdir(parents=True, exist_ok=True)
+        rows = [e.to_dict() for e in edges]
+        df = pd.DataFrame(rows)
+        df.to_csv(filename, index=False)

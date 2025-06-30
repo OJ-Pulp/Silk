@@ -373,24 +373,6 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
 
 # endregion
 
-# -------------------------------------------------------------------------------------------
-#                                NODES_AND_EDGES_TO_CSV
-# -------------------------------------------------------------------------------------------
-# region NODES_AND_EDGES_TO_CSV
-
-def write_nodes_to_csv(nodes: List[Component], filename: Path):
-    filename.parent.mkdir(parents=True, exist_ok=True)
-    rows = [c.to_dict() for c in nodes]
-    df = pd.DataFrame(rows)
-    df.to_csv(filename, index=False)
-
-def write_edges_to_csv(edges: List[Requires], filename: Path):
-    filename.parent.mkdir(parents=True, exist_ok=True)
-    rows = [e.to_dict() for e in edges]
-    df = pd.DataFrame(rows)
-    df.to_csv(filename, index=False)
-
-# endregion
 
 # -------------------------------------------------------------------------------------------
 #                                    MAIN_FUNCTION
@@ -451,8 +433,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    write_nodes_to_csv(components, get_next_test_output_filename("components", "csv"))
-    write_edges_to_csv(base_edges, get_next_test_output_filename("edges", "csv"))
+    Component.write_to_csv(components, get_next_test_output_filename("components", "csv"))
+    Requires.write_to_csv(base_edges, get_next_test_output_filename("edges", "csv"))
     logger.info("CSV Files Created")
 
     logger.info("Main End")
