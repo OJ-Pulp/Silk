@@ -3,7 +3,7 @@ Data model for components and their requirement relationships in the supply chai
 """
 
 from typing import List, Optional
-from .graph_model import Node, Edge
+from ..graph_model import Node, Edge
 
 
 class Component(Node):
