@@ -1,10 +1,10 @@
-from abc import ABC
-from typing import List, Optional
-import uuid
-
 """
 Graph model for representing nodes and edges in a database.
 """
+
+from abc import ABC
+from typing import List, Optional
+import uuid
 
 
 class Node(ABC):

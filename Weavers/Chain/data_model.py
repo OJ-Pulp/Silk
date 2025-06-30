@@ -1,9 +1,9 @@
+"""
+Data model for components and their requirement relationships in the supply chain.
+"""
+
 from typing import List, Optional
 from graph_model import Node, Edge
-
-"""
-Data model for components and their relationships in the supply chain.
-"""
 
 
 class Component(Node):
