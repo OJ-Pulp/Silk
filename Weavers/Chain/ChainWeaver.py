@@ -6,7 +6,6 @@ OVERALL CHAINWEAVER
 import copy
 import json
 import logging
-import sys
 import traceback
 import uuid
 from pathlib import Path
@@ -16,6 +15,10 @@ from typing import List, Tuple
 #                                   LOGGING_SETTINGS
 # -------------------------------------------------------------------------------------------
 # region LOGGING_SETTINGS
+
+SUCCESS = 0
+FAILURE = 1
+INTERRUPTED = 130
 
 # Configures for logging showing messages level INFO and above
 logging.basicConfig(
@@ -37,7 +40,7 @@ try:
     from jsonschema import validate, ValidationError
 except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Module '{e.name}' -- Try 'python -m pip install {e.name}' -- Exiting")
-    sys.exit(1)
+    raise SystemExit(FAILURE)
 
 # Local
 try:
@@ -45,7 +48,7 @@ try:
     from .data_model import Component, Requires
 except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Local Module '{e.name}' -- Check that '{e.name}.py' is in the Same Directory as 'ChainWeaver.py' -- Exiting")
-    sys.exit(1)
+    raise SystemExit(FAILURE)
 
 logger.info("Program Start")
 
@@ -397,7 +400,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
         inputdata = validate_inputdata()
     except Exception as e:
         logger.critical(f"{type(e).__name__}: {e}")
-        sys.exit(1)
+        raise SystemExit(FAILURE)
 
     resolved_inputdata = resolve_inputdata(inputdata)
     logger.info("Inputs Accepted")
@@ -442,6 +445,10 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
 # endregion
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt as e:
+        logger.warning(f"{type(e).__name__}: Input Processing Interrupted by User -- Exiting")
+        raise SystemExit(INTERRUPTED)
 
 logger.info("Program End")
