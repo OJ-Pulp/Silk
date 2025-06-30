@@ -374,23 +374,6 @@ def create_variant_products(base_products, num_variants: int = 10)  -> List[Comp
 # endregion
 
 # -------------------------------------------------------------------------------------------
-#                                NODES_AND_EDGES_TO_ROWS
-# -------------------------------------------------------------------------------------------
-# region NODES_AND_EDGES_TO_ROWS
-
-
-def requires_to_row(edge: Requires) -> dict:
-    return {
-        "start_node": edge.start_node.id,
-        "end_node": edge.end_node.id,
-        "lead_time": edge.lead_time,
-        "base_model": edge.base_model,
-    }
-
-
-# endregion
-
-# -------------------------------------------------------------------------------------------
 #                                NODES_AND_EDGES_TO_CSV
 # -------------------------------------------------------------------------------------------
 # region NODES_AND_EDGES_TO_CSV
@@ -403,7 +386,7 @@ def write_nodes_to_csv(nodes: List[Component], filename: Path):
 
 def write_edges_to_csv(edges: List[Requires], filename: Path):
     filename.parent.mkdir(parents=True, exist_ok=True)
-    rows = [requires_to_row(e) for e in edges]
+    rows = [e.to_dict() for e in edges]
     df = pd.DataFrame(rows)
     df.to_csv(filename, index=False)
 
