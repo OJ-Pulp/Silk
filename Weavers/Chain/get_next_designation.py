@@ -26,7 +26,7 @@ logging.getLogger("faker").setLevel(logging.INFO)
 
 # Local
 try:
-    from data_model import Component, Requires
+    from Weavers.Chain.data_model import Component, Requires
     #import input_utils
 except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Local Module '{e.name}' -- Check that '{e.name}.py' is in the Same Directory as 'ChainWeaver.py' -- Exiting")
