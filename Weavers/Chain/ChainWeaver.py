@@ -157,7 +157,7 @@ def create_base_product_sprues(
                 full_product=False,
                 product=base_product.id,
                 manufacturer=manufacturer,
-                locations=FAKER_GEN.random_element(elements=manufacturer_keys[manufacturer]["Locations"]),
+                locations=FAKER_GEN.random_element(elements=manufacturers_dict[manufacturer]["Locations"]),
                 variant=False,
             )
 
@@ -227,14 +227,14 @@ def create_base_product_parts(
     for i, base_product in enumerate(base_products, start=1):
         logger.debug(f"Base Product {i}:")
 
-        parts_categories = designation_keys[base_product.metadata["designation"]]["Parts"]
+        parts_categories = designations_dict[base_product.metadata["designation"]]["Parts"]
         for part_category, part_list in parts_categories.items():
             for part_type in part_list:
                 logger.debug(f"{part_type}:")
 
                 # Generates base product part data
                 base_product_part_manufacturer = FAKER_GEN.random_element(elements=list(manufacturer_keys))
-                if part_type in designation_keys[base_product.metadata["designation"]]["Vital Parts"]:
+                if part_type in designations_dict[base_product.metadata["designation"]]["Vital Parts"]:
                     base_product_part_vital = True
                 else:
                     base_product_part_vital = False
@@ -244,7 +244,7 @@ def create_base_product_parts(
                     name=f"{part_type} {FAKER_GEN.bothify(text='???#####')}",
                     full_product=False,
                     manufacturer=base_product_part_manufacturer,
-                    locations=FAKER_GEN.random_element(elements=manufacturer_keys[base_product_part_manufacturer]["Locations"]),
+                    locations=FAKER_GEN.random_element(elements=manufacturers_dict[base_product_part_manufacturer]["Locations"]),
                     product=base_product.id,
                     variant=False,
                     vital=base_product_part_vital,
