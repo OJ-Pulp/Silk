@@ -549,13 +549,13 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
 
     base_products = create_base_products(num_base_products, designations_dict, manufacturers_dict)
     logger.info("Base Products Created")
-    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products)
+    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products, manufacturers_dict)
     logger.info("Base Product Sprues Created")
-    base_product_parts, base_product_part_edges, vital_base_product_sprues = create_base_product_parts(base_products, base_product_sprues)
+    base_product_parts, base_product_part_edges, vital_base_product_sprues = create_base_product_parts(base_products, base_product_sprues, designations_dict, manufacturers_dict)
     logger.info("Base Product Parts Created")
     resolved_base_product_sprues, resolved_base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
     logger.info("Base Product Sprues Resolved")
-    variant_products = create_variant_products(base_products, num_variants)
+    variant_products = create_variant_products(base_products, manufacturers_dict, num_variants)
     logger.info("Variant Products Created")
 
     # Collect all components and edges
