@@ -1,5 +1,5 @@
 import pytest
-from ..data_model import Component, Requires
+from Weavers.Chain.data_model import Component, Requires
 
 
 def test_component_creation():
