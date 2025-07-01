@@ -41,9 +41,8 @@ def test_create_base_product_sprues(sample_designations, sample_manufacturers):
         2, sample_designations, sample_manufacturers
     )
     # Patch MANUFACTURERS global for test
-    ChainWeaver.MANUFACTURERS = sample_manufacturers
     sprues, edges = ChainWeaver.create_base_product_sprues(
-        base_products, sample_designations, sample_manufacturers
+        base_products, sample_manufacturers
     )
     assert all(isinstance(s, Component) for s in sprues)
     assert all(isinstance(e, Requires) for e in edges)
@@ -55,13 +54,11 @@ def test_create_base_product_parts(sample_designations, sample_manufacturers):
     base_products = ChainWeaver.create_base_products(
         1, sample_designations, sample_manufacturers
     )
-    ChainWeaver.MANUFACTURERS = sample_manufacturers
-    ChainWeaver.DESIGNATIONS = sample_designations
     sprues, _ = ChainWeaver.create_base_product_sprues(
-        base_products, sample_designations, sample_manufacturers
+        base_products, sample_manufacturers
     )
     parts, part_edges, vital_sprues = ChainWeaver.create_base_product_parts(
-        base_products, sprues
+        base_products, sprues, sample_designations, sample_manufacturers
     )
     assert all(isinstance(p, Component) for p in parts)
     assert all(isinstance(e, Requires) for e in part_edges)
@@ -72,12 +69,12 @@ def test_resolve_base_product_sprues(sample_designations, sample_manufacturers):
     base_products = ChainWeaver.create_base_products(
         1, sample_designations, sample_manufacturers
     )
-    ChainWeaver.MANUFACTURERS = sample_manufacturers
-    ChainWeaver.DESIGNATIONS = sample_designations
     sprues, sprue_edges = ChainWeaver.create_base_product_sprues(
-        base_products, sample_designations, sample_manufacturers
+        base_products, sample_manufacturers
     )
-    parts, part_edges, _ = ChainWeaver.create_base_product_parts(base_products, sprues)
+    parts, part_edges, _ = ChainWeaver.create_base_product_parts(
+        base_products, sprues, sample_designations, sample_manufacturers
+    )
     kept_sprues, kept_edges = ChainWeaver.resolve_base_product_sprues(
         sprues, sprue_edges, part_edges
     )
