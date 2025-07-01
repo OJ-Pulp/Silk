@@ -336,7 +336,6 @@ def resolve_base_product_sprues(
 
     return base_sprues_keep, base_sprue_edges_keep
 
-
 # endregion
 
 # -------------------------------------------------------------------------------------------
