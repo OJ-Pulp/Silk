@@ -378,18 +378,38 @@ def get_next_test_output_filename(base_name: str, extension: str, output_dir: Pa
 # -------------------------------------------------------------------------------------------
 # region VARIANT_PRODUCTS
 
-def create_variant_products(base_products, num_variants: int = 10)  -> List[Component]:
+def check_variant_base_product(
+    variant_products: List[Component], 
+    variant_base_product: Component
+) -> bool:
+    """
+    """
 
-    # Sets variant variables
+    designation = variant_base_product.metadata["designation"]
+    for variant_product in variant_products:
+        if variant_product.metadata["variant_base_product"] == variant_base_product.id:
+            designation = get
+            logger.debug(f"{variant_base_product.name} Already Chosen -- Next")
+
+
+def create_variant_products(
+    base_products: List[Component],
+    num_variants: int = 10
+)  -> List[Component]:
+    """
+    INSERT STUFF
+    """
+
+    # Sets empty list to collect variant products
     variant_products = []
 
-    # 2. Create list of variants
+    # Creates all variant products
     for i in range(num_variants):
-        logger.debug(f"Variant Product {i}:\n")
+        logger.debug(f"Variant Product {i}:")
 
-        # Assigns variant base_product
+        # Picks a random base product to create a variant of
         variant_base_product = FAKER_GEN.random_element(elements=base_products)
-        assert isinstance(variant_base_product, Component) 
+
 
         # Assigns variant designation
         variant_base_designation = variant_base_product.metadata["designation"]
