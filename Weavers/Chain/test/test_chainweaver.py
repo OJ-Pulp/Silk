@@ -3,6 +3,7 @@ from Weavers.Chain import ChainWeaver
 from Weavers.Chain.data_model import Component, Requires
 
 
+# Fixture makes pytest happy and my type checker happy
 @pytest.fixture
 def sample_designations():
     return {
@@ -17,6 +18,7 @@ def sample_designations():
     }
 
 
+# Fixture makes pytest happy and my type checker happy
 @pytest.fixture
 def sample_manufacturers():
     return {
@@ -72,7 +74,7 @@ def test_resolve_base_product_sprues(sample_designations, sample_manufacturers):
     sprues, sprue_edges = ChainWeaver.create_base_product_sprues(
         base_products, sample_manufacturers
     )
-    parts, part_edges, _ = ChainWeaver.create_base_product_parts(
+    _, part_edges, _ = ChainWeaver.create_base_product_parts(
         base_products, sprues, sample_designations, sample_manufacturers
     )
     kept_sprues, kept_edges = ChainWeaver.resolve_base_product_sprues(
