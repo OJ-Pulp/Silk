@@ -1,9 +1,75 @@
-"""
-Data model for components and their requirement relationships in the supply chain.
+"""Data model for components and their requirement relationships in the supply chain.
 """
 
 from typing import List, Optional
+
 from Weavers.graph_model import Node, Edge
+
+# This JSON schema defines the structure for this specific data model.
+# It changes depending on which Weaver is being used.
+# This should only be touched by engineers who are familiar with the 
+# data model and its requirements, and not by end users.
+# It is used to validate the data before it is saved to the database,
+# and defines how the end user is expected to enter the data.
+DATA_SCHEMA =  {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "Designations": {
+            "type": "object",
+            "minProperties": 1,
+            "patternProperties": {
+                "^[A-Z]$": {
+                    "type": "object",
+                    "properties": {
+                        "Type": {"type": ["string", "null"]},
+                        "Number of Parts": {"type": ["integer", "null"]},
+                        "Vital Parts": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "minItems": 1
+                        },
+                        "Parts": {
+                            "type": "object",
+                            "minProperties": 1,
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "minItems": 1
+                            }
+                        }
+                    },
+                    "required": ["Vital Parts", "Parts"],
+                    "additionalProperties": False
+                }
+            }
+        },
+        "Manufacturers": {
+            "type": "object",
+            "minProperties": 1,
+            "patternProperties": {
+                ".*": {
+                    "type": "object",
+                    "properties": {
+                        "ID": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                        },
+                        "Locations": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "minItems": 1
+                        }
+                    },
+                    "required": ["Locations"],
+                    "additionalProperties": False
+                }
+            }
+        }
+    },
+    "required": ["Designations", "Manufacturers"],
+    "additionalProperties": False
+}
 
 
 class Component(Node):
