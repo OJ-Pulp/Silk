@@ -1,0 +1,4 @@
+try:
+except Exception as e:
+    logger.critical(f"{type(e).__name__}: {e}")
+    sys.exit(1)
