@@ -6,6 +6,7 @@ OVERALL CHAINWEAVER
 import copy
 import json
 import logging
+import re
 import traceback
 import uuid
 from pathlib import Path
@@ -408,7 +409,7 @@ def find_current_designation(
         raise NamingError(f"VariantNameIdentificationError: {variant_base_product.id} has No Preexisting Variants")
 
 
-def main(
+def next_variant_designation(
     variant_base_product: Component,
     variant_products: List[Component]
 ) -> str:
