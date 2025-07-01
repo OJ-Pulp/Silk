@@ -463,14 +463,16 @@ def next_variant_designation(
 
 def create_variant_products(
     base_products: List[Component],
+    manufacturers_dict: dict,
     num_variants: int = 10
 )  -> List[Component]:
     """
     INSERT STUFF
     """
 
-    # Sets empty list to collect variant products
+    # Sets empty list to collect variant products along with other necessary variables
     variant_products = []
+    manufacturer_keys = list(manufacturers_dict.keys())
 
     # Creates all variant products
     for i in range(num_variants):
@@ -478,28 +480,15 @@ def create_variant_products(
 
         # Picks a random base product to create a variant of
         variant_base_product = FAKER_GEN.random_element(elements=base_products)
+        # Generates variant product data
+        variant_designation = next_variant_designation(variant_base_product, variant_products)
+        variant_manufacturer = FAKER_GEN.random_element(elements=manufacturer_keys)
 
-
-        # Assigns variant designation
-        variant_base_designation = variant_base_product.metadata["designation"]
-        if variant_base_designation[-1].isdigit():
-            variant_designation_letter = "A"
-        else:
-            variant_designation_letter = get_next_letter(variant_base_designation[-1])
-        variant_designation = f"{variant_base_designation}{variant_designation_letter}"
-        logger.debug(f"Variant Designation:        {variant_designation}")
-
-        # Assigns variant manufacturer and manufacturer_location
-        variant_manufacturer = variant_base_product.manufacturer
-        possible_manufacturer_locations = list(MANUFACTURERS[variant_manufacturer]["Locations"])
-        variant_manufacturer_location = FAKER_GEN.random_element(elements=possible_manufacturer_locations)
-        logger.debug(f"Variant Manufacturer:       {variant_manufacturer}")
-
-        # Creates variant_product node
+        # Creates 'variant_product' Component(Node)
         variant_product = Component(
             name=f"{variant_base_product.metadata['popular_name']} {variant_designation}", 
             manufacturer=variant_manufacturer,
-            locations=variant_manufacturer_location, 
+            locations=FAKER_GEN.random_element(elements=list(manufacturers_dict[variant_manufacturer]["Locations"])),
             full_product=True,
             variant=True,
             variant_base_product=variant_base_product.id,
@@ -509,8 +498,10 @@ def create_variant_products(
 
         # Appends variant_product to the overall list of variant_products
         variant_products.append(variant_product)
-
-        logger.debug("/n")
+        # Appends 'variant_product' Component(Node) to the overall list of 'variant_products'
+        variant_products.append(variant_product)
+        logger.debug(variant_product)
+        logger.debug("")
     
     return variant_products
 
