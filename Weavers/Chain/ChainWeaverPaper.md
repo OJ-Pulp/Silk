@@ -18,6 +18,8 @@ Put existing research here.
 
 Put our research general statistics and base information here.
 
+# Overall Keywords
+
 # 1 Introduction -- Why Our Research is Important
 
 ## Existing Research Progress
@@ -51,11 +53,66 @@ Put our research fix data here.
 
 # 2 Background -- Our Research Journey
 
-## Original Model Dataset
+## Scraper to Generation Journey
 
-Put our research Tam61040 journey here.
+### Original Model Dataset
 
-##
+Put our research Tam61040 dataset journey here.
+
+### PIVOT -- Scaled Dataset
+
+Put our research airplane dataset journey here.
+
+### PIVOT -- All Supply Chains
+
+Put our research ChainWeaver dataset here.
+
+### EXTENSION -- All Graph Databases
+
+Put our research Weaver dataset here.
+
+## Graph Theory
+
+### Graph Theory Uses
+
+Put our research graph theory here.
+
+### Graph Theory Keywords
+
+Put our research graph theory keywords here.
+
+## Inputdata Journey
+
+### Original Inputdata.json
+
+Put our research parts, companies, manufacturers.
+
+### PIVOT -- Add Designations and Remove Companies
+
+Put our research designations, individual parts, remove companies here.
+
+### EXTENSION -- Number of Parts
+
+Put our research number of parts per designation.
+
+### EXTENSION -- Vital Parts
+
+Put our research vital parts here.
+
+## Input Journey
+
+### Dictionary of Opened Inputdata
+
+### EXTENSION -- Hardcoded Inputdata Schema
+
+### PIVOT -- NonHardcoded Inputdata Schema
+
+### PIVOT -- Import Input_utils Validation
+
+### EXTENSION -- Import Input_utils Sanitation
+
+## Data Model Journey
+
 
 
 
