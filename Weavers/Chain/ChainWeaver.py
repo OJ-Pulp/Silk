@@ -3,12 +3,8 @@ OVERALL CHAINWEAVER
 """
 
 # Standard
-import copy
-import json
 import logging
 import re
-import traceback
-import uuid
 from pathlib import Path
 from typing import List, Tuple
 
@@ -37,8 +33,6 @@ logging.getLogger("faker").setLevel(logging.INFO)
 # Third-Party
 try:
     import faker
-    import pandas as pd
-    from jsonschema import validate, ValidationError
 except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Module '{e.name}' -- Try 'python -m pip install {e.name}' -- Exiting")
     raise SystemExit(FAILURE)
@@ -46,7 +40,7 @@ except ModuleNotFoundError as e:
 # Local
 try:
     from Weavers.Chain.data_model import Component, Requires
-    from input_utils import resolve_json
+    from Weavers.Chain.input_utils import resolve_json
 except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Local Module '{e.name}' -- Check that '{e.name}.py' is in the Same Directory as 'ChainWeaver.py' -- Exiting")
     raise SystemExit(FAILURE)
@@ -221,7 +215,7 @@ def create_base_product_parts(
     base_product_parts = []
     base_product_part_edges = []
     vital_base_product_sprues = []
-    designation_keys = list(designations_dict.keys())
+    # designation_keys = list(designations_dict.keys())
     manufacturer_keys = list(manufacturers_dict.keys())
 
     # Creates all base product parts and edges
@@ -278,7 +272,7 @@ def create_base_product_parts(
 
                         # If the part being added to that sprue is vital
                         # Appends 'base_product_sprue' Component(Node) to the overall list of 'vital_base_product_sprues'
-                        if base_product_part_vital == True:
+                        if base_product_part_vital:
                             vital_base_product_sprues.append(base_product_sprue)
 
     return base_product_parts, base_product_part_edges, vital_base_product_sprues
@@ -384,7 +378,10 @@ class NamingError(Exception):
 
 
 def current_designation_value(current_designation):
-    current_letters = re.search(r'([A-Z]+)$', current_designation).group(1)
+    match = re.search(r'([A-Z]+)$', current_designation)
+    if not match:
+        return 0
+    current_letters = match.group(1)
     value = 0
     for i, char in enumerate(reversed(current_letters)):
         value += (ord(char) - ord("A") + 1) * (26 ** i)
@@ -395,19 +392,17 @@ def find_current_designation(
     variant_base_product: Component,
     variant_products: List[Component]
 ) -> str:
-    
-    base_designation = variant_base_product.metadata["designation"]
     current_designations = []
     for variant_product in variant_products:
-        if variant_product.metadata["variant_base_product"] == variant_base_product.id:
-            current_designations.append(re.search(r'([A-Z]+)$', variant_product.metadata["designation"]))
+        if variant_product.metadata.get("variant_base_product") == variant_base_product.id:
+            designation = variant_product.metadata.get("designation")
+            if designation:
+                current_designations.append(designation)
 
-    try:
-        current_designation = max(current_designations, key=current_designation_value())
-        return current_designation
-    except:
+    if not current_designations:
         raise NamingError(f"VariantNameIdentificationError: {variant_base_product.id} has No Preexisting Variants")
-
+    current_designation = max(current_designations, key=current_designation_value)
+    return current_designation
 
 def next_variant_designation(
     variant_base_product: Component,
@@ -425,10 +420,13 @@ def next_variant_designation(
         current_designation = find_current_designation(variant_base_product, variant_products)
     except NamingError as e:
         logger.warning(f"{type(e).__name__}: {e}")
-        return variant_base_product.metadata("designation") + "A"
+        return variant_base_product.metadata["designation"] + "A"
 
-    current_letters = re.search(r'([A-Z]+)$', current_designation).group(1)
-    letters = list(current_letters)
+    match = re.search(r'([A-Z]+)$', current_designation)
+    if not match:
+        raise SystemExit(FAILURE)
+    current_letter = match.group(1)
+    letters = list(current_letter)
     logger.info(f"INPUT: Letters:         {letters}")
     i = len(letters) - 1
     logger.debug(f"I:       {i}")
@@ -550,7 +548,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Base Products Created")
     base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products, manufacturers_dict)
     logger.info("Base Product Sprues Created")
-    base_product_parts, base_product_part_edges, vital_base_product_sprues = create_base_product_parts(base_products, base_product_sprues, designations_dict, manufacturers_dict)
+    base_product_parts, base_product_part_edges, _ =  create_base_product_parts(base_products, base_product_sprues, designations_dict, manufacturers_dict)
     logger.info("Base Product Parts Created")
     resolved_base_product_sprues, resolved_base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
     logger.info("Base Product Sprues Resolved")
