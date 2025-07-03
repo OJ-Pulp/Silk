@@ -88,13 +88,13 @@ def preload(filename: str) -> Path:
             raise InputError(f"ValidationError: '{filename}' is Not a File -- Try Checking '{path}' -- Exiting")
         logger.info("Preload End")
         return path
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         filename_stem = Path(filename).stem
         logger.debug(f"'{filename}' Stem:       '{filename_stem}'")
         filename_stem_matches = list(Path(INPUT_DIR).glob(f"{filename_stem}.*"))
         logger.debug(f"'{filename}' Stem Matches:       '{filename_stem_matches}'")
         if filename_stem_matches == []:
-            logger.critical((f"InputError: '{filename}' Not Found -- Try Ensuring '{filename}' is Found at '{path}'-- Exiting"))
+            logger.critical((f"InputError: '{filename}' Not Found -- Try Ensuring '{filename}' is in the expected directory -- Exiting"))
             raise SystemExit(FAILURE)
         path = (filename_stem_matches[0]).resolve()
         logger.warning(f"InputError: ExtensionNotFoundError: '{filename}' Extension Not Found -- Input Changed to '{path.name}'")
@@ -180,28 +180,28 @@ def load(filename: str) -> Union[dict, str]:
         raise InputError(f"{type(e).__name__}: '{path}' Not Found -- Check that '/inputs' is in the Same Directory as 'input_utils.py' -- Check that '{sanitized_filename}' is in '/inputs/' -- Exiting") from e
 
 
-def validate_json(json_file: dict, schema: dict) -> dict:
+def validate_json(json_file: str) -> dict:
     inputdata = load(json_file)
-    inputdata_schema = DATA_SCHEMA
+    assert isinstance(inputdata, dict), f"TypeError: '{json_file}' is Not a Dictionary -- Exiting"
 
     try:
-        validate(inputdata, inputdata_schema)
+        validate(inputdata, DATA_SCHEMA)
     except ValidationError as e:
         raise InputError(f"{type(e).__name__}: Invalid File Structure -- {e.message} -- Exiting -- {traceback.format_exc()}")
 
     return inputdata
 
 
-def resolve_json(json_file: str, schema: str) -> dict:
+def resolve_json(json_file: str) -> dict:
     try:
-        inputdata = validate_json(json_file, schema)
+        inputdata = validate_json(json_file)
     except Exception as e:
         logger.critical(f"{type(e).__name__}: {e}")
         raise SystemExit(FAILURE)
 
     resolved_inputdata = copy.deepcopy(inputdata)
-    inputdata_path = Path(inputdata).resolve()
-    resolved_inputdata_path = Path(inputdata_path) / f"resolved_{inputdata_path.name}"
+    inputdata_path = (Path(INPUT_DIR) / json_file).resolve()
+    resolved_inputdata_path = Path(INPUT_DIR) / f"resolved_{inputdata_path.name}"
 
     # Resolves 'Number of Parts' for each designation by adding it if missing or warning the user if incorrect
     for designation, data in resolved_inputdata["Designations"].items():
@@ -228,7 +228,7 @@ def resolve_json(json_file: str, schema: str) -> dict:
 
 
 def main():
-    resolved_inputdata = resolve_json("inputdata", "inputdata_schema.json")
+    resolved_inputdata = resolve_json("inputdata")
     logger.info(resolved_inputdata)
 
 
