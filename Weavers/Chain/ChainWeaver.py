@@ -494,8 +494,6 @@ def create_variant_products(
             popular_name=variant_base_product.metadata["popular_name"]
             )
 
-        # Appends variant_product to the overall list of variant_products
-        variant_products.append(variant_product)
         # Appends 'variant_product' Component(Node) to the overall list of 'variant_products'
         variant_products.append(variant_product)
         logger.debug(variant_product)
