@@ -525,7 +525,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
 
     # Validates and resolves 'inputdata.json'
     try:
-        resolved_inputdata = resolve_json("inputdata.json", "inputdata_schema.json")
+        resolved_inputdata = resolve_json("inputdata.json")
     except Exception as e:
         logger.critical(f"{type(e).__name__}: {e}")
         raise SystemExit(FAILURE)
@@ -553,6 +553,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     resolved_base_product_sprues, resolved_base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
     logger.info("Base Product Sprues Resolved")
     variant_products = create_variant_products(base_products, manufacturers_dict, num_variants)
+    print(variant_products)
     logger.info("Variant Products Created")
 
     # Collect all components and edges
