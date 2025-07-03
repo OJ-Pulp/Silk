@@ -46,7 +46,7 @@ except ModuleNotFoundError as e:
 # Local
 try:
     from Weavers.Chain.data_model import Component, Requires
-    #import input_utils
+    from input_utils import resolve_json
 except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Local Module '{e.name}' -- Check that '{e.name}.py' is in the Same Directory as 'ChainWeaver.py' -- Exiting")
     raise SystemExit(FAILURE)
@@ -527,12 +527,11 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
 
     # Validates and resolves 'inputdata.json'
     try:
-        inputdata = validate_inputdata()
+        resolved_inputdata = resolve_json("inputdata.json", "inputdata_schema.json")
     except Exception as e:
         logger.critical(f"{type(e).__name__}: {e}")
         raise SystemExit(FAILURE)
 
-    resolved_inputdata = resolve_inputdata(inputdata)
     logger.info("Inputs Accepted")
 
     # Sets overall variables
