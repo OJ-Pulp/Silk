@@ -77,7 +77,7 @@ Put our research airplane dataset journey here.
 
 Put our research ChainWeaver dataset here.
 
-#### EXTENSION -- All Graph Databases
+#### EXTENSION -- All Graph Datasets
 
 Put our research Weaver dataset here.
 
