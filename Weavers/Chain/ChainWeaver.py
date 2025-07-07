@@ -490,7 +490,7 @@ def create_variant_products(
             full_product=True,
             variant=True,
             variant_base_product=variant_base_product.id,
-            designation=variant_designation, 
+            designation="".join(re.findall(r"[A-Za-z]", variant_designation)), 
             popular_name=variant_base_product.metadata["popular_name"]
             )
 
@@ -532,7 +532,7 @@ def create_variant_product_sprues(
         logger.debug(f"Variant Product {i}:")
 
         individual_needed_parts = []
-        designation = designations_dict["".join(re.findall(r"[A-Za-z]", variant_product.metadata["designation"]))]
+        designation = designations_dict[variant_product.metadata["designation"]]
         if designation:
             parts = designation.get("Parts", {})
             for part_list in parts.values():
