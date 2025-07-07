@@ -504,6 +504,85 @@ def create_variant_products(
 # endregion
 
 # -------------------------------------------------------------------------------------------
+#                                   VARIANT_SPRUES
+# -------------------------------------------------------------------------------------------
+# region VARIANT_SPRUES
+
+def create_variant_product_sprues(
+    variant_products: List[Component],
+    vital_base_product_sprues: List[Component],
+    base_product_part_edges: List[Requires],
+    manufacturers_dict: dict,
+    part_types_list: list
+)  -> Tuple[List[Component], List[Requires], dict]:
+    """
+    INSERT STUFF
+    """
+
+    # Sets empty list to collect variant sprues and edges along with other necessary variables
+    variant_sprues = []
+    variant_sprue_edges = []
+    manufacturer_keys = list(manufacturers_dict.keys())
+
+    # Creates all base product sprues and edges
+    for i, variant_product in enumerate(variant_products, start=1):
+        logger.debug(f"Variant Product {i}:")
+
+        individual_needed_parts = part_types_list
+        needed_parts = {}
+        needed_manufacturers = list(manufacturers_dict.keys())
+
+        for vital_sprue in vital_base_product_sprues:
+            if variant_product.metadata["variant_base_product"] == vital_sprue.metadata["product"]:
+                variant_sprues.append(vital_sprue)
+                
+                variant_sprue_edge = Requires(
+                    start_node=variant_product,
+                    end_node=vital_sprue,
+                    base_model=True,
+                    lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                )
+
+                variant_sprue_edges.append(variant_sprue_edge)
+                needed_manufacturers.remove(vital_sprue.manufacturer)
+
+                for base_product_part_edge in base_product_part_edges:
+                    if base_product_part_edge.start_node == vital_sprue:
+                        individual_needed_parts.remove(base_product_part_edge.end_node.metadata["part_type"])
+
+        needed_parts[variant_product.id] = individual_needed_parts
+
+        for manufacturer in needed_manufacturers:
+            logger.debug(f"{manufacturer} Variant Sprue:")
+
+            variant_sprue = Component(
+                name=f"Sprue {FAKER_GEN.bothify(text='???########')}",
+                full_product=False,
+                product=variant_product.id,
+                manufacturer=manufacturer,
+                locations=FAKER_GEN.random_element(elements=manufacturers_dict[manufacturer]["Locations"]),
+                variant=True,
+            )
+
+            variant_sprues.append(variant_sprue)
+
+            logger.debug(f"{manufacturer} Variant Sprue Edge:")
+
+            # Creates 'base_product' to 'base_product_sprue' Requires(Edge)
+            variant_sprue_edge = Requires(
+                start_node=variant_product,
+                end_node=variant_sprue,
+                base_model=True,
+                lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+            )
+
+            variant_sprue_edges.append(variant_sprue_edge)
+    
+    return variant_sprues, variant_sprue_edges, needed_parts
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
 #                                    MAIN_FUNCTION
 # -------------------------------------------------------------------------------------------
 # region MAIN_FUNCTION
@@ -540,6 +619,11 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.debug(f"Num_Base_Products:        {num_base_products}")
     designations_dict = resolved_inputdata["Designations"]
     manufacturers_dict = resolved_inputdata["Manufacturers"]
+    part_types_list = []
+    for designation in resolved_inputdata["Designations"].values():
+        parts = designation.get("Parts", {})
+        for part_list in parts.values():
+            part_types_list.extend(part_list)
     logger.info("Local Main Variables Set")
 
     base_products = create_base_products(num_base_products, designations_dict, manufacturers_dict)
@@ -553,6 +637,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     variant_products = create_variant_products(base_products, manufacturers_dict, num_variants)
     print(variant_products)
     logger.info("Variant Products Created")
+    variant_sprues, variant_sprue_edges, needed_parts = create_variant_product_sprues(vital_base_product_sprues, base_product_part_edges, manufacturers_dict, part_types_list)
 
     # Collect all components and edges
     base_components = base_products + resolved_base_product_sprues + base_product_parts
