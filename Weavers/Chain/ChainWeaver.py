@@ -513,6 +513,7 @@ def create_variant_product_sprues(
     variant_products: List[Component],
     vital_base_product_sprues: List[Component],
     base_product_part_edges: List[Requires],
+    designations_dict: dict,
     manufacturers_dict: dict,
     part_types_list: list
 )  -> Tuple[List[Component], List[Requires], dict]:
@@ -531,7 +532,7 @@ def create_variant_product_sprues(
         logger.debug(f"Variant Product {i}:")
 
         individual_needed_parts = []
-        designation = resolved_inputdata["Designations"]["".join(re.findall(r"[A-Za-z]", variant_product.metadata["designation"]))]
+        designation = designations_dict["".join(re.findall(r"[A-Za-z]", variant_product.metadata["designation"]))]
         if designation:
             parts = designation.get("Parts", {})
             for part_list in parts.values():
