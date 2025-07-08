@@ -93,16 +93,18 @@ class Edge(ABC):
     Used to define directional links in the graph.
     """
 
-    def __init__(self, start_node: Node, end_node: Node):
+    def __init__(self, start_node: Node, end_node: Node, weight: float = 1.0):
         """
         Create a directed edge from one node to another.
 
         :param start_node: The source node (must be a Node subclass).
         :param end_node: The target node (must be a Node subclass).
+        :param weight: The weight of the edge, default is 1.0.
         """
         self.id = str(uuid.uuid4())
         self.start_node = start_node
         self.end_node = end_node
+        self.weight = weight
 
     def __eq__(self, other):
         """
@@ -152,7 +154,7 @@ class Edge(ABC):
             row = {k: row.get(k, "") for k in getattr(self, "__csv_fields__")}
 
         return row
-    
+
     @staticmethod
     def write_to_csv(edges, filename: Path):
         """
