@@ -523,13 +523,13 @@ def create_variant_product_sprues(
     variant_sprues = []
     variant_sprue_edges = []
     manufacturer_keys = list(manufacturers_dict.keys())
+    needed_parts = {}
 
     # Creates all base product sprues and edges
     for i, variant_product in enumerate(variant_products, start=1):
         logger.debug(f"Variant Product {i}:")
 
         individual_needed_parts = part_types_list
-        needed_parts = {}
         needed_manufacturers = list(manufacturers_dict.keys())
 
         for vital_sprue in vital_base_product_sprues:
@@ -544,11 +544,13 @@ def create_variant_product_sprues(
                 )
 
                 variant_sprue_edges.append(variant_sprue_edge)
-                needed_manufacturers.remove(vital_sprue.manufacturer)
+                if vital_sprue.manufacturer in needed_manufacturers:
+                    needed_manufacturers.remove(vital_sprue.manufacturer)
 
                 for base_product_part_edge in base_product_part_edges:
                     if base_product_part_edge.start_node == vital_sprue:
-                        individual_needed_parts.remove(base_product_part_edge.end_node.metadata["part_type"])
+                        if base_product_part_edge.end_node.metadata["part_type"] in individual_needed_parts:
+                            individual_needed_parts.remove(base_product_part_edge.end_node.metadata["part_type"])
 
         needed_parts[variant_product.id] = individual_needed_parts
 
@@ -635,7 +637,6 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     resolved_base_product_sprues, resolved_base_product_sprue_edges = resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
     logger.info("Base Product Sprues Resolved")
     variant_products = create_variant_products(base_products, manufacturers_dict, num_variants)
-    print(variant_products)
     logger.info("Variant Products Created")
     variant_sprues, variant_sprue_edges, needed_parts = create_variant_product_sprues(vital_base_product_sprues, base_product_part_edges, manufacturers_dict, part_types_list)
 
