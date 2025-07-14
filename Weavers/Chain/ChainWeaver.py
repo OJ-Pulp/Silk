@@ -600,10 +600,10 @@ def create_variant_parts(
     variant_products: List[Component], 
     variant_sprues: List[Component], 
     needed_parts: dict, 
-    needed_manufacturers: list,
+    needed_manufacturers: dict,
     designations_dict: dict,
     manufacturers_dict: dict
-) -> Tuple[List[Component], List[Requires], List[Component]]:
+) -> Tuple[List[Component], List[Requires]]:
     """
     INSERT HERE
     """
@@ -615,43 +615,43 @@ def create_variant_parts(
     for i, variant_product in enumerate(variant_products, start=1):
         logger.debug(f"Variant Product {i}:")
 
-    parts_categories = designations_dict[variant_product.metadata["designation"]]["Parts"]
-    for part_category in parts_categories.items():
-        for part_type in needed_parts[variant_product.id]:
-            logger.debug(f"{part_type}:")
+        parts_categories = designations_dict[variant_product.metadata["designation"]]["Parts"]
+        for part_category, _ in parts_categories.items():
+            for part_type in needed_parts[variant_product.id]:
+                logger.debug(f"{part_type}:")
 
-            # Generates base product part data
-            variant_part_manufacturer = FAKER_GEN.random_element(elements=needed_manufacturers[variant_product.id])
+                # Generates base product part data
+                variant_part_manufacturer = FAKER_GEN.random_element(elements=needed_manufacturers[variant_product.id])
 
-            # Creates 'base_product_part' Component(Node)
-            variant_part = Component(
-                name=f"{part_type} {FAKER_GEN.bothify(text='???#####')}",
-                full_product=False,
-                manufacturer=variant_part_manufacturer,
-                locations=FAKER_GEN.random_element(elements=manufacturers_dict[variant_part_manufacturer]["Locations"]),
-                product=variant_product.id,
-                variant=True,
-                category=part_category,
-                part_type=part_type,
-            )
+                # Creates 'base_product_part' Component(Node)
+                variant_part = Component(
+                    name=f"{part_type} {FAKER_GEN.bothify(text='???#####')}",
+                    full_product=False,
+                    manufacturer=variant_part_manufacturer,
+                    locations=FAKER_GEN.random_element(elements=manufacturers_dict[variant_part_manufacturer]["Locations"]),
+                    product=variant_product.id,
+                    variant=True,
+                    category=part_category,
+                    part_type=part_type,
+                )
 
-            variant_parts.append(variant_part)
+                variant_parts.append(variant_part)
 
-            for variant_sprue in variant_sprues:
-                if variant_part.metadata["product"] == variant_sprue.metadata["product"] \
-                    and variant_part.manufacturer == variant_sprue.manufacturer:
-                    logger.debug(f"{part_type} Edge:")
+                for variant_sprue in variant_sprues:
+                    if variant_part.metadata["product"] == variant_sprue.metadata["product"] \
+                        and variant_part.manufacturer == variant_sprue.manufacturer:
+                        logger.debug(f"{part_type} Edge:")
 
-                    # Creates 'base_product_sprue' to 'base_product_part' Requires(Edge)
-                    variant_part_edge = Requires(
-                        start_node=variant_sprue,
-                        end_node=variant_part,
-                        base_model=True,
-                        lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
-                    )
+                        # Creates 'base_product_sprue' to 'base_product_part' Requires(Edge)
+                        variant_part_edge = Requires(
+                            start_node=variant_sprue,
+                            end_node=variant_part,
+                            base_model=True,
+                            lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                        )
 
-                    # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
-                    variant_part_edges.append(variant_part_edge)
+                        # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
+                        variant_part_edges.append(variant_part_edge)
 
     return variant_parts, variant_part_edges
 
