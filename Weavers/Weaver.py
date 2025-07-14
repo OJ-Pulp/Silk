@@ -28,7 +28,8 @@ logging.getLogger("faker").setLevel(logging.INFO)
 class Weaver(ABC):
     """
     Base class for all weavers.
-    A weaver is responsible for weaving together different parts of the application.
+    A weaver creates nodes and edges for a graph structure based on specific logic for each subclass.
+    Examples include ChainWeaver, DocWeaver, MapWeaver, etc.
     """
 
     def __init__(self):
