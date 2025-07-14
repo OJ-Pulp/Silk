@@ -522,7 +522,7 @@ def create_variant_product_sprues(
     variant_sprues = []
     variant_sprue_edges = []
     needed_parts = {}
-    individual_needed_manufacturers = {}
+    needed_manufacturers = {}
 
     # Creates all base product sprues and edges
     for i, variant_product in enumerate(variant_products, start=1):
