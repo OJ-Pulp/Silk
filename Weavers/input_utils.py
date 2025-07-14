@@ -17,6 +17,7 @@ from typing import Union, Tuple
 # -------------------------------------------------------------------------------------------
 # region LOGGING_SETTINGS
 
+# SystemExit codes
 SUCCESS = 0
 FAILURE = 1
 INTERRUPTED = 130
@@ -39,35 +40,78 @@ except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Module '{e.name}' -- Try 'python -m pip install {e.name}' -- Exiting")
     raise SystemExit(FAILURE)
 
-# TODO: Decide where to put INPUTDATA_SCHEMA
-# Local
-try:
-    from Weavers.Chain.data_model import DATA_SCHEMA
-except ModuleNotFoundError as e:
-    logger.critical(f"{type(e).__name__}: Missing Required Local Module '{e.name}' -- Check that '{e.name}.py' is in the Same Directory as 'ChainWeaver.py' -- Exiting")
-    raise SystemExit(FAILURE)
-
 logger.info("Program Start")
 
-INPUT_DIR = "Weavers/Chain/inputs"
+# -------------------------------------------------------------------------------------------
+#                                   EXCEPTION_CLASSES
+# -------------------------------------------------------------------------------------------
+# region EXCEPTION_CLASSES
+
+# Creates an overarching error type for inputs
+class InputError(Exception):
+    pass
+
+# [ ] Add subclasses + stuff inside them
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
+#                                  INPUT_DIR_SETTINGS
+# -------------------------------------------------------------------------------------------
+# region INPUT_DIR_SETTINGS
+
+def set_input_dir() -> Path:
+    """
+    Sets the Input Directory based on the subsidary of Weaver that is calling the utility.
+
+    :return: The Input Directory Path.
+    :rtype: Path
+    """
+
+    """
+    caller_frame = inspect.stack()[1]
+    calling_module_name = Path(caller_frame.filename)
+    logger.debug(f"Module Name Found: {calling_module_name}")
+    """
+
+    # [ ] Change for being called in ChainWeaver
+    project_dir = input("Enter Project Directory: ")
+    # [ ] Add logger tool for INPUT or ENTER
+    try:
+        project_dir == re.sub(r"[^a-zA-Z0-9_-]", "_", project_dir)
+    except:
+        raise InputError("InputDirectoryError: Unaccepted Characters Inputed in Project Directory Name")
+    
+    return Path(f"Weavers/{project_dir}/inputs")
+
+
+INPUT_DIR = set_input_dir()
 logger.debug(f"Input Directory:         '/{INPUT_DIR}'")
+
+# endregion
+
+# -------------------------------------------------------------------------------------------
+#                                  ALLOWED_FILE_TYPES
+# -------------------------------------------------------------------------------------------
+# region ALLOWED_FILE_TYPES
+
 ALLOWED_FILE_TYPES = {
     ".json": ["application/json", "text/plain"],
     ".txt": ["text/plain"]
 }
 logger.debug(f"Allowed Extensions:      {list(ALLOWED_FILE_TYPES.keys())}")
 logger.debug(f"Allowed MIME Types:      {list(ALLOWED_FILE_TYPES.values())}")    
+
+# endregion
+
+# [ ] Figure out MIME
 MIME = magic.Magic(mime=True)
 
-# Creates an overarching error type for input data
-class InputError(Exception):
-    pass
+
 
 # [ ] Add types
 # [ ] WARNING InputError
-# [ ] validate or validate_file
-# [ ] secure or secure_filename
-# [ ] load or load_file
+# [ ] Naming ex. validate or validate_file
 # [ ] add more recognized load suffixes
 # [ ] error or critical
 # [ ] load Exiting?
