@@ -50,10 +50,10 @@ class InputError(Exception):
     """
     Base class for input-related errors.
 
-    :attr message: The error message.
-    :type: str
-    :attr value: The value that caused the error (optional).
-    :type: object
+    :attr `message`: The error message.
+    :type `message`: str
+    :attr `value`: The value that caused the error (optional).
+    :type `value`: object
     """
 
     def __init__(self, message: str = "Invalid Input", value: object = None) -> None: 
@@ -63,10 +63,9 @@ class InputError(Exception):
     
     def __str__(self) -> str: 
         parts = ["InputError"]
-        sub = self.__class__.__name__
 
-        if parts[0] == sub:
-            parts.append(sub)
+        if self.__class__.__name__ != "InputError":
+            parts.append(self.__class__.__name__)
 
         parts.append(self.message)
 
@@ -74,6 +73,9 @@ class InputError(Exception):
             parts.append(repr(self.value)) 
 
         return ": ".join(parts)
+    
+class SanitationError(InputError):
+    pass
 
 # endregion
 
@@ -102,7 +104,7 @@ def set_input_dir() -> Path:
     project_dir = input("Enter Project Directory: ")
     # [ ] Add logger tool for INPUT or ENTER
     if project_dir != re.sub(r"[^a-zA-Z0-9_-]", "_", project_dir):
-        raise InputError("InputDirectoryError: Unaccepted Characters Inputed in Project Directory Name")
+        raise SanitationError("Unaccepted Characters Inputed in Project Directory Name")
     
     input_dir = Path(__file__).parent.resolve() / project_dir / "inputs"
 
