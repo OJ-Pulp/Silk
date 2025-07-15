@@ -128,7 +128,6 @@ def create_base_products(
 def create_base_product_sprues(
     base_products: List[Component], 
     manufacturers_dict: dict,
-    designations_dict: dict
 ) -> Tuple[List[Component], List[Requires]]:
     """
     Generates a fake dataset of base product sprues and sprue edges and their data.
@@ -159,7 +158,7 @@ def create_base_product_sprues(
             # Creates 'base_product_sprue' Component(Node)
             component_data = {
                 "name": f"Sprue {FAKER.bothify('???########')}",
-                "manufacturer": base_product["Manufacturer"],
+                "manufacturer": base_product.manufacturer,
                 "locations": FAKER.random_element(manufacturers_dict[manufacturer]["Locations"]),
                 "full_product": False,
                 "component_type": "sprue",
@@ -169,7 +168,7 @@ def create_base_product_sprues(
                 "vital": False,
                 "designation": base_product.metadata["designation"],
                 "popular_name": base_product.metadata["popular_name"],
-                "category": designations_dict[base_product.metadata["designation"]]["Type"] if "designation" in base_product.metadata else None,
+                "category": base_product.metadata["category"],
                 "part_type": None,
                 "dimensions": [
                     FAKER.random_int(10, 100),
@@ -797,7 +796,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
 
     base_products = create_base_products(num_base_products, designations_dict, manufacturers_dict)
     logger.info("Base Products Created")
-    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products, manufacturers_dict, designations_dict)
+    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products, manufacturers_dict)
     logger.info("Base Product Sprues Created")
     base_product_parts, base_product_part_edges, vital_base_product_sprues =  create_base_product_parts(base_products, base_product_sprues, designations_dict, manufacturers_dict)
     logger.info("Base Product Parts Created")
