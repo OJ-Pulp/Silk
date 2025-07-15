@@ -40,7 +40,6 @@ except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Module '{e.name}' -- Try 'python -m pip install {e.name}' -- Exiting")
     raise SystemExit(FAILURE)
 
-logger.info("Program Start")
 
 # -------------------------------------------------------------------------------------------
 #                                   EXCEPTION_CLASSES
@@ -281,4 +280,3 @@ if __name__ == "__main__":
         logger.warning(f"{type(e).__name__}: Input Processing Interrupted by User -- Exiting")
         raise SystemExit(INTERRUPTED)
 
-logger.info("Program End")
