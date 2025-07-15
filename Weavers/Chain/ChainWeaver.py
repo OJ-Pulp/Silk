@@ -389,6 +389,16 @@ def find_current_designation(
     variant_base_product: Component,
     variant_products: List[Component]
 ) -> str:
+    """ Finds the current designation of a variant base product by checking existing variant products.
+    :param variant_base_product: The base product for which the current designation is being found.
+    :type variant_base_product: Component
+    :param variant_products: A list of existing variant products to determine the current designation.
+    :type variant_products: List[Component]
+
+    :return: The current designation string of the variant base product.
+    :rtype: str
+    """
+
     current_designations = []
     for variant_product in variant_products:
         if variant_product.metadata.get("variant_base_product") == variant_base_product.id:
@@ -409,8 +419,13 @@ def next_variant_designation(
     Returns the next variant designation letter in a base-26 alphabetical sequence.
     After 'Z', it continues with 'AA', 'AB', etc.
     
-    :param current_letter: The current variant designation string (e.g., 'A', ..., 'Z', 'AA', ...)
+    :param variant_base_product: The base product for which the next variant designation is being generated.
+    :type variant_base_product: Component
+    :param variant_products: A list of existing variant products to determine the current designation.
+    :type variant_products: List[Component]
+
     :return: The next variant designation string.
+    :rtype: str
     """
 
     try:
@@ -462,7 +477,20 @@ def create_variant_products(
     num_variants: int = 10
 )  -> List[Component]:
     """
-    INSERT STUFF
+    Creates a list of variant products based on the base products. Variants are any products that are not the original base product, but are based on it. Many of the components will be similar.
+
+    Ex. Shelby Mustang GT500 is a variant of the Ford Mustang, but has different performance parts and other components.
+    Ex. A variant of a base product with designation "A" will have a designation of "A", "B", "C", etc. for each variant, and the popular name will be the same as the base product.
+
+    :param base_products: A list of base products and their data.
+    :type base_products: List[Component]
+    :param manufacturers_dict: The 'Manufacturer' category of 'resolved_inputdata'.
+    :type manufacturers_dict: dict   
+    :param num_variants: The total number of unique variant products to include in the supply chain.
+                         Defaults to 10.
+    :type num_variants: int
+
+    :return: A list of variant products.
     """
 
     # Sets empty list to collect variant products along with other necessary variables
@@ -512,7 +540,27 @@ def create_variant_product_sprues(
     manufacturers_dict: dict
 )  -> Tuple[List[Component], List[Requires], dict, dict]:
     """
-    INSERT STUFF
+    Creates a list of variant product sprues based on the variant products. Variants are any products that are not the original base product, but are based on it. Many of the components will be similar.
+
+    :param variant_products: A list of variant products and their data.
+    :type variant_products: List[Component]
+    :param vital_base_product_sprues: A list of vital base product sprues and their data.
+    :type vital_base_product_sprues: List[Component]
+    :param base_product_part_edges: A list of base product part edges and their data.
+    :type base_product_part_edges: List[Requires]
+    :param designations_dict: The 'Designation' category of 'resolved_inputdata'.
+    :type designations_dict: dict
+    :param manufacturers_dict: The 'Manufacturer' category of 'resolved_inputdata'.
+    :type manufacturers_dict: dict
+
+    :return: A list of variant product sprues.
+    :rtype: List[Component]
+    :return: A list of edges between variant products and variant product sprues.
+    :rtype: List[Requires]
+    :return: A dictionary of needed parts for each variant product.
+    :rtype: dict
+    :return: A dictionary of needed manufacturers for each variant product.
+    :rtype: dict
     """
 
     # Sets empty list to collect variant sprues and edges along with other necessary variables
@@ -600,7 +648,25 @@ def create_variant_parts(
     manufacturers_dict: dict
 ) -> Tuple[List[Component], List[Requires]]:
     """
-    INSERT HERE
+    Creates a list of variant product parts based on the variant products. Variants are any products that are not the original base product, but are based on it. Many of the components will be similar. 
+
+    :param variant_products: A list of variant products and their data.
+    :type variant_products: List[Component]
+    :param variant_sprues: A list of variant product sprues and their data.
+    :type variant_sprues: List[Component]
+    :param needed_parts: A dictionary of needed parts for each variant product.
+    :type needed_parts: dict
+    :param needed_manufacturers: A dictionary of needed manufacturers for each variant product.
+    :type needed_manufacturers: dict
+    :param designations_dict: The 'Designation' category of 'resolved_inputdata'.
+    :type designations_dict: dict    
+    :param manufacturers_dict: The 'Manufacturer' category of 'resolved_inputdata'.
+    :type manufacturers_dict: dict
+
+    :return: A list of variant product parts.
+    :rtype: List[Component]
+    :return: A list of edges between variant products and variant product parts.
+    :rtype: List[Requires]
     """
 
     variant_parts = []
