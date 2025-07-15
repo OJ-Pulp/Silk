@@ -75,33 +75,41 @@ def create_base_products(
 
     # Sets empty lists to collect products along with other necessary variables
     base_products = []
-    designation_keys = list(designations_dict.keys())
-    manufacturer_keys = list(manufacturers_dict.keys())
-    designation_counter = {designation_type: 0 for designation_type in designation_keys}
 
     logger.info("Base Product Initialization")
 
     # Creates all base products
-    for i in range(num_base_products):
-        logger.debug(f"Base Product {i}:")
-
-        # Generates base product data
-        selected_designation = FAKER.random_element(designation_keys)
-        designation_counter[selected_designation] += 1
-        designation = f"{selected_designation}-{designation_counter[selected_designation]}"
+    for _ in range(num_base_products):
+        manufacturer = FAKER.random_element(list(manufacturers_dict.keys()))
+        locations = FAKER.random_element(manufacturers_dict[manufacturer]["Locations"])
+        designation = FAKER.random_element(list(designations_dict.keys()))
         popular_name = FAKER.word("noun").capitalize()
-        manufacturer = FAKER.random_element(manufacturer_keys)
-
-        # Creates 'base_product' Component(Node)
-        base_product = Component(
-            name=f"{popular_name} {designation}",
-            full_product=True,
-            variant=False,
-            manufacturer=manufacturer,
-            locations=FAKER.random_element(list(manufacturers_dict[manufacturer]["Locations"])),
-            designation=selected_designation,
-            popular_name=popular_name,
-        )
+        component_data = {
+            "name": popular_name + " " + FAKER.bothify("???###"),
+            "manufacturer": manufacturer,
+            "locations": locations,
+            "full_product": True,
+            "component_type": "base_product",
+            "product": None,
+            "variant": False,
+            "variant_base_product": None,
+            "vital": FAKER.boolean(),
+            "designation": designation,
+            "popular_name": popular_name,
+            "category": designations_dict[designation]["Type"],
+            "part_type": None,
+            "dimensions": [
+                FAKER.random_int(10, 100),
+                FAKER.random_int(10, 100),
+                FAKER.random_int(10, 100)
+            ],
+            "cost": round(FAKER.random_number(digits=4), 2),
+            "failure_rate": round(FAKER.random_number(digits=2) / 100, 4),
+            "substitutions": [FAKER.bothify("???###") for _ in range(FAKER.random_int(0, 3))],
+            "breakability": round(FAKER.random_number(digits=2) / 100, 2),
+            "year_range": [FAKER.random_int(1990, 2024) for _ in range(FAKER.random_int(1, 3))],
+        }
+        base_product = Component(**component_data)
 
         # Appends 'base_product' Component(Node) to the overall list of 'base_products'
         base_products.append(base_product)
