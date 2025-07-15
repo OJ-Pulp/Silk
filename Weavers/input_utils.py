@@ -46,11 +46,34 @@ except ModuleNotFoundError as e:
 # -------------------------------------------------------------------------------------------
 # region EXCEPTION_CLASSES
 
-# Creates an overarching error type for inputs
-class InputError(Exception):
-    pass
+class InputError(Exception): 
+    """
+    Base class for input-related errors.
 
-# [ ] Add subclasses + stuff inside them
+    :attr message: The error message.
+    :type: str
+    :attr value: The value that caused the error (optional).
+    :type: object
+    """
+
+    def __init__(self, message: str = "Invalid Input", value: object = None) -> None: 
+        self.message = message
+        self.value = value 
+        super().__init__(message) 
+    
+    def __str__(self) -> str: 
+        parts = ["InputError"]
+        sub = self.__class__.__name__
+
+        if parts[0] == sub:
+            parts.append(sub)
+
+        parts.append(self.message)
+
+        if self.value is not None:
+            parts.append(repr(self.value)) 
+
+        return ": ".join(parts)
 
 # endregion
 
@@ -70,18 +93,24 @@ def set_input_dir() -> Path:
     """
     caller_frame = inspect.stack()[1]
     calling_module_name = Path(caller_frame.filename)
-    logger.debug(f"Module Name Found: {calling_module_name}")
+    # [ ] fix exceptions and calls
+    logger.debug(f"ModuleNameFound: {calling_module_name}")
+    project_dir = calling_module_name.parts[-2]
     """
 
     # [ ] Change for being called in ChainWeaver
     project_dir = input("Enter Project Directory: ")
     # [ ] Add logger tool for INPUT or ENTER
-    try:
-        project_dir == re.sub(r"[^a-zA-Z0-9_-]", "_", project_dir)
-    except:
+    if project_dir != re.sub(r"[^a-zA-Z0-9_-]", "_", project_dir):
         raise InputError("InputDirectoryError: Unaccepted Characters Inputed in Project Directory Name")
     
-    return Path(f"Weavers/{project_dir}/inputs")
+    input_dir = Path(__file__).parent.resolve() / project_dir / "inputs"
+
+    if not input_dir.exists():
+        logger.warning(input_dir)
+        raise InputError
+
+    return input_dir
 
 
 INPUT_DIR = set_input_dir()
