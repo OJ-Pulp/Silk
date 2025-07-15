@@ -351,7 +351,7 @@ def get_next_letter(current_letter):
     # Converts back to chr and outputs as a string of a standard capital letter
     return chr(next_char_code)
 
-def get_next_test_output_filename(base_name: str, extension: str, output_dir: Path = Path("output")) -> Path:
+def get_next_output_filename(base_name: str, extension: str, output_dir: Path = Path("output")) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     index = 1
     if not extension.startswith("."):
@@ -793,8 +793,8 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     logger.info("Lists Consolidated")
 
     # Write to CSV
-    Component.write_to_csv(components, get_next_test_output_filename("components", "csv"))
-    Requires.write_to_csv(base_edges, get_next_test_output_filename("edges", "csv"))
+    Component.write_to_csv(components, get_next_output_filename("components", "csv"))
+    Requires.write_to_csv(base_edges, get_next_output_filename("edges", "csv"))
     logger.info("CSV Files Created")
 
     logger.info("Main End")
