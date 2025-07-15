@@ -1,5 +1,7 @@
 """
-OVERALL CHAINWEAVER
+ChainWeaver.py
+
+ChainWeaver is a module that generates a supply chain graph structure using fake data. It outputs the supply chain as a dictionary containing nodes (components) and edges (relationships between components). The module supports base products, parts, and variants, allowing for complex supply chain modeling.
 """
 
 # Standard
@@ -45,10 +47,7 @@ except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Local Module '{e.name}' -- Check that '{e.name}.py' is in the Same Directory as 'ChainWeaver.py' -- Exiting")
     raise SystemExit(FAILURE)
 
-logger.info("Program Start")
-
 FAKER = faker.Faker()
-logger.info("Global Variables Set")
 
 # -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCTS
@@ -683,7 +682,7 @@ def create_variant_parts(
     variant_parts = []
     variant_part_edges = []
 
-    logger.debug("Variant Parts Initialization")
+    logger.info("Variant Parts Initialization")
 
     # Creates all base product parts and edges
     for variant_product in variant_products:
@@ -723,6 +722,8 @@ def create_variant_parts(
 
                         # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
                         variant_part_edges.append(variant_part_edge)
+    
+    logger.info("Variant Parts Created")
 
     return variant_parts, variant_part_edges
 
