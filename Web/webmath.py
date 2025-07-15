@@ -1,11 +1,10 @@
 import numpy as np
 from typing import List
 
-def max_profit_route(reward: np.ndarray, 
-                     cost: np.ndarray, 
-                     start: int,
-                     end: int, 
-                     K: int = None) -> list:
+
+def max_profit_route(
+    reward: np.ndarray, cost: np.ndarray, start: int, end: int, K: int = None
+) -> list:
     """
     Finds the most profitable route from a start node to an end node, maximizing the sum of rewards minus the sum of costs.
 
@@ -20,13 +19,17 @@ def max_profit_route(reward: np.ndarray,
     :return: A list of node indices representing the most profitable path from start to end. Returns an empty list if no valid path exists.
     """
     N = len(reward)
-    max_K = K if K is not None else N - 1  # If K is not given, search up to N-1 steps (no cycles assumed)
+    max_K = (
+        K if K is not None else N - 1
+    )  # If K is not given, search up to N-1 steps (no cycles assumed)
 
     # dp[v][k] stores the max profit to reach node v in k steps (i.e., k edges)
     dp = -np.inf * np.ones((N, max_K + 1))
     prev = -np.ones((N, max_K + 1), dtype=int)  # To track the path
 
-    dp[start][0] = reward[start]  # Starting condition: 0 steps, just the reward of start node
+    dp[start][0] = reward[
+        start
+    ]  # Starting condition: 0 steps, just the reward of start node
 
     # Fill the DP table
     for k in range(1, max_K + 1):  # For each step count
@@ -36,7 +39,9 @@ def max_profit_route(reward: np.ndarray,
             for v in range(N):  # Try going to each node v
                 if np.isinf(cost[u][v]):
                     continue  # Skip if no edge from u to v
-                profit = dp[u][k - 1] + reward[v] - cost[u][v]  # Profit from previous state + reward - cost
+                profit = (
+                    dp[u][k - 1] + reward[v] - cost[u][v]
+                )  # Profit from previous state + reward - cost
                 if profit > dp[v][k]:
                     dp[v][k] = profit
                     prev[v][k] = u  # Track the best previous node
@@ -63,16 +68,19 @@ def max_profit_route(reward: np.ndarray,
 
     return path[::-1]  # Return path in forward direction
 
-def mcl(matrix: np.ndarray, 
-            expansion: int = 2, 
-            inflation: float = 2.0, 
-            threshold: float = 1e-6, 
-            tol=1e-6, 
-            max_iter: int = 1000) -> List[List[int]]:
+
+def mcl(
+    matrix: np.ndarray,
+    expansion: int = 2,
+    inflation: float = 2.0,
+    threshold: float = 1e-6,
+    tol=1e-6,
+    max_iter: int = 1000,
+) -> List[List[int]]:
     """
     Cluster a transitory matrix using the Markov chain.
     The clusters are formed by the nodes that are connected to each other.
-    
+
     :param matrix: The transitory matrix.
     :param expansion: The expansion factor for the clusters.
     :param inflation: The inflation factor for the clusters.
@@ -83,7 +91,7 @@ def mcl(matrix: np.ndarray,
     """
     n = matrix.shape[0]
     M = matrix.copy()
-    
+
     for _ in range(max_iter):
         M_old = M.copy()
 
@@ -92,7 +100,7 @@ def mcl(matrix: np.ndarray,
 
         # Step 4: Inflation
         M = np.power(M, inflation)
-        
+
         # Step 5: Prune small values
         M[M < threshold] = 0
 
@@ -119,6 +127,7 @@ def mcl(matrix: np.ndarray,
 
     return clusters
 
+
 def mcc(adj_matrix: np.ndarray) -> np.ndarray:
     """
     Approximates edge betweenness centrality using a Markov chain approach.
@@ -138,14 +147,14 @@ def mcc(adj_matrix: np.ndarray) -> np.ndarray:
     # We solve for the eigenvector corresponding to eigenvalue 1.
     eigvals, eigvecs = np.linalg.eig(transition_matrix.T)
     stationary_dist = np.real(eigvecs[:, np.isclose(eigvals, 1)].flatten())
-    
+
     # Normalize the stationary distribution
     stationary_dist /= stationary_dist.sum()
 
     # Step 3: Approximate edge betweenness using stationary distribution
     edge_centrality = np.zeros((n, n))
     for i in range(n):
-        for j in range(i+1, n):
+        for j in range(i + 1, n):
             if adj_matrix[i, j] != 0:
                 # Approximate flow between i and j using the stationary distribution
                 flow = stationary_dist[i] * stationary_dist[j]
@@ -154,10 +163,13 @@ def mcc(adj_matrix: np.ndarray) -> np.ndarray:
 
     return edge_centrality
 
-def markov_chain(transition_matrix: np.ndarray, 
-                 v: np.ndarray = None, 
-                 max_iter: int = 100, 
-                 tol: float = 1e-6) -> np.ndarray:
+
+def markov_chain(
+    transition_matrix: np.ndarray,
+    v: np.ndarray = None,
+    max_iter: int = 100,
+    tol: float = 1e-6,
+) -> np.ndarray:
     """
     Computes the steady state distribution of a Markov chain using power iteration.
     :param transition_matrix: The transition matrix of the Markov chain. Rows should sum to 1.
@@ -177,12 +189,3 @@ def markov_chain(transition_matrix: np.ndarray,
             break
         v = v_next
     return v
-
-def graph_reduction(graph: np.ndarray) -> np.ndarray:
-    """
-    Ranks the nodes of a graph based on their degree and returns a list of nodes.
-    If the graph is a transitory matrix then the sum of the rows must be 1.
-    Can be used as a quicker but less accurate alternative to the Markov chain.
-    :param graph: The matrix of the graph.
-    """
-    return np.sum(graph, axis=0)

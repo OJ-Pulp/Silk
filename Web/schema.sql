@@ -1,82 +1,51 @@
--- schema.sql
-
--- Node Entities table
-CREATE TABLE Node_Entities (
-    ID INTEGER PRIMARY KEY,
-    Entity TEXT NOT NULL,
-    Type TEXT NOT NULL CHECK (Type IN ('Real', 'Int', 'Text'))
+-- Graphs and nodes (associative)
+CREATE TABLE Graph_Nodes (
+    Graph_ID INT NOT NULL,
+    Node_ID INT,
+    UNIQUE (Graph_ID, Node_ID)
 );
 
--- Nodes table
-CREATE TABLE Nodes (
-    ID INTEGER PRIMARY KEY,
-    Index INTEGER NOT NULL
-);
-
--- Real Node Entities table
-CREATE TABLE Real_Node_Entities (
-    Node_ID INTEGER NOT NULL,
-    Node_Entity_ID INTEGER NOT NULL,
-    value REAL,
-    FOREIGN KEY (Node_ID) REFERENCES Nodes(ID),
-    FOREIGN KEY (Node_Entity_ID) REFERENCES Node_Entities(ID)
-);
-
--- Text Node Entities table
-CREATE TABLE Text_Node_Entities (
-    Node_ID INTEGER NOT NULL,
-    Node_Entity_ID INTEGER NOT NULL,
-    value TEXT,
-    FOREIGN KEY (Node_ID) REFERENCES Nodes(ID),
-    FOREIGN KEY (Node_Entity_ID) REFERENCES Node_Entities(ID)
-);
-
--- Int Node Entities table
-CREATE TABLE Int_Node_Entities (
-    Node_ID INTEGER NOT NULL,
-    Node_Entity_ID INTEGER NOT NULL,
-    value INTEGER,
-    FOREIGN KEY (Node_ID) REFERENCES Nodes(ID),
-    FOREIGN KEY (Node_Entity_ID) REFERENCES Node_Entities(ID)
-);
-
--- Edge Entities table
-CREATE TABLE Edge_Entities (
-    ID INTEGER PRIMARY KEY,
-    Entity TEXT NOT NULL,
-    Type TEXT NOT NULL CHECK (Type IN ('Real', 'Int', 'Text'))
-);
-
--- Edges table
+-- Edges
 CREATE TABLE Edges (
     ID INTEGER PRIMARY KEY,
     SourceID INTEGER NOT NULL,
-    TargetID INTEGER NOT NULL
+    TargetID INTEGER NOT NULL,
+    FOREIGN KEY (SourceID) REFERENCES Graph_Nodes(Node_ID),
+    FOREIGN KEY (TargetID) REFERENCES Graph_Nodes(Node_ID)
+);
+    
+-- Core entities
+CREATE TABLE Entities (
+    ID INTEGER PRIMARY KEY,
+    Name TEXT NOT NULL,
+    Type TEXT NOT NULL CHECK (Type IN ('Real', 'Int', 'Text'))
 );
 
--- Real Edge Entities table
-CREATE TABLE Real_Edge_Entities (
-    Edge_ID INTEGER NOT NULL,
-    Edge_Entity_ID INTEGER NOT NULL,
-    value REAL,
-    FOREIGN KEY (Edge_ID) REFERENCES Edges(ID),
-    FOREIGN KEY (Edge_Entity_ID) REFERENCES Edge_Entities(ID)
+-- A polymorphic reference to graph, node, or edge
+-- Example values for target_type: 'graph', 'node', 'edge'
+CREATE TABLE Real_Entity_Values (
+    Entity_ID INTEGER NOT NULL,
+    Target_Type TEXT NOT NULL CHECK (Target_Type IN ('graph', 'node', 'edge')),
+    Target_ID INTEGER NOT NULL,
+    Value REAL,
+    PRIMARY KEY (Entity_ID, Target_Type, Target_ID),
+    FOREIGN KEY (Entity_ID) REFERENCES Entities(ID)
 );
 
--- Text Edge Entities table
-CREATE TABLE Text_Edge_Entities (
-    Edge_ID INTEGER NOT NULL,
-    Edge_Entity_ID INTEGER NOT NULL,
-    value TEXT,
-    FOREIGN KEY (Edge_ID) REFERENCES Edges(ID),
-    FOREIGN KEY (Edge_Entity_ID) REFERENCES Edge_Entities(ID)
+CREATE TABLE Int_Entity_Values (
+    Entity_ID INTEGER NOT NULL,
+    Target_Type TEXT NOT NULL CHECK (Target_Type IN ('graph', 'node', 'edge')),
+    Target_ID INTEGER NOT NULL,
+    Value INTEGER,
+    PRIMARY KEY (Entity_ID, Target_Type, Target_ID),
+    FOREIGN KEY (Entity_ID) REFERENCES Entities(ID)
 );
 
--- Int Edge Entities table
-CREATE TABLE Int_Edge_Entities (
-    Edge_ID INTEGER NOT NULL,
-    Edge_Entity_ID INTEGER NOT NULL,
-    value INTEGER,
-    FOREIGN KEY (Edge_ID) REFERENCES Edges(ID),
-    FOREIGN KEY (Edge_Entity_ID) REFERENCES Edge_Entities(ID)
+CREATE TABLE Text_Entity_Values (
+    Entity_ID INTEGER NOT NULL,
+    Target_Type TEXT NOT NULL CHECK (Target_Type IN ('graph', 'node', 'edge')),
+    Target_ID INTEGER NOT NULL,
+    Value TEXT,
+    PRIMARY KEY (Entity_ID, Target_Type, Target_ID),
+    FOREIGN KEY (Entity_ID) REFERENCES Entities(ID)
 );

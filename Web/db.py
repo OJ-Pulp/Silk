@@ -1,552 +1,445 @@
 import sqlite3
 import uuid
 import numpy as np
-import pickle
 import os
-from Web.network import Network
 from typing import Dict, Any, List, Tuple
 
-class WebDB:
-    def __init__(self, db_name: str, schema_path: str, web_size: int = 100, growth: int = 50):
+
+class GraphDB:
+    def __init__(self, db_name: str, schema_path: str):
         self.db_path = db_name
         self.schema_path = schema_path
-        self.network_path = db_name + '_network.pkl'
         # Initialize the database connection and schema.
         if not os.path.exists(db_name):
             self.connection = sqlite3.connect(db_name)
             self._initialize_db(schema_path)
             self.cursor = self.connection.cursor()
-            self.network =  Network(size=web_size, growth=growth)  # Initialize a network with specified size and growth
         else:
             self.connection = sqlite3.connect(db_name)
             self.cursor = self.connection.cursor()
-            # Load the existing network from the pickle file
-            with open(self.network_path, 'rb') as f:
-                self.network = pickle.load(f)
 
     def _initialize_db(self, schema_path: str):
         """Load and apply schema from an external SQL file."""
-        with open(schema_path, 'r') as f:
+        with open(schema_path, "r") as f:
             schema_sql = f.read()
             self.cursor.executescript(schema_sql)
         self.connection.commit()
 
-    def add_node(self, **kwargs) -> int:
+    def add_graph(self, **kwargs) -> int:
         """
-        Add a node to the web database and return its index in the network.
+        Add a new graph to the web database and return its ID.
+
+        Parameters:
+            **kwargs: Entity and value pairs of the graph following the schema.
+                    Example: name="Graph1", description="A sample graph", etc.
+        Returns:
+            int: ID of the newly added graph.
+        """
+        graph_id = str(uuid.uuid4())
+        self.cursor.execute(
+            "INSERT INTO Graph_Nodes (Graph_ID) VALUES (?)", (graph_id,)
+        )
+        self.connection.commit()
+        # Insert kwargs into the Graph_Entities Table
+        self._add_entities(graph_id, "graph", **kwargs)
+        return graph_id
+
+    def delete_graph(self, graph_id: str):
+        """
+        Delete a graph and its associated node links.
+        Only remove nodes if they are not shared with other graphs.
+        Assumes delete_node handles cleanup (edges, entities, etc.)
+        """
+        # Step 1: Get all nodes associated with this graph
+        self.cursor.execute(
+            "SELECT Node_ID FROM Graph_Nodes WHERE Graph_ID = ?", (graph_id,)
+        )
+        node_ids = [row[0] for row in self.cursor.fetchall() if row[0] is not None]
+
+        # Step 2: For each node, check if it belongs only to this graph
+        for node_id in node_ids:
+            self.cursor.execute(
+                """
+                SELECT COUNT(*) FROM Graph_Nodes
+                WHERE Node_ID = ? AND Graph_ID != ?
+                """,
+                (node_id, graph_id),
+            )
+            count = self.cursor.fetchone()[0]
+            if count == 0:
+                self.delete_node(node_id)
+
+        # Step 3: Remove the graph-node links
+        self.cursor.execute("DELETE FROM Graph_Nodes WHERE Graph_ID = ?", (graph_id,))
+
+        self.connection.commit()
+
+    def add_node(self, graph_id: int, **kwargs) -> int:
+        """
+        Add a node to the web database.
 
         Parameters:
             **kwargs: Entity and value pairs of nodes following the schema.
                     Example: name="Node1", location="USA", company="Acme", etc.
 
         Returns:
-            int: The index of the newly added node in the network.
+            str: ID of the newly added node.
         """
         node_id = str(uuid.uuid4())
-        node_index = self.network.add_node()
+        self.cursor.execute(
+            "INSERT INTO Graph_Nodes (Graph_ID, Node_ID) VALUES (?, ?)",
+            (graph_id, node_id),
+        )
+        self.connection.commit()
+        # Insert kwargs into the Node_Entities Table
+        self._add_entities(node_id, "node", **kwargs)
+        return node_id
 
-        # Insert the node into the Nodes table
-        self.cursor.execute("INSERT INTO Nodes (ID, Index) VALUES (?, ?)", (node_id, node_index))
+    def delete_node(self, node_id: str):
+        """
+        Delete a node from the web database.
 
-        # Search Node_Entities Table for each key in kwargs if it is not found then add it
-        for key in kwargs.keys():
-            self.cursor.execute("SELECT id, Entity, Type FROM Node_Entities WHERE Entity = ?", (key,))            
-            if not self.cursor.fetchone():
-                # Make new entity if it does not exist
-                entity_id, entity_name, entity_type = self.make_entity(key, kwargs[key])
+        Parameters:
+            node_id (str): ID of the node to delete.
+        """
+        # Delete the node from the Nodes table
+        self.cursor.execute("DELETE FROM Graph_Nodes WHERE Node_ID = ?", (node_id,))
+        # Delete all related entities from each of the Node_Entities tables
+        self._delete_entities(node_id, "node")
+        self.connection.commit()
+
+    def add_edge(self, from_node: str, to_node: str, **kwargs) -> str:
+        """
+        Add an edge to the web database and return the edge ID.
+
+        Parameters:
+            from_node (str): ID of the source node
+            to_node (str): ID of the target node
+            **kwargs: Any additional edge attributes (e.g., weight=2.5, type="friendship")
+
+        Returns:
+            str: ID of the newly added edge.
+        """
+        edge_id = str(uuid.uuid4())
+        self.cursor.execute(
+            "INSERT INTO Edges (ID, SourceID, TargetID) VALUES (?, ?, ?)",
+            (edge_id, from_node, to_node),
+        )
+        self.connection.commit()
+        # Insert kwargs into the Edge_Entities Table
+        self._add_entities(edge_id, "edge", **kwargs)
+        return edge_id
+
+    def delete_edge(self, edge_id: str):
+        """
+        Delete an edge from the web database.
+
+        Parameters:
+            edge_id (str): ID of the edge to delete.
+        """
+        # Delete the edge from the Edges table
+        self.cursor.execute("DELETE FROM Edges WHERE ID = ?", (edge_id,))
+        # Delete all related entities from each of the Edge_Entities tables
+        self._delete_entities(edge_id, "edge")
+        self.connection.commit()
+
+    def create_graph(
+        self,
+        graph_ids: List[str] = None,
+        node_conditions: Dict[str, List[str]] = None,
+        edge_conditions: Dict[str, List[str]] = None,
+    ):
+        """
+        Create a network based on the specified graph IDs and conditions.
+
+        Parameters:
+            graph_ids (list[str], optional): List of graph IDs to include in the network.
+            node_conditions (dict[str, list[str]], optional): Dictionary of SQL conditions to filter nodes.
+            Example: {"age": ["<= 30", "> 10"]} to filter nodes by age between 10 and 30.
+            edge_conditions (dict[str, list[str]], optional): Dictionary of SQL conditions to filter edges.
+
+        Returns:
+            Node_Weights: np.ndarray
+            Edge_Weights: np.ndarray
+            Node_Ids: List[str]
+        """
+        node_weights, node_ids = self._weight_nodes(node_conditions, graph_ids)
+        edge_weights, _ = self._weight_edges(edge_conditions, node_ids)
+        return node_weights, edge_weights, node_ids
+
+    def _weight_nodes(
+        self, node_conditions: Dict[str, List[str]], graph_ids: List[str] = None
+    ) -> np.ndarray:
+        """
+        Calculate weights for nodes based on specified conditions. If no conditions are provided,
+        equal weights are assigned to all nodes. Additionally, if no graph IDs are provided,
+        all graphs are considered.
+
+        Parameters:
+            node_conditions (dict[str, list[str]]): Dictionary of conditions for filtering nodes.
+            graph_ids (list[str], optional): List of graph IDs to filter nodes. If None, all graphs are considered.
+        Returns:
+            Tuple[np.ndarray, List[str]]: A tuple containing an array of node weights and a list of node IDs.
+        """
+        if not graph_ids:
+            self.cursor.execute("SELECT DISTINCT Graph_ID FROM Graph_Nodes")
+            graph_ids = [row[0] for row in self.cursor.fetchall()]
+
+        if not node_conditions:
+            # If no conditions are provided, return equal weights for all nodes
+            self.cursor.execute(
+                "SELECT Node_ID FROM Graph_Nodes WHERE Graph_ID IN ({})".format(
+                    ",".join(["?"] * len(graph_ids))
+                ),
+                graph_ids,
+            )
+            node_ids = [row[0] for row in self.cursor.fetchall()]
+            return np.ones(len(node_ids)), node_ids
+        else:
+            node_weights = {}
+            for entity, conditions in node_conditions.items():
+                # Get the entity ID and type
                 self.cursor.execute(
-                    "INSERT INTO Node_Entities (ID, Entity, Type) VALUES (?, ?, ?)",
-                    (entity_id, entity_name, entity_type)
+                    "SELECT ID, Type FROM Entities WHERE Name = ?", (entity,)
+                )
+                entity_id, entity_type = self.cursor.fetchone()
+
+                value_table = f"{entity_type}_Entity_Values"
+
+                for condition in conditions:
+                    # parse the operator and value from the condition
+                    # e.g., condition = "> 5"
+                    operator, condition_value = condition.strip().split(" ", 1)
+
+                    # Build SQL with normalization via window function
+                    placeholders = ",".join(["?"] * len(graph_ids))
+                    query = f"""
+                        SELECT ev.Target_ID, 
+                            CASE 
+                                WHEN ? = 'Text' THEN 1.0 / COUNT(*) OVER ()
+                                ELSE CAST(ev.Value AS FLOAT) / SUM(CAST(ev.Value AS FLOAT)) OVER ()
+                            END AS weight
+                        FROM {value_table} ev
+                        JOIN Graph_Nodes gn ON ev.Target_ID = gn.Node_ID
+                        WHERE ev.Entity_ID = ?
+                        AND ev.Target_Type = 'node'
+                        AND ev.Value {operator} ?
+                        AND gn.Graph_ID IN ({placeholders})
+                    """
+
+                    self.cursor.execute(
+                        query,
+                        (entity_type, entity_id, condition_value, *graph_ids),
+                    )
+
+                    for node_id, weight in self.cursor.fetchall():
+                        node_weights.setdefault(node_id, []).append(weight)
+
+            # Average across all conditions for each node
+            for node_id, weights in node_weights.items():
+                node_weights[node_id] = sum(weights) / len(weights)
+
+            return np.array(list(node_weights.values())), list(node_weights.keys())
+
+    def _weight_edges(
+        self, edge_conditions: Dict[str, List[str]], node_ids: List[str] = None
+    ) -> np.ndarray:
+        """
+        Calculate weights for edges based on specified conditions. If no conditions are provided,
+        equal weights are assigned to all edges. Additionally, if no node IDs are provided,
+        all nodes are considered.
+        Parameters:
+            edge_conditions (dict[str, list[str]]): Dictionary of conditions for filtering edges.
+            node_ids (list[str], optional): List of node IDs to filter edges. If None, all nodes are considered.
+        Returns:
+            Tuple[np.ndarray, List[str]]: A tuple containing an array of edge weights and a list of node IDs.
+        """
+        if not node_ids:
+            self.cursor.execute("SELECT DISTINCT Node_ID FROM Graph_Nodes")
+            node_ids = [row[0] for row in self.cursor.fetchall()]
+
+        node_index_map = {node_id: i for i, node_id in enumerate(node_ids)}
+        N = len(node_ids)
+        matrix = np.zeros((N, N))
+
+        if not edge_conditions:
+            # If no conditions are provided, return equal weights for all edges
+            self.cursor.execute(
+                "SELECT SourceID, TargetID FROM Edges WHERE SourceID IN ({}) AND TargetID IN ({})".format(
+                    ",".join(["?"] * len(node_ids)), ",".join(["?"] * len(node_ids))
+                ),
+                (*node_ids, *node_ids),
+            )
+            for source_id, target_id in self.cursor.fetchall():
+                if source_id in node_index_map and target_id in node_index_map:
+                    i = node_index_map[source_id]
+                    j = node_index_map[target_id]
+                    matrix[i][j] = 1.0
+
+            return matrix, node_ids
+        else:
+            edge_weights = {}  # edge_id → list of weights
+            for entity, conditions in edge_conditions.items():
+                self.cursor.execute(
+                    "SELECT ID, Type FROM Entities WHERE Name = ?", (entity,)
+                )
+                entity_id, entity_type = self.cursor.fetchone()
+                value_table = f"{entity_type}_Entity_Values"
+
+                for condition in conditions:
+                    operator, condition_value = condition.strip().split(" ", 1)
+                    placeholders = ",".join(["?"] * len(node_ids))
+
+                    query = f"""
+                        SELECT ev.Target_ID, ge.Source_ID, ge.Target_ID,
+                            CASE 
+                                WHEN ? = 'Text' THEN 1.0 / COUNT(*) OVER ()
+                                ELSE CAST(ev.Value AS FLOAT) / SUM(CAST(ev.Value AS FLOAT)) OVER ()
+                            END AS weight
+                        FROM {value_table} ev
+                        JOIN Edges ge ON ev.Target_ID = ge.ID
+                        WHERE ev.Entity_ID = ?
+                        AND ev.Target_Type = 'edge'
+                        AND ev.Value {operator} ?
+                        AND ge.Source_ID IN ({placeholders})
+                        AND ge.Target_ID IN ({placeholders})
+                    """
+
+                    self.cursor.execute(
+                        query,
+                        (entity_type, entity_id, condition_value, *node_ids, *node_ids),
+                    )
+
+                    for edge_id, source_id, target_id, weight in self.cursor.fetchall():
+                        edge_weights.setdefault((source_id, target_id), []).append(
+                            weight
+                        )
+
+            # Average weights and fill the matrix
+            for (source_id, target_id), weights in edge_weights.items():
+                if source_id in node_index_map and target_id in node_index_map:
+                    i = node_index_map[source_id]
+                    j = node_index_map[target_id]
+                    matrix[i][j] = sum(weights) / len(weights)
+
+            return matrix, node_ids
+
+    def _add_entities(self, target_id: str, target_type: str, **kwargs) -> None:
+        for key in kwargs.keys():
+            self.cursor.execute(
+                "SELECT ID, Name, Type FROM Entities WHERE Name = ?", (key,)
+            )
+            if not self.cursor.fetchone():
+                entity_name = key.lower()
+                entity_id = str(uuid.uuid4())
+                entity_type = type(kwargs[key]).__name__
+                self.cursor.execute(
+                    "INSERT INTO Entities (ID, Name, Type) VALUES (?, ?, ?)",
+                    (entity_id, entity_name, entity_type),
                 )
 
             else:
                 entity_id, entity_name, entity_type = self.cursor.fetchone()
 
             # Insert into the Node_Entity table based on the entity type
-            if entity_type == "str":
-                # Text_Node_Entities
+            type_map = {
+                "str": "Text_Entity_Values",
+                "int": "Int_Entity_Values",
+                "float": "Real_Entity_Values",
+            }
+            if entity_type in type_map:
                 self.cursor.execute(
-                    "INSERT INTO Text_Node_Entities (Node_ID, Node_Entity_ID, Value) VALUES (?, ?, ?)",
-                    (node_id, entity_id, kwargs[key])
-                )
-            elif entity_type == "int":
-                # Int_Node_Entities
-                self.cursor.execute(
-                    "INSERT INTO Int_Node_Entities (Node_ID, Node_Entity_ID, Value) VALUES (?, ?, ?)",
-                    (node_id, entity_id, int(kwargs[key]))
-                )
-            elif entity_type == "float":
-                # Real_Node_Entities
-                self.cursor.execute(
-                    "INSERT INTO Real_Node_Entities (Node_ID, Node_Entity_ID, Value) VALUES (?, ?, ?)",
-                    (node_id, entity_id, float(kwargs[key]))
+                    f"INSERT INTO {type_map[entity_type]} (Entity_ID, Target_Type, Target_ID, Value) VALUES (?, ?, ?, ?)",
+                    (entity_id, target_type, target_id, kwargs[key]),
                 )
             else:
                 raise ValueError(f"Unsupported entity type: {entity_type}")
         # Commit the changes to the database
         self.connection.commit()
 
-        return node_index
-        
-    def add_edge(self, from_node: int, to_node: int, **kwargs) -> int:
+    def _delete_entities(self, target_id: str, target_type: str) -> None:
         """
-        Add an edge to the web database and return the edge index.
-
+        Delete all entity values associated with a target, and delete the entity itself
+        if it is no longer referenced elsewhere.
         Parameters:
-            from_node (int): Index of the source node
-            to_node (int): Index of the target node
-            **kwargs: Any additional edge attributes (e.g., Base_Model=True)
-
-        Returns:
-            int: Index of the newly added edge (optional — or just return nothing)
+            target_id (str): The ID of the target (graph, node, or edge).
+            target_type (str): The type of the target (e.g., 'graph', 'node', 'edge').
         """
-        # Add into Edges table
-        if from_node < 0 or from_node >= self.network.index or to_node < 0 or to_node >= self.network.index:
-            raise IndexError("Node index out of range.")
-        
-        edge_id = str(uuid.uuid4())
+        entity_ids = set()
 
-        self.network.add_edge(from_node, to_node)
-        
-        self.cursor.execute(
-            "INSERT INTO Edges (ID, SourceID, TargetID) VALUES (?, ?, ?)",
-            (edge_id, from_node, to_node)
-        )
-
-        # Commit the changes to the database
-        self.connection.commit()
-
-        # Search Edge_Entities Table for each key in kwargs if it is not found then add it
-        for key in kwargs.keys():
-            self.cursor.execute("SELECT id, Entity, Type FROM Edge_Entities WHERE Entity = ?", (key,))
-            if not self.cursor.fetchone():
-                # Make new entity if it does not exist
-                entity_id, entity_name, entity_type = self.make_entity(key, kwargs[key])
-                self.cursor.execute(
-                    "INSERT INTO Edge_Entities (ID, Entity, Type) VALUES (?, ?, ?)",
-                    (entity_id, entity_name, entity_type)
-                )
-
-            else:
-                entity_id, entity_name, entity_type = self.cursor.fetchone()
-
-            # Insert into the Edge_Entity table based on the entity type
-            if entity_type == "str":
-                self.cursor.execute(
-                    "INSERT INTO Text_Edge_Entities (Edge_ID, Edge_Entity_ID, Value) VALUES (?, ?, ?)",
-                    (edge_id, entity_id, kwargs[key])
-                )
-            elif entity_type == "int":
-                self.cursor.execute(
-                    "INSERT INTO Int_Edge_Entities (Edge_ID, Edge_Entity_ID, Value) VALUES (?, ?, ?)",
-                    (edge_id, entity_id, int(kwargs[key]))
-                )
-            elif entity_type == "float":
-                self.cursor.execute(
-                    "INSERT INTO Real_Edge_Entities (Edge_ID, Edge_Entity_ID, Value) VALUES (?, ?, ?)",
-                    (edge_id, entity_id, float(kwargs[key]))
-                )
-            else:
-                raise ValueError(f"Unsupported entity type: {entity_type}")
-            
-
-    def delete_node(self, node_index: int):
-        """Delete a node from the web database."""
-        # Delete the node from the network
-        self.network.delete_node(node_index)
-        # Delete the node from the Nodes table and get the node ID
-        self.cursor.execute("SELECT ID FROM Nodes WHERE Index = ?", (node_index,))
-        row = self.cursor.fetchone()
-        if row is None:
-            raise IndexError("Node index out of range.")
-        node_id = row[0]
-
-        # Delete the node from the Nodes table
-        self.cursor.execute("DELETE FROM Nodes WHERE Index = ?", (node_index,))
-        # Delete all related entities from each of the Node_Entities tables
-        self.cursor.execute("DELETE FROM Text_Node_Entities WHERE Node_ID = ?", (node_id,))
-        self.cursor.execute("DELETE FROM Int_Node_Entities WHERE Node_ID = ?", (node_id,))
-        self.cursor.execute("DELETE FROM Real_Node_Entities WHERE Node_ID = ?", (node_id,))
-
-        self.connection.commit()
-
-    def delete_edge(self, from_node: int, to_node: int):
-        """Delete an edge from the web database."""
-        if from_node < 0 or from_node >= self.network.index or to_node < 0 or to_node >= self.network.index:
-            raise IndexError("Node index out of range.")
-        
-        # Delete the edge from the network
-        self.network.delete_edge(from_node, to_node)
-
-        # Get the edge ID from the Edges table
-        self.cursor.execute(
-            "SELECT ID FROM Edges WHERE SourceID = ? AND TargetID = ?",
-            (from_node, to_node)
-        )
-        edge_id = self.cursor.fetchone()
-        if edge_id is None:
-            raise IndexError("Edge not found.")
-        edge_id = edge_id[0]
-
-        # Delete the edge from the Edges table
-        self.cursor.execute(
-            "DELETE FROM Edges WHERE SourceID = ? AND TargetID = ?",
-            (from_node, to_node)
-        )
-        # Delete all related entities from each of the Edge_Entities tables
-        self.cursor.execute("DELETE FROM Text_Edge_Entities WHERE Edge_ID = ?", (edge_id,))
-        self.cursor.execute("DELETE FROM Int_Edge_Entities WHERE Edge_ID = ?", (edge_id,))
-        self.cursor.execute("DELETE FROM Real_Edge_Entities WHERE Edge_ID = ?", (edge_id,))
-
-        self.connection.commit()
-
-    def change_node(self, node_index: int, **kwargs):
-        """
-        Change the attributes of a node in the web database.
-
-        Parameters:
-            node_index (int): Index of the node to change.
-            **kwargs: Entity and value pairs to update the node's attributes.
-                    Example: name="NewNode", location="Canada", company="NewCo", etc.
-        """
-        if node_index < 0 or node_index >= self.network.index:
-            raise IndexError("Node index out of range.")
-
-        # Update the Node_Entities table with new values
-        for key, value in kwargs.items():
-            self.cursor.execute("SELECT id, Entity, Type FROM Node_Entities WHERE Entity = ?", (key,))
-            row = self.cursor.fetchone()
-            if row is None:
-                # Make new entity if it does not exist
-                entity_id, entity_name, entity_type = self.make_entity(key, value)
-                self.cursor.execute(
-                    "INSERT INTO Node_Entities (ID, Entity, Type) VALUES (?, ?, ?)",
-                    (entity_id, entity_name, entity_type)
-                )
-            else:
-                entity_id, entity_name, entity_type = row
-
-            # Update the corresponding Node_Entity table based on the entity type
-            if entity_type == "str":
-                self.cursor.execute(
-                    "INSERT INTO Text_Node_Entities (Node_ID, Node_Entity_ID, Value) VALUES (?, ?, ?) "
-                    "ON CONFLICT(Node_ID, Node_Entity_ID) DO UPDATE SET Value = excluded.Value",
-                    (node_index, entity_id, value)
-                )
-            elif entity_type == "int":
-                self.cursor.execute(
-                    "INSERT INTO Int_Node_Entities (Node_ID, Node_Entity_ID, Value) VALUES (?, ?, ?) "
-                    "ON CONFLICT(Node_ID, Node_Entity_ID) DO UPDATE SET Value = excluded.Value",
-                    (node_index, entity_id, int(value))
-                )
-            elif entity_type == "float":
-                self.cursor.execute(
-                    "INSERT INTO Real_Node_Entities (Node_ID, Node_Entity_ID, Value) VALUES (?, ?, ?) "
-                    "ON CONFLICT(Node_ID, Node_Entity_ID) DO UPDATE SET Value = excluded.Value",
-                    (node_index, entity_id, float(value))
-                )
-            else:
-                raise ValueError(f"Unsupported entity type: {entity_type}")
-
-        # Commit the changes to the database
-        self.connection.commit()
-    
-    def change_edge(self, from_node: int, to_node: int, **kwargs):
-        """
-        Change the attributes of an edge in the web database.
-
-        Parameters:
-            from_node (int): Index of the source node.
-            to_node (int): Index of the target node.
-            **kwargs: Entity and value pairs to update the edge's attributes.
-                    Example: weight=2.5, type="friendship", etc.
-        """
-
-        if from_node < 0 or from_node >= self.network.index or to_node < 0 or to_node >= self.network.index:
-            raise IndexError("Node index out of range.")
-        
-        # Get the edge ID from the Edges table
-        self.cursor.execute(
-            "SELECT ID FROM Edges WHERE SourceID = ? AND TargetID = ?",
-            (from_node, to_node)
-        )
-        edge_row = self.cursor.fetchone()
-        if edge_row is None:
-            raise IndexError("Edge not found.")
-        edge_id = edge_row[0]
-
-        # Update the Edge_Entities table with new values
-        for key, value in kwargs.items():
-            self.cursor.execute("SELECT ID, Entity, Type FROM Edge_Entities WHERE Entity = ?", (key,))
-            row = self.cursor.fetchone()
-            if row is None:
-                # Make new entity if it does not exist
-                entity_id, entity_name, entity_type = self.make_entity(key, value)
-                self.cursor.execute(
-                    "INSERT INTO Edge_Entities (ID, Entity, Type) VALUES (?, ?, ?)",
-                    (entity_id, entity_name, entity_type)
-                )
-            else:
-                entity_id, entity_name, entity_type = row
-            # Update the corresponding Edge_Entity table based on the entity type
-            if entity_type == "str":
-                self.cursor.execute(
-                    "INSERT INTO Text_Edge_Entities (Edge_ID, Edge_Entity_ID, Value) VALUES (?, ?, ?) "
-                    "ON CONFLICT(Edge_ID, Edge_Entity_ID) DO UPDATE SET Value = excluded.Value",
-                    (edge_id, entity_id, value)
-                )
-            elif entity_type == "int":
-                self.cursor.execute(
-                    "INSERT INTO Int_Edge_Entities (Edge_ID, Edge_Entity_ID, Value) VALUES (?, ?, ?) "
-                    "ON CONFLICT(Edge_ID, Edge_Entity_ID) DO UPDATE SET Value = excluded.Value",
-                    (edge_id, entity_id, int(value))
-                )
-            elif entity_type == "float":
-                self.cursor.execute(
-                    "INSERT INTO Real_Edge_Entities (Edge_ID, Edge_Entity_ID, Value) VALUES (?, ?, ?) "
-                    "ON CONFLICT(Edge_ID, Edge_Entity_ID) DO UPDATE SET Value = excluded.Value",
-                    (edge_id, entity_id, float(value))
-                )
-            else:
-                raise ValueError(f"Unsupported entity type: {entity_type}")
-            
-        # Commit the changes to the database
-        self.connection.commit()
-
-    def get_node(self, node_index: int) -> np.ndarray:
-        """
-        Get nodes from the web database.
-        """
-        # Get node id
-        if node_index < 0 or node_index >= self.network.index:
-            raise IndexError("Node index out of range.")
-
-        self.cursor.execute("SELECT ID FROM Nodes WHERE Index = ?", (node_index,))
-        row = self.cursor.fetchone()
-        if row is None:
-            raise IndexError("Node index not found.")
-        node_id = row[0]
-        # Get all node entities for the given node ID
-        self.cursor.execute(
-            "SELECT Node_Entities.Entity, "
-            "COALESCE(Text_Node_Entities.Value, Int_Node_Entities.Value, Real_Node_Entities.Value) AS Value "
-            "FROM Node_Entities "
-            "LEFT JOIN Text_Node_Entities ON Node_Entities.ID = Text_Node_Entities.Node_Entity_ID AND Text_Node_Entities.Node_ID = ? "
-            "LEFT JOIN Int_Node_Entities ON Node_Entities.ID = Int_Node_Entities.Node_Entity_ID AND Int_Node_Entities.Node_ID = ? "
-            "LEFT JOIN Real_Node_Entities ON Node_Entities.ID = Real_Node_Entities.Node_Entity_ID AND Real_Node_Entities.Node_ID = ?",
-            (node_id, node_id, node_id)
-        )
-        rows = self.cursor.fetchall()
-        if not rows:
-            raise IndexError("No entities found for the node.")
-        # Convert the rows to a structured numpy array
-        entity_names = [row[0] for row in rows]
-        entity_values = [row[1] for row in rows]
-        node_array = np.array(list(zip(entity_names, entity_values)), dtype=object)
-        return node_array
-
-    def get_edge(self, from_node: int, to_node: int) -> np.ndarray:
-        """
-        Get an edge from the web database using source and target node indices.
-        """
-        if from_node < 0 or from_node >= self.network.index or to_node < 0 or to_node >= self.network.index:
-            raise IndexError("Node index out of range.")
-        # Get edge id
-        self.cursor.execute(
-            "SELECT ID FROM Edges WHERE SourceID = ? AND TargetID = ?",
-            (from_node, to_node)
-        )
-        row = self.cursor.fetchone()
-        if row is None:
-            raise IndexError("Edge not found.")
-        edge_id = row[0]
-        # Get all edge entities for the given edge ID
-        self.cursor.execute(
-            "SELECT Edge_Entities.Entity, "
-            "COALESCE(Text_Edge_Entities.Value, Int_Edge_Entities.Value, Real_Edge_Entities.Value) AS Value "
-            "FROM Edge_Entities "
-            "LEFT JOIN Text_Edge_Entities ON Edge_Entities.ID = Text_Edge_Entities.Edge_Entity_ID AND Text_Edge_Entities.Edge_ID = ? "
-            "LEFT JOIN Int_Edge_Entities ON Edge_Entities.ID = Int_Edge_Entities.Edge_Entity_ID AND Int_Edge_Entities.Edge_ID = ? "
-            "LEFT JOIN Real_Edge_Entities ON Edge_Entities.ID = Real_Edge_Entities.Edge_Entity_ID AND Real_Edge_Entities.Edge_ID = ?",
-            (edge_id, edge_id, edge_id)
-        )
-        rows = self.cursor.fetchall()
-        if not rows:
-            raise IndexError("No entities found for the edge.")
-        # Convert the rows to a structured numpy array
-        entity_names = [row[0] for row in rows]
-        entity_values = [row[1] for row in rows]
-        edge_array = np.array(list(zip(entity_names, entity_values)), dtype=object)
-        return edge_array
-    
-    def _filter_nodes(self, conditions: Dict[str, str]) -> List[int]:
-        """
-        Retrieve node indexes from the Nodes table that satisfy a set of attribute-based conditions.
-
-        Parameters:
-            conditions (dict[str, str]): A dictionary of attribute conditions where:
-                - Keys are attribute names from the Node_Entities table (e.g., 'height', 'name').
-                - Values are raw SQL condition strings to apply to the `value` field
-                (e.g., ">= 180", "= 'John'", "< 30").
-
-        Returns:
-            list[int]: A list of `Index` values from the Nodes table for nodes that satisfy all conditions.
-
-        Notes:
-            - Conditions must be correctly formatted as raw SQL fragments.
-            - No SQL injection protection is applied—do not pass unsanitized user input.
-            - Each entity key must exist in the Node_Entities table.
-        """
-        # Step 1: Find types for all entities
-        entity_names = tuple(conditions.keys())
-        placeholders = ','.join('?' for _ in entity_names)
-
-        self.cursor.execute(
-            f"SELECT Entity, Type FROM Node_Entities WHERE Entity IN ({placeholders})",
-            entity_names
-        )
-        entity_type_map = dict(self.cursor.fetchall())  # { 'height': 'Real', 'name': 'Text', ... }
-
-        # Step 2: Create subqueries for each condition
-        subqueries = []
-        for entity, condition in conditions.items():
-            entity_type = entity_type_map.get(entity)
-            if not entity_type:
-                raise ValueError(f"Unknown entity: {entity}")
-
-            if entity_type == 'Real':
-                table = 'Real_Node_Entities'
-            elif entity_type == 'Int':
-                table = 'Int_Node_Entities'
-            elif entity_type == 'Text':
-                table = 'Text_Node_Entities'
-            else:
-                raise ValueError(f"Unsupported type: {entity_type}")
-
-            subqueries.append(f"""
-                SELECT {table}.Node_ID
-                FROM {table}
-                JOIN Node_Entities ne ON {table}.Node_Entity_ID = ne.ID
-                WHERE ne.Entity = '{entity}' AND {table}.value {condition}
-            """)
-
-        # Step 3: Combine with INTERSECT
-        if not subqueries:
-            return []
-
-        intersect_query = "\nINTERSECT\n".join(subqueries)
-
-        final_query = f"""
-            SELECT Index FROM Nodes
-            WHERE ID IN (
-                {intersect_query}
+        # Step 1: Collect all Entity_IDs related to the target across all value tables
+        for table in ["Real_Entity_Values", "Int_Entity_Values", "Text_Entity_Values"]:
+            self.cursor.execute(
+                f"SELECT Entity_ID FROM {table} WHERE Target_ID = ? AND Target_Type = ?",
+                (target_id, target_type),
             )
-        """
+            entity_ids.update(row[0] for row in self.cursor.fetchall())
 
-        self.cursor.execute(final_query)
-        return [row[0] for row in self.cursor.fetchall()]
-    
-    def _filter_edges(self, conditions: Dict[str, str]) -> List[Tuple[int, int]]:
+        if not entity_ids:
+            raise ValueError("No entities found for the given target ID and type.")
+
+        # Step 2: Delete value records for this target
+        for table in ["Real_Entity_Values", "Int_Entity_Values", "Text_Entity_Values"]:
+            self.cursor.execute(
+                f"DELETE FROM {table} WHERE Target_ID = ? AND Target_Type = ?",
+                (target_id, target_type),
+            )
+
+        # Step 3: Remove unreferenced Entity_IDs from Entities table
+        for entity_id in entity_ids:
+            self.cursor.execute(
+                """
+                SELECT 1 FROM (
+                    SELECT Entity_ID FROM Real_Entity_Values
+                    UNION ALL
+                    SELECT Entity_ID FROM Int_Entity_Values
+                    UNION ALL
+                    SELECT Entity_ID FROM Text_Entity_Values
+                ) WHERE Entity_ID = ? LIMIT 1
+            """,
+                (entity_id,),
+            )
+            still_referenced = self.cursor.fetchone()
+            if not still_referenced:
+                self.cursor.execute("DELETE FROM Entities WHERE ID = ?", (entity_id,))
+
+        self.connection.commit()
+
+    def _get_entities(self, target_id: str, target_type: str) -> Dict[str, Any]:
         """
-        Retrieve (SourceID, TargetID) edge pairs from the Edges table that meet a set of attribute-based conditions.
+        Retrieve all entity values associated with a target (graph, node, or edge).
 
         Parameters:
-            conditions (dict[str, str]): A dictionary of attribute conditions where:
-                - Keys are attribute names from the Edge_Entities table (e.g., 'distance', 'label').
-                - Values are raw SQL condition strings to apply to the `value` field
-                (e.g., ">= 5.0", "= 'highway'", "<= 60").
+            target_id (str): The ID of the target.
+            target_type (str): The type of the target (e.g., 'graph', 'node', 'edge').
 
         Returns:
-            list[tuple[int, int]]: A list of `(SourceID, TargetID)` pairs for edges matching all conditions.
-
-        Notes:
-            - Conditions must be correctly formatted as raw SQL fragments.
-            - No SQL injection protection is applied—do not pass unsanitized user input.
-            - Each entity key must exist in the Edge_Entities table.
+            dict: A dictionary where keys are entity names and values are their corresponding values.
         """
-        # Step 1: Find types for all entities
-        entity_names = tuple(conditions.keys())
-        placeholders = ','.join('?' for _ in entity_names)
+        entities = {}
 
-        self.cursor.execute(
-            f"SELECT Entity, Type FROM Edge_Entities WHERE Entity IN ({placeholders})",
-            entity_names
-        )
-        entity_type_map = dict(self.cursor.fetchall())  # e.g., { 'distance': 'Real', 'label': 'Text' }
-
-        # Step 2: Create subqueries for each condition
-        subqueries = []
-        for entity, condition in conditions.items():
-            entity_type = entity_type_map.get(entity)
-            if not entity_type:
-                raise ValueError(f"Unknown entity: {entity}")
-
-            if entity_type == 'Real':
-                table = 'Real_Edge_Entities'
-            elif entity_type == 'Int':
-                table = 'Int_Edge_Entities'
-            elif entity_type == 'Text':
-                table = 'Text_Edge_Entities'
-            else:
-                raise ValueError(f"Unsupported type: {entity_type}")
-
-            subqueries.append(f"""
-                SELECT {table}.Edge_ID
-                FROM {table}
-                JOIN Edge_Entities ee ON {table}.Edge_Entity_ID = ee.ID
-                WHERE ee.Entity = '{entity}' AND {table}.value {condition}
-            """)
-
-        # Step 3: Combine with INTERSECT
-        if not subqueries:
-            return []
-
-        intersect_query = "\nINTERSECT\n".join(subqueries)
-
-        final_query = f"""
-            SELECT SourceID, TargetID FROM Edges
-            WHERE ID IN (
-                {intersect_query}
+        for table in ["Real_Entity_Values", "Int_Entity_Values", "Text_Entity_Values"]:
+            self.cursor.execute(
+                f"""
+                SELECT Entity_ID, Value FROM {table}
+                WHERE Target_ID = ? AND Target_Type = ?
+            """,
+                (target_id, target_type),
             )
-        """
+            for entity_id, value in self.cursor.fetchall():
+                self.cursor.execute(
+                    "SELECT Name FROM Entities WHERE ID = ?", (entity_id,)
+                )
+                entity_name = self.cursor.fetchone()[0]
+                entities[entity_name] = value
 
-        self.cursor.execute(final_query)
-        return self.cursor.fetchall()  # list of (SourceID, TargetID) tuples
+        return entities
 
-    def get_web(self, node_conditions: Dict[str, str], edge_conditions: Dict[str, str]) -> np.ndarray:
-        # Get Node Indicies
-        node_indicies = self._filter_nodes(node_conditions)
-        if not node_indicies:
-            raise ValueError("No nodes found matching the given conditions.")
-
-        # Get Edge Indicies
-        edge_indicies = self._filter_edges(edge_conditions)
-        if not edge_indicies:
-            raise ValueError("No edges found matching the given conditions.")
- 
-        # Get Sub-Network
-        edge_matrix, node_weights = self.network.filtered_subgraph(node_indicies, edge_indicies)
-        # Return the network edge matrix, node weights, and node indicies (keys)
-        return edge_matrix, node_weights, node_indicies
-
-    def make_entity(self, entity: str, value: Any) -> str:
-        """
-        Create the data for a new entity in the database and return its ID, name, and type.
-        """
-        entity = entity.lower()
-        entity_id = str(uuid.uuid4())
-        entity_type = type(value).__name__
-        return entity_id, entity, entity_type
-    
     def delete_db(self):
         """Delete the database file."""
         self.connection.close()
-        if os.path.exists(self.db_path) and os.path.exists(self.network_path):
+        if os.path.exists(self.db_path):
             os.remove(self.db_path)
-            os.remove(self.network_path)
 
     def close(self):
-        # Pickle the network to save its state
-        with open(self.network_path, 'wb') as f:
-            pickle.dump(self.network, f)
         self.connection.close()
