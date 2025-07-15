@@ -81,16 +81,17 @@ def create_base_products(
     designation_counter = {designation_type: 0 for designation_type in designation_keys}
 
     logger.debug("Base Product Initialization")
+
     # Creates all base products
     for i in range(num_base_products):
         logger.debug(f"Base Product {i}:")
 
         # Generates base product data
-        selected_designation = FAKER_GEN.random_element(elements=designation_keys)
+        selected_designation = FAKER_GEN.random_element(designation_keys)
         designation_counter[selected_designation] += 1
         designation = f"{selected_designation}-{designation_counter[selected_designation]}"
-        popular_name = FAKER_GEN.word(part_of_speech="noun").capitalize()
-        manufacturer = FAKER_GEN.random_element(elements=manufacturer_keys)
+        popular_name = FAKER_GEN.word("noun").capitalize()
+        manufacturer = FAKER_GEN.random_element(manufacturer_keys)
 
         # Creates 'base_product' Component(Node)
         base_product = Component(
@@ -98,7 +99,7 @@ def create_base_products(
             full_product=True,
             variant=False,
             manufacturer=manufacturer,
-            locations=FAKER_GEN.random_element(elements=list(manufacturers_dict[manufacturer]["Locations"])),
+            locations=FAKER_GEN.random_element(list(manufacturers_dict[manufacturer]["Locations"])),
             designation=selected_designation,
             popular_name=popular_name,
         )
@@ -149,11 +150,11 @@ def create_base_product_sprues(
 
             # Creates 'base_product_sprue' Component(Node)
             base_product_sprue = Component(
-                name=f"Sprue {FAKER_GEN.bothify(text='???########')}",
+                name=f"Sprue {FAKER_GEN.bothify('???########')}",
                 full_product=False,
                 product=base_product.id,
                 manufacturer=manufacturer,
-                locations=FAKER_GEN.random_element(elements=manufacturers_dict[manufacturer]["Locations"]),
+                locations=FAKER_GEN.random_element(manufacturers_dict[manufacturer]["Locations"]),
                 variant=False,
             )
 
@@ -224,7 +225,7 @@ def create_base_product_parts(
                 logger.debug(f"{part_type}:")
 
                 # Generates base product part data
-                base_product_part_manufacturer = FAKER_GEN.random_element(elements=list(manufacturer_keys))
+                base_product_part_manufacturer = FAKER_GEN.random_element(list(manufacturer_keys))
                 if part_type in designations_dict[base_product.metadata["designation"]]["Vital Parts"]:
                     base_product_part_vital = True
                 else:
@@ -232,10 +233,10 @@ def create_base_product_parts(
 
                 # Creates 'base_product_part' Component(Node)
                 base_product_part = Component(
-                    name=f"{part_type} {FAKER_GEN.bothify(text='???#####')}",
+                    name=f"{part_type} {FAKER_GEN.bothify('???#####')}",
                     full_product=False,
                     manufacturer=base_product_part_manufacturer,
-                    locations=FAKER_GEN.random_element(elements=manufacturers_dict[base_product_part_manufacturer]["Locations"]),
+                    locations=FAKER_GEN.random_element(manufacturers_dict[base_product_part_manufacturer]["Locations"]),
                     product=base_product.id,
                     variant=False,
                     vital=base_product_part_vital,
@@ -471,16 +472,16 @@ def create_variant_products(
     # Creates all variant products
 
         # Picks a random base product to create a variant of
-        variant_base_product = FAKER_GEN.random_element(elements=base_products)
+        variant_base_product = FAKER_GEN.random_element(base_products)
         # Generates variant product data
         variant_designation = next_variant_designation(variant_base_product, variant_products)
-        variant_manufacturer = FAKER_GEN.random_element(elements=manufacturer_keys)
+        variant_manufacturer = FAKER_GEN.random_element(manufacturer_keys)
 
         # Creates 'variant_product' Component(Node)
         variant_product = Component(
             name=f"{variant_base_product.metadata['popular_name']} {variant_designation}", 
             manufacturer=variant_manufacturer,
-            locations=FAKER_GEN.random_element(elements=list(manufacturers_dict[variant_manufacturer]["Locations"])),
+            locations=FAKER_GEN.random_element(list(manufacturers_dict[variant_manufacturer]["Locations"])),
             full_product=True,
             variant=True,
             variant_base_product=variant_base_product.id,
@@ -560,11 +561,11 @@ def create_variant_product_sprues(
         for manufacturer in individual_needed_manufacturers:
 
             variant_sprue = Component(
-                name=f"Sprue {FAKER_GEN.bothify(text='???########')}",
+                name=f"Sprue {FAKER_GEN.bothify('???########')}",
                 full_product=False,
                 product=variant_product.id,
                 manufacturer=manufacturer,
-                locations=FAKER_GEN.random_element(elements=manufacturers_dict[manufacturer]["Locations"]),
+                locations=FAKER_GEN.random_element(manufacturers_dict[manufacturer]["Locations"]),
                 variant=True,
             )
 
@@ -614,14 +615,14 @@ def create_variant_parts(
             for part_type in needed_parts[variant_product.id]:
 
                 # Generates base product part data
-                variant_part_manufacturer = FAKER_GEN.random_element(elements=needed_manufacturers[variant_product.id])
+                variant_part_manufacturer = FAKER_GEN.random_element(needed_manufacturers[variant_product.id])
 
                 # Creates 'base_product_part' Component(Node)
                 variant_part = Component(
-                    name=f"{part_type} {FAKER_GEN.bothify(text='???#####')}",
+                    name=f"{part_type} {FAKER_GEN.bothify('???#####')}",
                     full_product=False,
                     manufacturer=variant_part_manufacturer,
-                    locations=FAKER_GEN.random_element(elements=manufacturers_dict[variant_part_manufacturer]["Locations"]),
+                    locations=FAKER_GEN.random_element(manufacturers_dict[variant_part_manufacturer]["Locations"]),
                     product=variant_product.id,
                     variant=True,
                     category=part_category,
