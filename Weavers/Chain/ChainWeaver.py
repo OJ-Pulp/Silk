@@ -127,7 +127,8 @@ def create_base_products(
 
 def create_base_product_sprues(
     base_products: List[Component], 
-    manufacturers_dict: dict
+    manufacturers_dict: dict,
+    designations_dict: dict
 ) -> Tuple[List[Component], List[Requires]]:
     """
     Generates a fake dataset of base product sprues and sprue edges and their data.
@@ -156,14 +157,32 @@ def create_base_product_sprues(
         for manufacturer in manufacturer_keys:
 
             # Creates 'base_product_sprue' Component(Node)
-            base_product_sprue = Component(
-                name=f"Sprue {FAKER.bothify('???########')}",
-                full_product=False,
-                product=base_product.id,
-                manufacturer=manufacturer,
-                locations=FAKER.random_element(manufacturers_dict[manufacturer]["Locations"]),
-                variant=False,
-            )
+            component_data = {
+                "name": f"Sprue {FAKER.bothify('???########')}",
+                "manufacturer": base_product["Manufacturer"],
+                "locations": FAKER.random_element(manufacturers_dict[manufacturer]["Locations"]),
+                "full_product": False,
+                "component_type": "sprue",
+                "product": base_product.id,
+                "variant": False,
+                "variant_base_product": None,
+                "vital": False,
+                "designation": base_product.metadata["designation"],
+                "popular_name": base_product.metadata["popular_name"],
+                "category": designations_dict[base_product.metadata["designation"]]["Type"] if "designation" in base_product.metadata else None,
+                "part_type": None,
+                "dimensions": [
+                    FAKER.random_int(10, 100),
+                    FAKER.random_int(10, 100),
+                    FAKER.random_int(10, 100)
+                ],
+                "cost": round(FAKER.random_number(digits=4), 2),
+                "failure_rate": round(FAKER.random_number(digits=2) / 100, 4),
+                "substitutions": [FAKER.bothify("???###") for _ in range(FAKER.random_int(0, 3))],
+                "breakability": round(FAKER.random_number(digits=2) / 100, 2),
+                "year_range": [FAKER.random_int(1990, 2024) for _ in range(FAKER.random_int(1, 3))],
+            }
+            base_product_sprue = Component(**component_data)
 
             # Appends 'base_product_sprue' Component(Node) to the overall list of 'base_product_sprues'
             base_product_sprues.append(base_product_sprue)
@@ -778,7 +797,7 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
 
     base_products = create_base_products(num_base_products, designations_dict, manufacturers_dict)
     logger.info("Base Products Created")
-    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products, manufacturers_dict)
+    base_product_sprues, base_product_sprue_edges = create_base_product_sprues(base_products, manufacturers_dict, designations_dict)
     logger.info("Base Product Sprues Created")
     base_product_parts, base_product_part_edges, vital_base_product_sprues =  create_base_product_parts(base_products, base_product_sprues, designations_dict, manufacturers_dict)
     logger.info("Base Product Parts Created")
