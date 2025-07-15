@@ -215,14 +215,13 @@ def create_base_product_parts(
     vital_base_product_sprues = []
     manufacturer_keys = list(manufacturers_dict.keys())
 
-    # Creates all base product parts and edges
-    for i, base_product in enumerate(base_products, start=1):
-        logger.debug(f"Base Product {i}:")
+    logger.debug("Base Product Parts Initialization")
 
+    # Creates all base product parts and edges
+    for base_product in base_products:
         parts_categories = designations_dict[base_product.metadata["designation"]]["Parts"]
         for part_category, part_list in parts_categories.items():
             for part_type in part_list:
-                logger.debug(f"{part_type}:")
 
                 # Generates base product part data
                 base_product_part_manufacturer = FAKER_GEN.random_element(list(manufacturer_keys))
@@ -246,8 +245,6 @@ def create_base_product_parts(
 
                 # Appends 'base_product_part' Component(Node) to the overall list of 'base_product_parts'
                 base_product_parts.append(base_product_part)
-                logger.debug(base_product_part)
-                logger.debug("")
 
                 for base_product_sprue in base_product_sprues:
                     if base_product_part.metadata["product"] == base_product_sprue.metadata["product"] \
@@ -264,13 +261,13 @@ def create_base_product_parts(
 
                         # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
                         base_product_part_edges.append(base_product_part_edge)
-                        logger.debug(base_product_part_edge)
-                        logger.debug("")
 
                         # If the part being added to that sprue is vital
                         # Appends 'base_product_sprue' Component(Node) to the overall list of 'vital_base_product_sprues'
                         if base_product_part_vital:
                             vital_base_product_sprues.append(base_product_sprue)
+
+    logger.debug("Base Product Parts Created")
 
     return base_product_parts, base_product_part_edges, vital_base_product_sprues
 
@@ -306,6 +303,8 @@ def resolve_base_product_sprues(
     resolved_base_sprues = []
     resolved_base_sprue_edges = []
 
+    logger.info("Base Product Sprues Resolution Start")
+
     # Checks that all sprues are used
     for i, base_product_sprue in enumerate(base_product_sprues, start=1):
         logger.debug(f"Sprue {i}:")
@@ -325,6 +324,8 @@ def resolve_base_product_sprues(
             logger.debug(f"Removed Base Product Sprue {i}:")
             logger.debug(base_product_sprue)
             logger.debug("")
+
+    logger.info("Base Product Sprues Resolved")
 
     return resolved_base_sprues, resolved_base_sprue_edges
 
@@ -497,6 +498,8 @@ def create_variant_products(
     variant_products = []
     manufacturer_keys = list(manufacturers_dict.keys())
 
+    logger.info("Variant Products Initialization")
+
     # Creates all variant products
     for _ in range(num_variants):
 
@@ -520,9 +523,9 @@ def create_variant_products(
 
         # Appends 'variant_product' Component(Node) to the overall list of 'variant_products'
         variant_products.append(variant_product)
-        logger.debug(variant_product)
-        logger.debug("")
     
+    logger.info("Variant Products Created")
+
     return variant_products
 
 # endregion
@@ -569,21 +572,29 @@ def create_variant_product_sprues(
     needed_parts = {}
     needed_manufacturers = {}
 
-    logger.debug("Variant Product Sprues Initialization")
+    logger.info("Variant Product Sprues Initialization")
 
     # Creates all base product sprues and edges
+    # Iterates through each variant product and determines its needed parts and manufacturers
     for variant_product in variant_products:
 
-        individual_needed_parts = []
+        # Individual sets to collect needed parts and manufacturers for each variant product
+        # Implemented as sets to avoid duplicates (I remembered sets) - CGH
+        individual_needed_parts = set()
         designation = designations_dict.get(variant_product.metadata["designation"])
+
+        # If the designation exists, get the parts for that designation
         if designation:
             parts = designation.get("Parts")
             for part_list in parts.values():
-                individual_needed_parts.extend(part_list)
+                individual_needed_parts.update(part_list)
         
-        individual_needed_manufacturers = list(manufacturers_dict.keys())
+        individual_needed_manufacturers = set(manufacturers_dict.keys())
 
+        # If the variant product is a variant of a base product, it will have the 'variant_base_product' metadata field
         for vital_sprue in vital_base_product_sprues:
+
+            # Check vital base product sprues to see if the variant product is based on a vital base product
             if variant_product.metadata["variant_base_product"] == vital_sprue.metadata["product"]:
                 variant_sprues.append(vital_sprue)
                 
@@ -596,13 +607,11 @@ def create_variant_product_sprues(
 
                 variant_sprue_edges.append(variant_sprue_edge)
 
-                if vital_sprue.manufacturer in individual_needed_manufacturers:
-                    individual_needed_manufacturers.remove(vital_sprue.manufacturer)
+                individual_needed_manufacturers.discard(vital_sprue.manufacturer)
 
                 for base_product_part_edge in base_product_part_edges:
                     if base_product_part_edge.start_node == vital_sprue:
-                        if base_product_part_edge.end_node.metadata["part_type"] in individual_needed_parts:
-                            individual_needed_parts.remove(base_product_part_edge.end_node.metadata["part_type"])
+                        individual_needed_parts.discard(base_product_part_edge.end_node.metadata["part_type"])
 
         needed_parts[variant_product.id] = individual_needed_parts
         needed_manufacturers[variant_product.id] = individual_needed_manufacturers
@@ -629,7 +638,9 @@ def create_variant_product_sprues(
             )
 
             variant_sprue_edges.append(variant_sprue_edge)
-    
+ 
+    logger.info("Variant Product Sprues Created")
+
     return variant_sprues, variant_sprue_edges, needed_parts, needed_manufacturers
 
 # endregion
