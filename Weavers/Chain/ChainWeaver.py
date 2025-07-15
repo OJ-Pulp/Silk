@@ -47,7 +47,7 @@ except ModuleNotFoundError as e:
 
 logger.info("Program Start")
 
-FAKER_GEN = faker.Faker()
+FAKER = faker.Faker()
 logger.info("Global Variables Set")
 
 # -------------------------------------------------------------------------------------------
@@ -80,18 +80,18 @@ def create_base_products(
     manufacturer_keys = list(manufacturers_dict.keys())
     designation_counter = {designation_type: 0 for designation_type in designation_keys}
 
-    logger.debug("Base Product Initialization")
+    logger.info("Base Product Initialization")
 
     # Creates all base products
     for i in range(num_base_products):
         logger.debug(f"Base Product {i}:")
 
         # Generates base product data
-        selected_designation = FAKER_GEN.random_element(designation_keys)
+        selected_designation = FAKER.random_element(designation_keys)
         designation_counter[selected_designation] += 1
         designation = f"{selected_designation}-{designation_counter[selected_designation]}"
-        popular_name = FAKER_GEN.word("noun").capitalize()
-        manufacturer = FAKER_GEN.random_element(manufacturer_keys)
+        popular_name = FAKER.word("noun").capitalize()
+        manufacturer = FAKER.random_element(manufacturer_keys)
 
         # Creates 'base_product' Component(Node)
         base_product = Component(
@@ -99,7 +99,7 @@ def create_base_products(
             full_product=True,
             variant=False,
             manufacturer=manufacturer,
-            locations=FAKER_GEN.random_element(list(manufacturers_dict[manufacturer]["Locations"])),
+            locations=FAKER.random_element(list(manufacturers_dict[manufacturer]["Locations"])),
             designation=selected_designation,
             popular_name=popular_name,
         )
@@ -107,7 +107,7 @@ def create_base_products(
         # Appends 'base_product' Component(Node) to the overall list of 'base_products'
         base_products.append(base_product)
 
-    logger.debug("Base Products Created")
+    logger.info("Base Products Created")
 
     return base_products
 
@@ -141,7 +141,7 @@ def create_base_product_sprues(
     base_product_sprue_edges = []
     manufacturer_keys = list(manufacturers_dict.keys())
 
-    logger.debug("Base Product Sprues Initialization")
+    logger.info("Base Product Sprues Initialization")
 
     # Creates all base product sprues and edges
     for base_product in base_products:
@@ -150,11 +150,11 @@ def create_base_product_sprues(
 
             # Creates 'base_product_sprue' Component(Node)
             base_product_sprue = Component(
-                name=f"Sprue {FAKER_GEN.bothify('???########')}",
+                name=f"Sprue {FAKER.bothify('???########')}",
                 full_product=False,
                 product=base_product.id,
                 manufacturer=manufacturer,
-                locations=FAKER_GEN.random_element(manufacturers_dict[manufacturer]["Locations"]),
+                locations=FAKER.random_element(manufacturers_dict[manufacturer]["Locations"]),
                 variant=False,
             )
 
@@ -166,13 +166,13 @@ def create_base_product_sprues(
                 start_node=base_product,
                 end_node=base_product_sprue,
                 base_model=True,
-                lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                lead_time=FAKER.random_int(1, 1000),    # In Business Days
             )
 
             # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
             base_product_sprue_edges.append(base_product_sprue_edge)
 
-    logger.debug("Base Product Sprues Created")
+    logger.info("Base Product Sprues Created")
 
     return base_product_sprues, base_product_sprue_edges
 
@@ -215,7 +215,7 @@ def create_base_product_parts(
     vital_base_product_sprues = []
     manufacturer_keys = list(manufacturers_dict.keys())
 
-    logger.debug("Base Product Parts Initialization")
+    logger.info("Base Product Parts Initialization")
 
     # Creates all base product parts and edges
     for base_product in base_products:
@@ -224,7 +224,7 @@ def create_base_product_parts(
             for part_type in part_list:
 
                 # Generates base product part data
-                base_product_part_manufacturer = FAKER_GEN.random_element(list(manufacturer_keys))
+                base_product_part_manufacturer = FAKER.random_element(list(manufacturer_keys))
                 if part_type in designations_dict[base_product.metadata["designation"]]["Vital Parts"]:
                     base_product_part_vital = True
                 else:
@@ -232,10 +232,10 @@ def create_base_product_parts(
 
                 # Creates 'base_product_part' Component(Node)
                 base_product_part = Component(
-                    name=f"{part_type} {FAKER_GEN.bothify('???#####')}",
+                    name=f"{part_type} {FAKER.bothify('???#####')}",
                     full_product=False,
                     manufacturer=base_product_part_manufacturer,
-                    locations=FAKER_GEN.random_element(manufacturers_dict[base_product_part_manufacturer]["Locations"]),
+                    locations=FAKER.random_element(manufacturers_dict[base_product_part_manufacturer]["Locations"]),
                     product=base_product.id,
                     variant=False,
                     vital=base_product_part_vital,
@@ -256,7 +256,7 @@ def create_base_product_parts(
                             start_node=base_product_sprue,
                             end_node=base_product_part,
                             base_model=True,
-                            lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                            lead_time=FAKER.random_int(1, 1000),    # In Business Days
                         )
 
                         # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
@@ -267,7 +267,7 @@ def create_base_product_parts(
                         if base_product_part_vital:
                             vital_base_product_sprues.append(base_product_sprue)
 
-    logger.debug("Base Product Parts Created")
+    logger.info("Base Product Parts Created")
 
     return base_product_parts, base_product_part_edges, vital_base_product_sprues
 
@@ -504,16 +504,16 @@ def create_variant_products(
     for _ in range(num_variants):
 
         # Picks a random base product to create a variant of
-        variant_base_product = FAKER_GEN.random_element(base_products)
+        variant_base_product = FAKER.random_element(base_products)
         # Generates variant product data
         variant_designation = next_variant_designation(variant_base_product, variant_products)
-        variant_manufacturer = FAKER_GEN.random_element(manufacturer_keys)
+        variant_manufacturer = FAKER.random_element(manufacturer_keys)
 
         # Creates 'variant_product' Component(Node)
         variant_product = Component(
             name=f"{variant_base_product.metadata['popular_name']} {variant_designation}", 
             manufacturer=variant_manufacturer,
-            locations=FAKER_GEN.random_element(list(manufacturers_dict[variant_manufacturer]["Locations"])),
+            locations=FAKER.random_element(list(manufacturers_dict[variant_manufacturer]["Locations"])),
             full_product=True,
             variant=True,
             variant_base_product=variant_base_product.id,
@@ -602,7 +602,7 @@ def create_variant_product_sprues(
                     start_node=variant_product,
                     end_node=vital_sprue,
                     base_model=True,
-                    lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                    lead_time=FAKER.random_int(1, 1000),    # In Business Days
                 )
 
                 variant_sprue_edges.append(variant_sprue_edge)
@@ -619,11 +619,11 @@ def create_variant_product_sprues(
         for manufacturer in individual_needed_manufacturers:
 
             variant_sprue = Component(
-                name=f"Sprue {FAKER_GEN.bothify('???########')}",
+                name=f"Sprue {FAKER.bothify('???########')}",
                 full_product=False,
                 product=variant_product.id,
                 manufacturer=manufacturer,
-                locations=FAKER_GEN.random_element(manufacturers_dict[manufacturer]["Locations"]),
+                locations=FAKER.random_element(manufacturers_dict[manufacturer]["Locations"]),
                 variant=True,
             )
 
@@ -634,7 +634,7 @@ def create_variant_product_sprues(
                 start_node=variant_product,
                 end_node=variant_sprue,
                 base_model=True,
-                lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                lead_time=FAKER.random_int(1, 1000),    # In Business Days
             )
 
             variant_sprue_edges.append(variant_sprue_edge)
@@ -693,14 +693,14 @@ def create_variant_parts(
             for part_type in needed_parts[variant_product.id]:
 
                 # Generates base product part data
-                variant_part_manufacturer = FAKER_GEN.random_element(needed_manufacturers[variant_product.id])
+                variant_part_manufacturer = FAKER.random_element(needed_manufacturers[variant_product.id])
 
                 # Creates 'base_product_part' Component(Node)
                 variant_part = Component(
-                    name=f"{part_type} {FAKER_GEN.bothify('???#####')}",
+                    name=f"{part_type} {FAKER.bothify('???#####')}",
                     full_product=False,
                     manufacturer=variant_part_manufacturer,
-                    locations=FAKER_GEN.random_element(manufacturers_dict[variant_part_manufacturer]["Locations"]),
+                    locations=FAKER.random_element(manufacturers_dict[variant_part_manufacturer]["Locations"]),
                     product=variant_product.id,
                     variant=True,
                     category=part_category,
@@ -718,7 +718,7 @@ def create_variant_parts(
                             start_node=variant_sprue,
                             end_node=variant_part,
                             base_model=True,
-                            lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                            lead_time=FAKER.random_int(1, 1000),    # In Business Days
                         )
 
                         # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
