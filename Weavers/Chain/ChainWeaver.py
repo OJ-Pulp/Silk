@@ -80,6 +80,7 @@ def create_base_products(
     manufacturer_keys = list(manufacturers_dict.keys())
     designation_counter = {designation_type: 0 for designation_type in designation_keys}
 
+    logger.debug("Base Product Initialization")
     # Creates all base products
     for i in range(num_base_products):
         logger.debug(f"Base Product {i}:")
@@ -104,8 +105,8 @@ def create_base_products(
 
         # Appends 'base_product' Component(Node) to the overall list of 'base_products'
         base_products.append(base_product)
-        logger.debug(base_product)
-        logger.debug("")
+
+    logger.debug("Base Products Created")
 
     return base_products
 
@@ -139,12 +140,12 @@ def create_base_product_sprues(
     base_product_sprue_edges = []
     manufacturer_keys = list(manufacturers_dict.keys())
 
+    logger.debug("Base Product Sprues Initialization")
+
     # Creates all base product sprues and edges
-    for i, base_product in enumerate(base_products, start=1):
-        logger.debug(f"Base Product {i}:")
+    for base_product in base_products:
 
         for manufacturer in manufacturer_keys:
-            logger.debug(f"{manufacturer} Base Product Sprue:")
 
             # Creates 'base_product_sprue' Component(Node)
             base_product_sprue = Component(
@@ -158,10 +159,6 @@ def create_base_product_sprues(
 
             # Appends 'base_product_sprue' Component(Node) to the overall list of 'base_product_sprues'
             base_product_sprues.append(base_product_sprue)
-            logger.debug(base_product_sprue)
-            logger.debug("")
-
-            logger.debug(f"{manufacturer} Base Product Sprue Edge:")
 
             # Creates 'base_product' to 'base_product_sprue' Requires(Edge)
             base_product_sprue_edge = Requires(
@@ -173,8 +170,8 @@ def create_base_product_sprues(
 
             # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
             base_product_sprue_edges.append(base_product_sprue_edge)
-            logger.debug(base_product_sprue_edge)
-            logger.debug("")
+
+    logger.debug("Base Product Sprues Created")
 
     return base_product_sprues, base_product_sprue_edges
 
@@ -361,7 +358,7 @@ def get_next_test_output_filename(base_name: str, extension: str, output_dir: Pa
     while True:
         filename = output_dir / f"test{index}_{base_name}{extension}"
         if not filename.exists():
-            logger.warning(index)
+            logger.info("Creating new output file: %s at index %s", filename, index)
             return filename
         index += 1
 
@@ -472,8 +469,6 @@ def create_variant_products(
     manufacturer_keys = list(manufacturers_dict.keys())
 
     # Creates all variant products
-    for i in range(num_variants):
-        logger.debug(f"Variant Product {i}:")
 
         # Picks a random base product to create a variant of
         variant_base_product = FAKER_GEN.random_element(elements=base_products)
@@ -524,14 +519,15 @@ def create_variant_product_sprues(
     needed_parts = {}
     needed_manufacturers = {}
 
+    logger.debug("Variant Product Sprues Initialization")
+
     # Creates all base product sprues and edges
-    for i, variant_product in enumerate(variant_products, start=1):
-        logger.debug(f"Variant Product {i}:")
+    for variant_product in variant_products:
 
         individual_needed_parts = []
         designation = designations_dict.get(variant_product.metadata["designation"])
         if designation:
-            parts = designation.get("Parts", {})
+            parts = designation.get("Parts")
             for part_list in parts.values():
                 individual_needed_parts.extend(part_list)
         
@@ -562,7 +558,6 @@ def create_variant_product_sprues(
         needed_manufacturers[variant_product.id] = individual_needed_manufacturers
 
         for manufacturer in individual_needed_manufacturers:
-            logger.debug(f"{manufacturer} Variant Sprue:")
 
             variant_sprue = Component(
                 name=f"Sprue {FAKER_GEN.bothify(text='???########')}",
@@ -574,8 +569,6 @@ def create_variant_product_sprues(
             )
 
             variant_sprues.append(variant_sprue)
-
-            logger.debug(f"{manufacturer} Variant Sprue Edge:")
 
             # Creates 'base_product' to 'base_product_sprue' Requires(Edge)
             variant_sprue_edge = Requires(
@@ -611,14 +604,14 @@ def create_variant_parts(
     variant_parts = []
     variant_part_edges = []
 
+    logger.debug("Variant Parts Initialization")
+
     # Creates all base product parts and edges
-    for i, variant_product in enumerate(variant_products, start=1):
-        logger.debug(f"Variant Product {i}:")
+    for variant_product in variant_products:
 
         parts_categories = designations_dict[variant_product.metadata["designation"]]["Parts"]
         for part_category, _ in parts_categories.items():
             for part_type in needed_parts[variant_product.id]:
-                logger.debug(f"{part_type}:")
 
                 # Generates base product part data
                 variant_part_manufacturer = FAKER_GEN.random_element(elements=needed_manufacturers[variant_product.id])
@@ -640,7 +633,6 @@ def create_variant_parts(
                 for variant_sprue in variant_sprues:
                     if variant_part.metadata["product"] == variant_sprue.metadata["product"] \
                         and variant_part.manufacturer == variant_sprue.manufacturer:
-                        logger.debug(f"{part_type} Edge:")
 
                         # Creates 'base_product_sprue' to 'base_product_part' Requires(Edge)
                         variant_part_edge = Requires(
@@ -735,5 +727,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt as e:
         logger.warning(f"{type(e).__name__}: Input Processing Interrupted by User -- Exiting")
         raise SystemExit(INTERRUPTED)
-
-logger.info("Program End")
