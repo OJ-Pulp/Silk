@@ -470,6 +470,7 @@ def create_variant_products(
     manufacturer_keys = list(manufacturers_dict.keys())
 
     # Creates all variant products
+    for _ in range(num_variants):
 
         # Picks a random base product to create a variant of
         variant_base_product = FAKER_GEN.random_element(base_products)
