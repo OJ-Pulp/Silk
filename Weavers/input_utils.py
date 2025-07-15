@@ -22,6 +22,16 @@ SUCCESS = 0
 FAILURE = 1
 INTERRUPTED = 130
 
+SUCCESS_LEVEL_NUM = 35
+
+logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
+
+def success(self, message, *args, **kwargs):
+    if self.isEnabledFor(SUCCESS_LEVEL_NUM):
+        self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)
+
+logging.Logger.success = success
+
 # Configures for logging showing messages level INFO and above
 logging.basicConfig(
     level=logging.DEBUG,
@@ -34,8 +44,8 @@ logger = logging.getLogger(__name__)
 
 # Third-Party
 try:
-    from jsonschema import validate, ValidationError
     import magic
+    from jsonschema import validate, ValidationError
 except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Module '{e.name}' -- Try 'python -m pip install {e.name}' -- Exiting")
     raise SystemExit(FAILURE)
@@ -102,6 +112,7 @@ def set_input_dir() -> Path:
 
     # [ ] Change for being called in ChainWeaver
     project_dir = input("Enter Project Directory: ")
+
     # [ ] Add logger tool for INPUT or ENTER
     if project_dir != re.sub(r"[^a-zA-Z0-9_-]", "_", project_dir):
         raise SanitationError("Unaccepted Characters Inputed in Project Directory Name")
