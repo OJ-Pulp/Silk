@@ -258,17 +258,31 @@ def create_base_product_parts(
                     base_product_part_vital = False
 
                 # Creates 'base_product_part' Component(Node)
-                base_product_part = Component(
-                    name=f"{part_type} {FAKER_GEN.bothify(text='???#####')}",
-                    full_product=False,
-                    manufacturer=base_product_part_manufacturer,
-                    locations=FAKER_GEN.random_element(manufacturers_dict[base_product_part_manufacturer]["Locations"]),
-                    product=base_product.id,
-                    variant=False,
-                    vital=base_product_part_vital,
-                    category=part_category,
-                    part_type=part_type,
-                )
+                component_data = {
+                    "name": f"{part_type} {FAKER.bothify('???#####')}",
+                    "full_product": False,
+                    "manufacturer": base_product_part_manufacturer,
+                    "locations": FAKER.random_element(manufacturers_dict[base_product_part_manufacturer]["Locations"]),
+                    "product": base_product.id,
+                    "variant": False,
+                    "variant_base_product": None,
+                    "vital": base_product_part_vital,
+                    "designation": base_product.metadata["designation"],
+                    "popular_name": base_product.metadata["popular_name"],
+                    "category": part_category,
+                    "part_type": part_type,
+                    "dimensions": [
+                        FAKER.random_int(10, 100),
+                        FAKER.random_int(10, 100),
+                        FAKER.random_int(10, 100)
+                    ],
+                    "cost": round(FAKER.random_number(digits=4), 2),
+                    "failure_rate": round(FAKER.random_number(digits=2) / 100, 4),
+                    "substitutions": [FAKER.bothify("???###") for _ in range(FAKER.random_int(0, 3))],
+                    "breakability": round(FAKER.random_number(digits=2) / 100, 2),
+                    "year_range": [FAKER.random_int(1990, 2024) for _ in range(FAKER.random_int(1, 3))],
+                }
+                base_product_part = Component(**component_data)
 
                 # Appends 'base_product_part' Component(Node) to the overall list of 'base_product_parts'
                 base_product_parts.append(base_product_part)
