@@ -22,7 +22,7 @@ SUCCESS = 0
 FAILURE = 1
 INTERRUPTED = 130
 
-SUCCESS_LEVEL_NUM = 10
+SUCCESS_LEVEL_NUM = 15
 
 logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
@@ -66,9 +66,10 @@ class InputError(Exception):
     :type `value`: Any
     """
 
-    def __init__(self, message: str = "Invalid Input", value: Any = None) -> None: 
+    def __init__(self, message: str = "Invalid Input", value: Any = None, seperate: bool = True) -> None: 
         self.message = message
         self.value = value 
+        self.seperate = seperate
         super().__init__(message) 
     
     def __str__(self) -> str: 
@@ -79,10 +80,18 @@ class InputError(Exception):
 
         parts.append(self.message)
 
-        if self.value is not None:
-            parts.append(repr(self.value)) 
-
-        return ": ".join(parts)
+        # [ ] Consolidate -- break out if self.value?
+        if self.seperate is True:  
+            if self.value is not None:
+                parts.append(repr(self.value)) 
+            return ": ".join(parts)
+        else:
+            main_message = ": ".join(parts)
+            full_message = [main_message]
+            if self.value is not None:
+                full_message.append(self.value)
+                return " -- ".join(full_message)
+            return main_message
     
 class SanitationError(InputError):
     """
@@ -96,25 +105,38 @@ class SanitationError(InputError):
     """
 
     def __init__(self, message: str = "Str", value: Any = None) -> None:
-        prefix = "Unaccepted Characters Inputed in "
-        full_message = f"{prefix}{message}"
-        super().__init__(full_message, value)
+        super().__init__(f"Unaccepted Characters Inputed in {message}", value)
 
-class DirectoryNotFoundError(InputError):
+class NotFoundError(InputError):
     """
     Raised when an input fails sanitation rules.
-    Standard Message Suffix - 'Unaccepted Characters Inputed in'
+    Standard Message Suffix - ' Not Found'
 
-    :attr `message`: The name or use of the directory that failed.
+    :attr `message`: The name or use of the directory or file that failed.
     :type `message`: str
-    :attr `value`: The directory name or path.
+    :attr `value`: The directory or file name or path.
     :type `value`: Any
     """
 
-    def __init__(self, message: str = "Str", value: Any = None) -> None:
-        suffix = " Directory Not Found"
-        full_message = f"{message}{suffix}"
+    def __init__(self, message: str = "Input Location", value: Any = None, issue_type: str = None) -> None:
+        if issue_type == "Misplaced":
+            full_message = f"'{message}' Not Found -- Try Ensuring '{message}' is in '{INPUT_DIR}'"
+        # [ ] Change here later -- add more -- change else
+        else:
+            full_message = f"{message}"
         super().__init__(full_message, value)
+
+class ValidationError(InputError):
+
+    def __init__(self, message: str = "Str", value: Any = None, issue_type: str = None) -> None:
+        if issue_type == "File":
+            full_message = f"'{message}' is Not a File"
+        # [ ] Change here later -- add more -- change else
+        else:
+            full_message = f"{message}"
+        if value is not None:
+                full_value = f"Try Checking '{value}'"
+        super().__init__(full_message, full_value, False)
 
 # endregion
 
@@ -148,7 +170,7 @@ def set_input_dir() -> Path:
     input_dir = Path(__file__).parent.resolve() / project_dir / "inputs"
 
     if not input_dir.exists():
-        raise DirectoryNotFoundError("Input", input_dir)
+        raise NotFoundError("Input Directory", input_dir)
 
     return input_dir
 
@@ -157,7 +179,7 @@ try:
 except Exception as e:
     logger.critical(e)
     raise SystemExit(FAILURE)
-logger.debug(f"Input Directory:         '{INPUT_DIR}'")
+logger.success(f"Input Directory:         '{INPUT_DIR}'")
 
 # endregion
 
@@ -191,28 +213,29 @@ MIME = magic.Magic(mime=True)
 
 
 def preload(filename: str) -> Path:
-    logger.info("Preload Start")
     try:
-        path = (Path(f"{Path(INPUT_DIR)}/{filename}")).resolve()
+        path = INPUT_DIR / filename
         logger.debug(f"'{filename}' Path:       '{path}'")
         if not path.exists():
-            raise FileNotFoundError
+            raise NotFoundError(filename, path)
         if not path.is_file():
-            raise InputError(f"ValidationError: '{filename}' is Not a File -- Try Checking '{path}' -- Exiting")
-        logger.info("Preload End")
+            raise ValidationError(filename, path, "File")
         return path
-    except FileNotFoundError:
+    except NotFoundError as e:
+        logger.warning(e)
         filename_stem = Path(filename).stem
         logger.debug(f"'{filename}' Stem:       '{filename_stem}'")
         filename_stem_matches = list(Path(INPUT_DIR).glob(f"{filename_stem}.*"))
         logger.debug(f"'{filename}' Stem Matches:       '{filename_stem_matches}'")
         if filename_stem_matches == []:
-            logger.critical((f"InputError: '{filename}' Not Found -- Try Ensuring '{filename}' is in the expected directory -- Exiting"))
-            raise SystemExit(FAILURE)
+            try:
+                raise NotFoundError(filename, issue_type="Misplaced")
+            except Exception as e:
+                logger.critical(e)
+                raise SystemExit(FAILURE)
         path = (filename_stem_matches[0]).resolve()
         logger.warning(f"InputError: ExtensionNotFoundError: '{filename}' Extension Not Found -- Input Changed to '{path.name}'")
         logger.debug(f"'{path.name}' Path:       '{path}'")
-        logger.info("Preload End")
         return path
     except InputError as e:
         logger.critical(f"{type(e).__name__}: {e}")
