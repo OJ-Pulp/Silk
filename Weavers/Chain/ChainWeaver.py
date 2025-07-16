@@ -519,17 +519,29 @@ def create_variant_products(
         variant_designation = next_variant_designation(variant_base_product, variant_products)
         variant_manufacturer = FAKER_GEN.random_element(manufacturer_keys)
 
-        # Creates 'variant_product' Component(Node)
-        variant_product = Component(
-            name=f"{variant_base_product.metadata['popular_name']} {variant_designation}", 
-            manufacturer=variant_manufacturer,
-            locations=FAKER_GEN.random_element(list(manufacturers_dict[variant_manufacturer]["Locations"])),
-            full_product=True,
-            variant=True,
-            variant_base_product=variant_base_product.id,
-            designation=variant_base_product.metadata["designation"],
-            popular_name=variant_base_product.metadata["popular_name"]
-            )
+        # Creates 'base_product' Component(Node)
+        component_data = {
+            "name": f"{variant_base_product.metadata['popular_name']} {variant_designation}", 
+            "manufacturer": variant_manufacturer,
+            "locations": FAKER_GEN.random_element(list(manufacturers_dict[variant_manufacturer]["Locations"])),
+            "full_product": True,
+            "component_type": "Product",
+            "variant": True,
+            "variant_base_product": variant_base_product.id,
+            "designation": variant_base_product.metadata["designation"],
+            "popular_name": variant_base_product.metadata["popular_name"],
+            "dimensions": [
+                FAKER_GEN.random_int(10, 100),
+                FAKER_GEN.random_int(10, 100),
+                FAKER_GEN.random_int(10, 100)
+            ],
+            "cost": round(FAKER_GEN.random_number(digits=4), 2),
+            "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
+            "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
+            "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
+            "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))]
+        }
+        variant_product = Component(**component_data)
 
         # Appends 'variant_product' Component(Node) to the overall list of 'variant_products'
         variant_products.append(variant_product)
