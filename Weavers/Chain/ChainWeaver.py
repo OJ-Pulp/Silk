@@ -252,10 +252,7 @@ def create_base_product_parts(
 
                 # Generates base product part data
                 base_product_part_manufacturer = FAKER_GEN.random_element(list(manufacturer_keys))
-                if part_type in designations_dict[base_product.metadata["designation"]]["Vital Parts"]:
-                    base_product_part_vital = True
-                else:
-                    base_product_part_vital = False
+                base_product_part_vital = True if part_type in designations_dict[base_product.metadata["designation"]]["Vital Parts"] else False
 
                 # Creates 'base_product_part' Component(Node)
                 component_data = {
@@ -672,7 +669,7 @@ def create_variant_parts(
     variant_parts = []
     variant_part_edges = []
 
-    # Creates all base product parts and edges
+    # Creates all variant product parts and edges
     for i, variant_product in enumerate(variant_products, start=1):
         logger.debug(f"Variant Product {i}:")
 
@@ -681,20 +678,36 @@ def create_variant_parts(
             for part_type in needed_parts[variant_product.id]:
                 logger.debug(f"{part_type}:")
 
-                # Generates base product part data
+                # Generates variant product part data
                 variant_part_manufacturer = FAKER_GEN.random_element(needed_manufacturers[variant_product.id])
+                variant_part_vital = True if part_type in designations_dict[variant_product.metadata["designation"]]["Vital Parts"] else False
 
-                # Creates 'base_product_part' Component(Node)
-                variant_part = Component(
-                    name=f"{part_type} {FAKER_GEN.bothify(text='???#####')}",
-                    full_product=False,
-                    manufacturer=variant_part_manufacturer,
-                    locations=FAKER_GEN.random_element(manufacturers_dict[variant_part_manufacturer]["Locations"]),
-                    product=variant_product.id,
-                    variant=True,
-                    category=part_category,
-                    part_type=part_type,
-                )
+                # Creates 'variant_product_part' Component(Node)
+                component_data = {
+                    "name": f"{part_type}{FAKER_GEN.bothify('???#####')}",
+                    "full_product": False,
+                    "manufacturer": variant_part_manufacturer,
+                    "locations": FAKER_GEN.random_element(manufacturers_dict[variant_part_manufacturer]["Locations"]),
+                    "product": variant_product.id,
+                    "variant": True,
+                    "variant_base_product": None,
+                    "vital": variant_part_vital,
+                    "designation": variant_product.metadata["designation"],
+                    "popular_name": variant_product.metadata["popular_name"],
+                    "category": part_category,
+                    "part_type": part_type,
+                    "dimensions": [
+                        FAKER_GEN.random_int(10, 100),
+                        FAKER_GEN.random_int(10, 100),
+                        FAKER_GEN.random_int(10, 100)
+                    ],
+                    "cost": round(FAKER_GEN.random_number(digits=4), 2),
+                    "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
+                    "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
+                    "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
+                    "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))],
+                }
+                variant_part = Component(**component_data)
 
                 variant_parts.append(variant_part)
 
