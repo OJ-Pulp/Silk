@@ -612,14 +612,27 @@ def create_variant_product_sprues(
         for manufacturer in individual_needed_manufacturers:
             logger.debug(f"{manufacturer} Variant Sprue:")
 
-            variant_sprue = Component(
-                name=f"Sprue {FAKER_GEN.bothify(text='???########')}",
-                full_product=False,
-                product=variant_product.id,
-                manufacturer=manufacturer,
-                locations=FAKER_GEN.random_element(manufacturers_dict[manufacturer]["Locations"]),
-                variant=True,
-            )
+            # Creates 'base_product_sprue' Component(Node)
+            component_data = {
+                "name": f"Sprue {FAKER_GEN.bothify(text='???########')}",
+                "manufacturer": manufacturer,
+                "locations": FAKER_GEN.random_element(manufacturers_dict[manufacturer]["Locations"]),
+                "full_product": False,
+                "component_type": "Sprue",
+                "variant": True,
+                "product": variant_product.id,
+                "dimensions": [
+                    FAKER_GEN.random_int(10, 100),
+                    FAKER_GEN.random_int(10, 100),
+                    FAKER_GEN.random_int(10, 100)
+                ],
+                "cost": round(FAKER_GEN.random_number(digits=4), 2),
+                "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
+                "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
+                "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
+                "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))]
+            }
+            variant_sprue = Component(**component_data)
 
             variant_sprues.append(variant_sprue)
 
