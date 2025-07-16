@@ -180,6 +180,9 @@ class ValidationError(InputError):
             full_message = f"'{message}' Not Accepted" if message is not None else "Path Not Accepted"
             full_value = f"Moved  to '{value}'" if value is not None else "Moved"
             full_seperate = False
+        elif issue_type == "Json":
+            full_message = f"Error Decoding" if message is not None else "Path Not Accepted"
+            full_value = f"Moved  to '{value}'" if value is not None else "Moved"
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"{message}" if message is not None else "Input Not Accepted"
@@ -356,38 +359,39 @@ def sanitize(filename) -> str:
     
 
 def sanitize_path(filename: str) -> Tuple[str, Path]:
-    sanitized_filename = sanitize(filename)
-    sanitized_path = INPUT_DIR / sanitized_filename
-    logger.debug(f"'{sanitized_filename}' Sanitized Path:         '{sanitized_path}'")
-    path = preload(filename, True)
-    logger.debug(f"'{filename}' Path:         '{path}'")
+    try:
+        sanitized_filename = sanitize(filename)
+        sanitized_path = INPUT_DIR / sanitized_filename
+        logger.debug(f"'{sanitized_filename}' Sanitized Path:         '{sanitized_path}'")
+        path = preload(filename, True)
+        logger.debug(f"'{filename}' Path:         '{path}'")
 
-    if path != sanitized_path:
-        if sanitized_path.exists():
-            old_sanitized_path = sanitized_path
-            sanitized_path = sanitized_path.with_name(f"{sanitized_path.stem}_{uuid.uuid4()}{sanitized_path.suffix}")
+        if path != sanitized_path:
+            if sanitized_path.exists():
+                old_sanitized_path = sanitized_path
+                sanitized_path = sanitized_path.with_name(f"{sanitized_path.stem}_{uuid.uuid4()}{sanitized_path.suffix}")
+                try:
+                    raise ExistsError(old_sanitized_path.name, sanitized_path.name, "File")
+                except Exception as e:
+                    logger.warning(e)
             try:
-                raise ExistsError(old_sanitized_path.name, sanitized_path.name, "File")
+                raise ValidationError(path, sanitized_path, "Path")
             except Exception as e:
                 logger.warning(e)
-        try:
-            raise ValidationError(path, sanitized_path, "Path")
-        except Exception as e:
-            logger.warning(e)
 
-        sanitized_path.parent.mkdir(parents=True, exist_ok=True)
+            sanitized_path.parent.mkdir(parents=True, exist_ok=True)
 
-        shutil.copy2(path, sanitized_path)
+            shutil.copy2(path, sanitized_path)
 
-    return sanitized_path.name, sanitized_path
-
-
-def load(filename: str) -> Union[dict, str]:
-    try:
-        sanitized_filename, path = sanitize_path(filename)
+        return sanitized_path.name, sanitized_path
     except Exception as e:
         logger.critical(e)
         raise SystemExit(FAILURE)
+
+
+def load(filename: str) -> Union[dict, str]:
+    # [ ] Move inside of try?
+    sanitized_filename, path = sanitize_path(filename)
     try:
         with path.open("r", encoding="utf-8") as f:
             if path.suffix.lower() == ".json":
