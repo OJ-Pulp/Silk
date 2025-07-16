@@ -45,7 +45,8 @@ logger = logging.getLogger(__name__)
 # Third-Party
 try:
     import magic
-    from jsonschema import validate, ValidationError
+    from jsonschema import validate
+    from jsonschema import ValidationError as SchemaValidationError
 except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Module '{e.name}' -- Try 'python -m pip install {e.name}' -- Exiting")
     raise SystemExit(FAILURE)
@@ -125,7 +126,6 @@ class NotFoundError(InputError):
         elif issue_type == "Extension":
             full_message = f"'{message}' Extension Not Found"
             full_value = f"Input Changed to '{value}'" if value is not None else None
-            full_seperate = False
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"'{message}' Not Found"
@@ -134,15 +134,25 @@ class NotFoundError(InputError):
 
 class ValidationError(InputError):
 
-    def __init__(self, message: str = "Str", value: Any = None, issue_type: str = None) -> None:
+    def __init__(self, message: str = "Input Not Accepted", value: Any = None, issue_type: str = None) -> None:
+        full_seperate = False
         if issue_type == "File":
             full_message = f"'{message}' is Not a File"
             full_value = f"Try Checking '{value}'" if value is not None else None
+        elif issue_type == "Mimetype":
+            full_message = f"Mimetype '{value}' of '{message}' Not Accepted"
+            full_value == None
+        elif issue_type == "Extension":
+            full_message = f"Extension '{value}' of '{message}' Not Accepted"
+            full_value = None
+        elif issue_type == "Filename":
+            full_message = f"'{message}' Not Accepted"
+            full_value = f"Renamed to '{value}'"
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"{message}"
             full_value = f"{value}"
-        super().__init__(full_message, full_value, False)
+        super().__init__(full_message, full_value, full_seperate)
 
 
 # endregion
@@ -168,7 +178,7 @@ def set_input_dir() -> Path:
     """
 
     # [ ] Change for being called in ChainWeaver  SEE ABOVE
-    project_dir = input("Enter Project Directory: ")
+    project_dir = "Chain"
 
     # [ ] Add logger tool for INPUT or ENTER
     if project_dir != re.sub(r"[^a-zA-Z0-9_-]", "_", project_dir):
@@ -232,7 +242,7 @@ def preload(filename: str) -> Path:
         logger.warning(e)
         filename_stem = Path(filename).stem
         logger.debug(f"'{filename}' Stem:       '{filename_stem}'")
-        filename_stem_matches = list(Path(INPUT_DIR).glob(f"{filename_stem}.*"))
+        filename_stem_matches = list(INPUT_DIR.glob(f"{filename_stem}.*"))
         logger.debug(f"'{filename}' Stem Matches:       '{filename_stem_matches}'")
         if filename_stem_matches == []:
             try:
@@ -254,19 +264,19 @@ def preload(filename: str) -> Path:
 
 def sanitize(filename) -> str:
     path = preload(filename)
-    logger.info("Sanitize Start")
     filename = path.name
-    #mimetype = MIME.from_file(str(path))    
+    #mimetype = MIME.from_file(str(path))  
+    #logger.debug(f"'{filename}' Mimetype:       '{mimetype}'")  
     suffix = path.suffix.lower()
     logger.debug(f"'{filename}' Suffix:       '{suffix}'")
     sanitized_stem = re.sub(r"[^a-zA-Z0-9_-]", "_", path.stem.replace(".", "_"))
     logger.debug(f"'{filename}' Sanitized Stem:       '{sanitized_stem}'")
 
     #if mimetype not in ALLOWED_FILE_TYPES.values():
-    #    raise InputError(f"ValidationError: Mimetype '{mimetype}' of '{filename}' Not Accepted -- Exiting")
+    #    raise ValidationError(filename, mimetype, "Mimetype")
     if suffix:
         if suffix not in ALLOWED_FILE_TYPES.keys():
-            raise InputError(f"ValidationError: Extension '{suffix}' of '{filename}' Not Accepted -- Exiting")
+            raise ValidationError(filename, suffix, "Extension")
     #    if ALLOWED_FILE_TYPES[suffix] != mimetype:
     #        raise InputError(f"Validation Error: '{suffix}' and '{mimetype}' Do Not Match -- Exiting")
         sanitized_filename = sanitized_stem + suffix  
@@ -275,10 +285,11 @@ def sanitize(filename) -> str:
     logger.debug(f"'{filename}' Sanitized Filename:         '{sanitized_filename}'")
 
     if Path(filename).name != sanitized_filename:
-        logger.warning(f"InputError: ValidationError: '{Path(filename).name}' Not Accepted -- Renamed to '{sanitized_filename}'")
+        try:
+            raise ValidationError(Path(filename).name, sanitized_filename, "Filename")
+        except Exception as e:
+            logger.warning(e)
 
-
-    logger.info("Sanitize End")
     return sanitized_filename
     
 
@@ -374,7 +385,7 @@ def resolve_json(json_file: str) -> dict:
 
 
 def main():
-    resolved_inputdata = resolve_json("inputdata")
+    resolved_inputdata = resolve_json("test.bleh")
     logger.info(resolved_inputdata)
 
 
