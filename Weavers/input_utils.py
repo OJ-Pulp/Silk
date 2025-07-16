@@ -7,6 +7,7 @@ import copy
 import json
 import logging
 import re
+import shutil
 import traceback
 import uuid
 from pathlib import Path
@@ -137,12 +138,12 @@ class NotFoundError(InputError):
     ) -> None:
         full_seperate = True
         if issue_type == "File":
-            full_message = f"'{message}' Not Found -- Try Ensuring '{message}' is in '{INPUT_DIR}'"
+            full_message = f"'{message}' Not Found -- Try Ensuring '{message}' is in '{INPUT_DIR}'" if message is not None else "File Not Found"
             full_value = f"{value}" if value is not None else None
         elif issue_type == "Extension":
-            full_message = f"'{message}' Extension Not Found"
-            full_value = f"Input Changed to '{value}'" if value is not None else None
-            full_seperate = False if value is not None else True
+            full_message = f"'{message}' Extension Not Found" if message is not None else "Extension Not Found"
+            full_value = f"Input Changed to '{value}'" if value is not None else "Input Changed"
+            full_seperate = False
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"'{message}' Not Found" if message is not None else "Input Location Not Found"
@@ -173,14 +174,37 @@ class ValidationError(InputError):
             full_value = None
         elif issue_type == "Filename":
             full_message = f"'{message}' Not Accepted" if message is not None else "Filename Not Accepted"
-            full_value = f"Renamed to '{value}'" if value is not None else None
-            full_seperate = False if full_value is not None else True
+            full_value = f"Renamed to '{value}'" if value is not None else "Renamed"
+            full_seperate = False
+        elif issue_type == "Path":
+            full_message = f"'{message}' Not Accepted" if message is not None else "Path Not Accepted"
+            full_value = f"Moved  to '{value}'" if value is not None else "Moved"
+            full_seperate = False
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"{message}" if message is not None else "Input Not Accepted"
             full_value = f"{value}" if value is not None else None
         super().__init__(full_message, full_value, full_seperate)
 
+
+class ExistsError(InputError):
+
+    def __init__(
+        self, 
+        message: Optional[str] = None, 
+        value: Optional[Any] = None, 
+        issue_type: Optional[str] = None
+    ) -> None:
+        full_seperate = True
+        if issue_type == "File":
+            full_message = f"'{message}' Already Exists" if message is not None else "File Already Exists"
+            full_value = f"Renamed to '{value}'" if value is not None else "Renamed"
+            full_seperate = False
+        # [ ] Change here later -- add more -- change else
+        else:
+            full_message = f"'{message}' Not Found" if message is not None else "Input Location Not Found"
+            full_value = f"{value}" if value is not None else None
+        super().__init__(full_message, full_value, full_seperate)
 
 # endregion
 
@@ -342,12 +366,18 @@ def sanitize_path(filename: str) -> Tuple[str, Path]:
         if sanitized_path.exists():
             old_sanitized_path = sanitized_path
             sanitized_path = sanitized_path.with_name(f"{sanitized_path.stem}_{uuid.uuid4()}{sanitized_path.suffix}")
-            logger.warning(f"InputError: FileExistsError: '{old_sanitized_path.name}' Already Exists -- Renamed to '{sanitized_path.name}'")
-        logger.warning(f"InputError: ValidationError: '{path}' Not Accepted -- Moved to '{sanitized_path}'")
+            try:
+                raise ExistsError(old_sanitized_path.name, sanitized_path.name, "File")
+            except Exception as e:
+                logger.warning(e)
+        try:
+            raise ValidationError(path, sanitized_path, "Path")
+        except Exception as e:
+            logger.warning(e)
 
         sanitized_path.parent.mkdir(parents=True, exist_ok=True)
 
-        path.rename(sanitized_path)
+        shutil.copy2(path, sanitized_path)
 
     return sanitized_path.name, sanitized_path
 
