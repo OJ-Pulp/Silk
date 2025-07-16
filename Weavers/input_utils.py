@@ -10,7 +10,7 @@ import re
 import traceback
 import uuid
 from pathlib import Path
-from typing import Union, Tuple, Any
+from typing import Union, Tuple, Any, Optional
 
 # -------------------------------------------------------------------------------------------
 #                                   LOGGING_SETTINGS
@@ -67,7 +67,13 @@ class InputError(Exception):
     :type `value`: Any
     """
 
-    def __init__(self, message: str = "Invalid Input", value: Any = None, seperate: bool = True) -> None: 
+    def __init__(
+        self, 
+        message: Optional[str] = "Invalid Input", 
+        value: Optional[Any] = None, 
+        seperate: Optional[bool] = True
+    ) -> None: 
+        # [ ] Decide if Space or Docstring or what here
         self.message = message
         self.value = value 
         self.seperate = seperate
@@ -105,7 +111,11 @@ class SanitationError(InputError):
     :type `value`: Any
     """
 
-    def __init__(self, message: str = "Str", value: Any = None) -> None:
+    def __init__(
+        self, 
+        message: Optional[str] = "Str", 
+        value: Optional[Any] = None
+    ) -> None:
         super().__init__(f"Unaccepted Characters Inputed in {message}", value)
 
 class NotFoundError(InputError):
@@ -119,7 +129,12 @@ class NotFoundError(InputError):
     :type `value`: Any
     """
 
-    def __init__(self, message: str = "Input Location", value: Any = None, issue_type: str = None) -> None:
+    def __init__(
+        self, 
+        message: Optional[str] = None, 
+        value: Optional[Any] = None, 
+        issue_type: Optional[str] = None
+    ) -> None:
         full_seperate = True
         if issue_type == "File":
             full_message = f"'{message}' Not Found -- Try Ensuring '{message}' is in '{INPUT_DIR}'"
@@ -130,13 +145,18 @@ class NotFoundError(InputError):
             full_seperate = False if value is not None else True
         # [ ] Change here later -- add more -- change else
         else:
-            full_message = f"'{message}' Not Found"
+            full_message = f"'{message}' Not Found" if message is not None else "Input Location Not Found"
             full_value = f"{value}" if value is not None else None
         super().__init__(full_message, full_value, full_seperate)
 
 class ValidationError(InputError):
 
-    def __init__(self, message: str = None, value: Any = None, issue_type: str = None) -> None:
+    def __init__(
+        self, 
+        message: Optional[str] = None, 
+        value: Optional[Any] = None, 
+        issue_type: Optional[str] = None
+    ) -> None:
         full_seperate = True
         if issue_type == "File":
             full_message = f"'{message}' is Not a File" if message is not None else "Input is Not a File"
