@@ -123,35 +123,42 @@ class NotFoundError(InputError):
         full_seperate = True
         if issue_type == "File":
             full_message = f"'{message}' Not Found -- Try Ensuring '{message}' is in '{INPUT_DIR}'"
+            full_value = f"{value}" if value is not None else None
         elif issue_type == "Extension":
             full_message = f"'{message}' Extension Not Found"
             full_value = f"Input Changed to '{value}'" if value is not None else None
+            full_seperate = False if value is not None else True
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"'{message}' Not Found"
-            full_value = f"{value}"
+            full_value = f"{value}" if value is not None else None
         super().__init__(full_message, full_value, full_seperate)
 
 class ValidationError(InputError):
 
-    def __init__(self, message: str = "Input Not Accepted", value: Any = None, issue_type: str = None) -> None:
-        full_seperate = False
+    def __init__(self, message: str = None, value: Any = None, issue_type: str = None) -> None:
+        full_seperate = True
         if issue_type == "File":
-            full_message = f"'{message}' is Not a File"
+            full_message = f"'{message}' is Not a File" if message is not None else "Input is Not a File"
             full_value = f"Try Checking '{value}'" if value is not None else None
+            full_seperate = False if value is not None else True
         elif issue_type == "Mimetype":
-            full_message = f"Mimetype '{value}' of '{message}' Not Accepted"
-            full_value == None
+            full_message = f"Mimetype '{value}' of '{message}' Not Accepted" if value is not None and message is not None else "Mimetype Not Accepted"
+            full_value = None
         elif issue_type == "Extension":
-            full_message = f"Extension '{value}' of '{message}' Not Accepted"
+            full_message = f"Extension '{value}' of '{message}' Not Accepted" if value is not None and message is not None else "Extension Not Accepted"
+            full_value = None
+        elif issue_type == "Matching":
+            full_message = f"'{message}' and '{value}' Do Not Match" if value is not None and message is not None else "Suffix and Mimetype Do Not Match"
             full_value = None
         elif issue_type == "Filename":
-            full_message = f"'{message}' Not Accepted"
-            full_value = f"Renamed to '{value}'"
+            full_message = f"'{message}' Not Accepted" if message is not None else "Filename Not Accepted"
+            full_value = f"Renamed to '{value}'" if value is not None else None
+            full_seperate = False if full_value is not None else True
         # [ ] Change here later -- add more -- change else
         else:
-            full_message = f"{message}"
-            full_value = f"{value}"
+            full_message = f"{message}" if message is not None else "Input Not Accepted"
+            full_value = f"{value}" if value is not None else None
         super().__init__(full_message, full_value, full_seperate)
 
 
@@ -257,6 +264,7 @@ def preload(filename: str) -> Path:
             logger.warning(e)
         logger.debug(f"'{path.name}' Path:       '{path}'")
         return path
+    # [ ] Change to where called?
     except Exception as e:
         logger.critical(e)
         raise SystemExit(FAILURE)
@@ -265,20 +273,20 @@ def preload(filename: str) -> Path:
 def sanitize(filename) -> str:
     path = preload(filename)
     filename = path.name
-    #mimetype = MIME.from_file(str(path))  
-    #logger.debug(f"'{filename}' Mimetype:       '{mimetype}'")  
+    mimetype = MIME.from_file(str(path))  
+    logger.debug(f"'{filename}' Mimetype:       '{mimetype}'")  
     suffix = path.suffix.lower()
     logger.debug(f"'{filename}' Suffix:       '{suffix}'")
     sanitized_stem = re.sub(r"[^a-zA-Z0-9_-]", "_", path.stem.replace(".", "_"))
     logger.debug(f"'{filename}' Sanitized Stem:       '{sanitized_stem}'")
 
-    #if mimetype not in ALLOWED_FILE_TYPES.values():
-    #    raise ValidationError(filename, mimetype, "Mimetype")
+    if not any(mimetype in types for types in ALLOWED_FILE_TYPES.values()):
+        raise ValidationError(filename, mimetype, "Mimetype")
     if suffix:
         if suffix not in ALLOWED_FILE_TYPES.keys():
             raise ValidationError(filename, suffix, "Extension")
-    #    if ALLOWED_FILE_TYPES[suffix] != mimetype:
-    #        raise InputError(f"Validation Error: '{suffix}' and '{mimetype}' Do Not Match -- Exiting")
+        if mimetype not in ALLOWED_FILE_TYPES[suffix]:
+            raise ValidationError(suffix, mimetype, "Matching")
         sanitized_filename = sanitized_stem + suffix  
     else:
         sanitized_filename = sanitized_stem
@@ -319,7 +327,7 @@ def load(filename: str) -> Union[dict, str]:
     try:
         sanitized_filename, path = sanitize_path(filename)
     except Exception as e:
-        logger.critical(f"{type(e).__name__}: {e}")
+        logger.critical(e)
         raise SystemExit(FAILURE)
     try:
         with path.open("r", encoding="utf-8") as f:
@@ -385,7 +393,7 @@ def resolve_json(json_file: str) -> dict:
 
 
 def main():
-    resolved_inputdata = resolve_json("test.bleh")
+    resolved_inputdata = resolve_json("inputdata")
     logger.info(resolved_inputdata)
 
 
