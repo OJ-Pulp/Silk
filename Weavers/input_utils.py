@@ -255,8 +255,11 @@ MIME = magic.Magic(mime=True)
 # [ ] security in load or securing around load
 # [ ] logger.debug
 
-
-def preload(filename: str) -> Path:
+# [ ] decide if try except moves to where called or stays inside FOR ALL
+def preload(filename: str, quiet: Optional[bool] = False) -> Path:
+    original_level = logger.level
+    if quiet:
+        logger.setLevel(logging.CRITICAL)
     try:
         path = INPUT_DIR / filename
         logger.debug(f"'{filename}' Path:       '{path}'")
@@ -277,7 +280,7 @@ def preload(filename: str) -> Path:
             except Exception as e:
                 logger.critical(e)
                 raise SystemExit(FAILURE)
-        path = (filename_stem_matches[0]).resolve()
+        path = INPUT_DIR / filename_stem_matches[0]
         try:
             raise NotFoundError(filename, path.name, "Extension")
         except Exception as e:
@@ -288,45 +291,51 @@ def preload(filename: str) -> Path:
     except Exception as e:
         logger.critical(e)
         raise SystemExit(FAILURE)
+    finally:
+        if quiet:
+            logger.setLevel(original_level)
 
 
 def sanitize(filename) -> str:
-    path = preload(filename)
-    filename = path.name
-    mimetype = MIME.from_file(str(path))  
-    logger.debug(f"'{filename}' Mimetype:       '{mimetype}'")  
-    suffix = path.suffix.lower()
-    logger.debug(f"'{filename}' Suffix:       '{suffix}'")
-    sanitized_stem = re.sub(r"[^a-zA-Z0-9_-]", "_", path.stem.replace(".", "_"))
-    logger.debug(f"'{filename}' Sanitized Stem:       '{sanitized_stem}'")
+    try:
+        path = preload(filename)
+        filename = path.name
+        mimetype = MIME.from_file(str(path))  
+        logger.debug(f"'{filename}' Mimetype:       '{mimetype}'")  
+        suffix = path.suffix.lower()
+        logger.debug(f"'{filename}' Suffix:       '{suffix}'")
+        sanitized_stem = re.sub(r"[^a-zA-Z0-9_-]", "_", path.stem.replace(".", "_"))
+        logger.debug(f"'{filename}' Sanitized Stem:       '{sanitized_stem}'")
 
-    if not any(mimetype in types for types in ALLOWED_FILE_TYPES.values()):
-        raise ValidationError(filename, mimetype, "Mimetype")
-    if suffix:
-        if suffix not in ALLOWED_FILE_TYPES.keys():
-            raise ValidationError(filename, suffix, "Extension")
-        if mimetype not in ALLOWED_FILE_TYPES[suffix]:
-            raise ValidationError(suffix, mimetype, "Matching")
-        sanitized_filename = sanitized_stem + suffix  
-    else:
-        sanitized_filename = sanitized_stem
-    logger.debug(f"'{filename}' Sanitized Filename:         '{sanitized_filename}'")
+        if not any(mimetype in types for types in ALLOWED_FILE_TYPES.values()):
+            raise ValidationError(filename, mimetype, "Mimetype")
+        if suffix:
+            if suffix not in ALLOWED_FILE_TYPES.keys():
+                raise ValidationError(filename, suffix, "Extension")
+            if mimetype not in ALLOWED_FILE_TYPES[suffix]:
+                raise ValidationError(suffix, mimetype, "Matching")
+            sanitized_filename = sanitized_stem + suffix  
+        else:
+            sanitized_filename = sanitized_stem
+        logger.debug(f"'{filename}' Sanitized Filename:         '{sanitized_filename}'")
 
-    if Path(filename).name != sanitized_filename:
-        try:
-            raise ValidationError(Path(filename).name, sanitized_filename, "Filename")
-        except Exception as e:
-            logger.warning(e)
+        if Path(filename).name != sanitized_filename:
+            try:
+                raise ValidationError(Path(filename).name, sanitized_filename, "Filename")
+            except Exception as e:
+                logger.warning(e)
 
-    return sanitized_filename
+        return sanitized_filename
+    except Exception as e:
+        logger.critical(e)
+        raise SystemExit(FAILURE)
     
 
 def sanitize_path(filename: str) -> Tuple[str, Path]:
     sanitized_filename = sanitize(filename)
-    logger.info("Sanitize Path Start")
-    sanitized_path = (Path(f"{Path(INPUT_DIR)}/{sanitized_filename}")).resolve()
+    sanitized_path = INPUT_DIR / sanitized_filename
     logger.debug(f"'{sanitized_filename}' Sanitized Path:         '{sanitized_path}'")
-    path = Path(preload(filename)).resolve()
+    path = preload(filename, True)
     logger.debug(f"'{filename}' Path:         '{path}'")
 
     if path != sanitized_path:
