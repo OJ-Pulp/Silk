@@ -259,10 +259,10 @@ def create_base_product_parts(
 
                 # Creates 'base_product_part' Component(Node)
                 component_data = {
-                    "name": f"{part_type} {FAKER.bothify('???#####')}",
+                    "name": f"{part_type} {FAKER_GEN.bothify('???#####')}",
                     "full_product": False,
                     "manufacturer": base_product_part_manufacturer,
-                    "locations": FAKER.random_element(manufacturers_dict[base_product_part_manufacturer]["Locations"]),
+                    "locations": FAKER_GEN.random_element(manufacturers_dict[base_product_part_manufacturer]["Locations"]),
                     "product": base_product.id,
                     "variant": False,
                     "variant_base_product": None,
@@ -272,15 +272,15 @@ def create_base_product_parts(
                     "category": part_category,
                     "part_type": part_type,
                     "dimensions": [
-                        FAKER.random_int(10, 100),
-                        FAKER.random_int(10, 100),
-                        FAKER.random_int(10, 100)
+                        FAKER_GEN.random_int(10, 100),
+                        FAKER_GEN.random_int(10, 100),
+                        FAKER_GEN.random_int(10, 100)
                     ],
-                    "cost": round(FAKER.random_number(digits=4), 2),
-                    "failure_rate": round(FAKER.random_number(digits=2) / 100, 4),
-                    "substitutions": [FAKER.bothify("???###") for _ in range(FAKER.random_int(0, 3))],
-                    "breakability": round(FAKER.random_number(digits=2) / 100, 2),
-                    "year_range": [FAKER.random_int(1990, 2024) for _ in range(FAKER.random_int(1, 3))],
+                    "cost": round(FAKER_GEN.random_number(digits=4), 2),
+                    "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
+                    "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
+                    "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
+                    "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))],
                 }
                 base_product_part = Component(**component_data)
 
