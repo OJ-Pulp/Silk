@@ -10,7 +10,7 @@ import re
 import traceback
 import uuid
 from pathlib import Path
-from typing import Union, Tuple
+from typing import Union, Tuple, Any
 
 # -------------------------------------------------------------------------------------------
 #                                   LOGGING_SETTINGS
@@ -22,7 +22,7 @@ SUCCESS = 0
 FAILURE = 1
 INTERRUPTED = 130
 
-SUCCESS_LEVEL_NUM = 35
+SUCCESS_LEVEL_NUM = 10
 
 logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
@@ -62,11 +62,11 @@ class InputError(Exception):
 
     :attr `message`: The error message.
     :type `message`: str
-    :attr `value`: The value that caused the error (optional).
-    :type `value`: object
+    :attr `value`: The value that caused the error.
+    :type `value`: Any
     """
 
-    def __init__(self, message: str = "Invalid Input", value: object = None) -> None: 
+    def __init__(self, message: str = "Invalid Input", value: Any = None) -> None: 
         self.message = message
         self.value = value 
         super().__init__(message) 
@@ -85,7 +85,36 @@ class InputError(Exception):
         return ": ".join(parts)
     
 class SanitationError(InputError):
-    pass
+    """
+    Raised when an input fails sanitation rules.
+    Standard Message Prefix - 'Unaccepted Characters Inputed in'
+
+    :attr `message`: The name or use of the input that failed.
+    :type `message`: str
+    :attr `value`: The input with the unaccepted characters.
+    :type `value`: Any
+    """
+
+    def __init__(self, message: str = "Str", value: Any = None) -> None:
+        prefix = "Unaccepted Characters Inputed in "
+        full_message = f"{prefix}{message}"
+        super().__init__(full_message, value)
+
+class DirectoryNotFoundError(InputError):
+    """
+    Raised when an input fails sanitation rules.
+    Standard Message Suffix - 'Unaccepted Characters Inputed in'
+
+    :attr `message`: The name or use of the directory that failed.
+    :type `message`: str
+    :attr `value`: The directory name or path.
+    :type `value`: Any
+    """
+
+    def __init__(self, message: str = "Str", value: Any = None) -> None:
+        suffix = " Directory Not Found"
+        full_message = f"{message}{suffix}"
+        super().__init__(full_message, value)
 
 # endregion
 
@@ -105,29 +134,30 @@ def set_input_dir() -> Path:
     """
     caller_frame = inspect.stack()[1]
     calling_module_name = Path(caller_frame.filename)
-    # [ ] fix exceptions and calls
-    logger.debug(f"ModuleNameFound: {calling_module_name}")
+    logger.success(f"ModuleNameFound: {calling_module_name}")
     project_dir = calling_module_name.parts[-2]
     """
 
-    # [ ] Change for being called in ChainWeaver
+    # [ ] Change for being called in ChainWeaver  SEE ABOVE
     project_dir = input("Enter Project Directory: ")
 
     # [ ] Add logger tool for INPUT or ENTER
     if project_dir != re.sub(r"[^a-zA-Z0-9_-]", "_", project_dir):
-        raise SanitationError("Unaccepted Characters Inputed in Project Directory Name")
+        raise SanitationError("Project Directory Name", project_dir)
     
     input_dir = Path(__file__).parent.resolve() / project_dir / "inputs"
 
     if not input_dir.exists():
-        logger.warning(input_dir)
-        raise InputError
+        raise DirectoryNotFoundError("Input", input_dir)
 
     return input_dir
 
-
-INPUT_DIR = set_input_dir()
-logger.debug(f"Input Directory:         '/{INPUT_DIR}'")
+try:
+    INPUT_DIR = set_input_dir()
+except Exception as e:
+    logger.critical(e)
+    raise SystemExit(FAILURE)
+logger.debug(f"Input Directory:         '{INPUT_DIR}'")
 
 # endregion
 
