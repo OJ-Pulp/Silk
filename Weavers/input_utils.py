@@ -119,24 +119,31 @@ class NotFoundError(InputError):
     """
 
     def __init__(self, message: str = "Input Location", value: Any = None, issue_type: str = None) -> None:
-        if issue_type == "Misplaced":
+        full_seperate = True
+        if issue_type == "File":
             full_message = f"'{message}' Not Found -- Try Ensuring '{message}' is in '{INPUT_DIR}'"
+        elif issue_type == "Extension":
+            full_message = f"'{message}' Extension Not Found"
+            full_value = f"Input Changed to '{value}'" if value is not None else None
+            full_seperate = False
         # [ ] Change here later -- add more -- change else
         else:
-            full_message = f"{message}"
-        super().__init__(full_message, value)
+            full_message = f"'{message}' Not Found"
+            full_value = f"{value}"
+        super().__init__(full_message, full_value, full_seperate)
 
 class ValidationError(InputError):
 
     def __init__(self, message: str = "Str", value: Any = None, issue_type: str = None) -> None:
         if issue_type == "File":
             full_message = f"'{message}' is Not a File"
+            full_value = f"Try Checking '{value}'" if value is not None else None
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"{message}"
-        if value is not None:
-                full_value = f"Try Checking '{value}'"
+            full_value = f"{value}"
         super().__init__(full_message, full_value, False)
+
 
 # endregion
 
@@ -229,16 +236,19 @@ def preload(filename: str) -> Path:
         logger.debug(f"'{filename}' Stem Matches:       '{filename_stem_matches}'")
         if filename_stem_matches == []:
             try:
-                raise NotFoundError(filename, issue_type="Misplaced")
+                raise NotFoundError(filename, issue_type="File")
             except Exception as e:
                 logger.critical(e)
                 raise SystemExit(FAILURE)
         path = (filename_stem_matches[0]).resolve()
-        logger.warning(f"InputError: ExtensionNotFoundError: '{filename}' Extension Not Found -- Input Changed to '{path.name}'")
+        try:
+            raise NotFoundError(filename, path.name, "Extension")
+        except Exception as e:
+            logger.warning(e)
         logger.debug(f"'{path.name}' Path:       '{path}'")
         return path
-    except InputError as e:
-        logger.critical(f"{type(e).__name__}: {e}")
+    except Exception as e:
+        logger.critical(e)
         raise SystemExit(FAILURE)
 
 
