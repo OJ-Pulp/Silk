@@ -132,7 +132,7 @@ class NotFoundError(InputError):
 
     def __init__(
         self, 
-        message: Optional[str] = None, 
+        message: Optional[Union[str, Path]] = None, 
         value: Optional[Any] = None, 
         issue_type: Optional[str] = None
     ) -> None:
@@ -143,6 +143,10 @@ class NotFoundError(InputError):
         elif issue_type == "Extension":
             full_message = f"'{message}' Extension Not Found" if message is not None else "Extension Not Found"
             full_value = f"Input Changed to '{value}'" if value is not None else "Input Changed"
+            full_seperate = False
+        elif issue_type == "Path":
+            full_message = f"'{message}' Not Found" if message is not None else "Path Not Found"
+            full_value = f"Check that '{message.name}' is in '{message.parent.name}' and that is in '/Weavers' -- Check that '/input_utils.py' is in '/Weavers'" if message is Path else "Check Directory Structure"
             full_seperate = False
         # [ ] Change here later -- add more -- change else
         else:
@@ -180,9 +184,12 @@ class ValidationError(InputError):
             full_message = f"'{message}' Not Accepted" if message is not None else "Path Not Accepted"
             full_value = f"Moved  to '{value}'" if value is not None else "Moved"
             full_seperate = False
-        elif issue_type == "Json":
-            full_message = f"Error Decoding" if message is not None else "Path Not Accepted"
-            full_value = f"Moved  to '{value}'" if value is not None else "Moved"
+        elif issue_type == "Dict":
+            full_message = f"'{message}' is JSON but Not Dictionary" if message is not None else "Input is JSON but Not Dictionary"
+            full_value = f"{value}" if value is not None else None
+        elif issue_type == "Decoding":
+            full_message = f"Error Decoding JSON: {message}" if message is not None else "Error Decoding JSON: Check Foramtting"
+            full_value = f"{value}" if value is not None else None
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"{message}" if message is not None else "Input Not Accepted"
@@ -398,14 +405,17 @@ def load(filename: str) -> Union[dict, str]:
                 try:
                     json_file = json.load(f)
                     if not isinstance(json_file, dict):
-                        raise InputError(f"TypeError: '{sanitized_filename}' is Json but Not Dictionary -- Exiting")
+                        raise ValidationError(sanitized_filename, issue_type="Dict")
                     return json_file
                 except json.JSONDecodeError as e:
-                    raise InputError(f"{type(e).__name__}: Error Decoding JSON: {e} -- Exiting") from e
+                    raise ValidationError(e, issue_type="Decoding")
             else:
                 return f.read()
     except FileNotFoundError as e:
-        raise InputError(f"{type(e).__name__}: '{path}' Not Found -- Check that '/inputs' is in the Same Directory as 'input_utils.py' -- Check that '{sanitized_filename}' is in '/inputs/' -- Exiting") from e
+        raise NotFoundError(path, issue_type="Path")
+    except Exception as e:
+        logger.critical(e)
+        raise SystemExit(FAILURE)
 
 
 def validate_json(json_file: str) -> dict:
