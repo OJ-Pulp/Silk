@@ -6,6 +6,7 @@ from typing import List
 
 # Third-Party
 from kafka import KafkaProducer
+import faker
 
 # Local
 from Weavers.graph_model import Edge, Node
@@ -32,6 +33,8 @@ logging.getLogger("faker").setLevel(logging.INFO)
 
 # endregion
 
+FAKER_GEN = faker.Faker()
+logger.info("Module Variables Set")
 
 class Weaver(ABC):
     """
@@ -40,11 +43,20 @@ class Weaver(ABC):
     Examples include ChainWeaver, DocWeaver, MapWeaver, etc.
     """
 
-    def __init__(self):
+
+    def __init__(
+        self,
+        nodes: List[Node],
+        edges: List[Edge]
+    ):
         """
         Initialize the Weaver with a name.
         :param name: The name of the weaver.
         """
+
+        self.nodes = nodes
+        self.edges = edges
+
         logger.info("Weaver Initialized")
 
     @abstractmethod
@@ -76,19 +88,17 @@ class Weaver(ABC):
         :param path: The path to the CSV file.
         """
 
-    @staticmethod
     def publish_to_kafka(
-        nodes: List[Node],
-        edges: List[Edge],
-        kafka_bootstrap_servers="localhost:9092",
+        self,
+        kafka_bootstrap_servers="localhost:9092"
     ):
         producer = KafkaProducer(
             bootstrap_servers=kafka_bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
         )
-        for node in nodes:
+        for node in self.nodes:
             producer.send("nodes", node.metadata)
-        for edge in edges:
+        for edge in self.edges:
             producer.send(
                 "edges",
                 {
