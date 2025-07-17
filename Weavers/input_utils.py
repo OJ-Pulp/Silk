@@ -397,22 +397,22 @@ def sanitize_path(filename: str) -> Tuple[str, Path]:
 
 
 def load(filename: str) -> Union[dict, str]:
-    # [ ] Move inside of try?
-    sanitized_filename, path = sanitize_path(filename)
     try:
-        with path.open("r", encoding="utf-8") as f:
-            if path.suffix.lower() == ".json":
-                try:
-                    json_file = json.load(f)
-                    if not isinstance(json_file, dict):
-                        raise ValidationError(sanitized_filename, issue_type="Dict")
-                    return json_file
-                except json.JSONDecodeError as e:
-                    raise ValidationError(e, issue_type="Decoding")
-            else:
-                return f.read()
-    except FileNotFoundError as e:
-        raise NotFoundError(path, issue_type="Path")
+        sanitized_filename, path = sanitize_path(filename)
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                if path.suffix.lower() == ".json":
+                    try:
+                        json_file = json.load(f)
+                        if not isinstance(json_file, dict):
+                            raise ValidationError(sanitized_filename, issue_type="Dict")
+                        return json_file
+                    except json.JSONDecodeError as e:
+                        raise ValidationError(e, issue_type="Decoding")
+                else:
+                    return f.read()
+        except FileNotFoundError:
+            raise NotFoundError(path, issue_type="Path")
     except Exception as e:
         logger.critical(e)
         raise SystemExit(FAILURE)
