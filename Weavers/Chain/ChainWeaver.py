@@ -217,7 +217,8 @@ def create_base_product_parts(
 ) -> Tuple[List[Component], List[Requires], List[Component]]:
     """
     Generates a fake dataset of base product parts and part edges and their data.
-
+    Supports recursive subcomponent generation for parts that have their own parts.
+    
     :param `base_products`: A list of base products and their data.
     :type `base_products`: List[Component]
     :param `base_product_sprues`: A list of base product sprues and their data.
@@ -241,20 +242,58 @@ def create_base_product_parts(
     vital_base_product_sprues = []
     manufacturer_keys = list(manufacturers_dict.keys())
 
-    # Creates all base product parts and edges
+    def generate_subparts(parent_part, parent_category, parent_designation, parent_manufacturer):
+        # If this part type is also a designation, generate its subparts
+        if parent_part.metadata["part_type"] in designations_dict:
+            sub_designation = designations_dict[parent_part.metadata["part_type"]]
+            sub_parts_categories = sub_designation.get("Parts", {})
+            for sub_category, sub_part_list in sub_parts_categories.items():
+                for sub_part_type in sub_part_list:
+                    sub_part_manufacturer = FAKER_GEN.random_element(manufacturer_keys)
+                    component_data = {
+                        "name": f"{sub_part_type} {FAKER_GEN.bothify('???#####')}",
+                        "manufacturer": sub_part_manufacturer,
+                        "locations": FAKER_GEN.random_element(manufacturers_dict[sub_part_manufacturer]["Locations"]),
+                        "full_product": False,
+                        "component_type": "Part",
+                        "variant": False,
+                        "product": parent_part.metadata["product"],
+                        "variant_base_product": None,
+                        "vital": False,
+                        "category": sub_category,
+                        "part_type": sub_part_type,
+                        "dimensions": [
+                            FAKER_GEN.random_int(10, 100),
+                            FAKER_GEN.random_int(10, 100),
+                            FAKER_GEN.random_int(10, 100)
+                        ],
+                        "cost": round(FAKER_GEN.random_number(digits=4), 2),
+                        "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
+                        "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
+                        "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
+                        "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))],
+                    }
+                    sub_part = Component(**component_data)
+                    base_product_parts.append(sub_part)
+                    # Edge from parent_part to sub_part
+                    edge = Requires(
+                        start_node=parent_part,
+                        end_node=sub_part,
+                        base_model=True,
+                        lead_time=FAKER_GEN.random_int(1, 1000),
+                    )
+                    base_product_part_edges.append(edge)
+                    # Recurse further if needed
+                    generate_subparts(sub_part, sub_category, parent_part.metadata["part_type"], sub_part_manufacturer)
+
     for i, base_product in enumerate(base_products, start=1):
         logger.debug(f"Base Product {i}:")
-
         parts_categories = designations_dict[base_product.metadata["designation"]]["Parts"]
         for part_category, part_list in parts_categories.items():
             for part_type in part_list:
                 logger.debug(f"{part_type}:")
-
-                # Generates base product part data
                 base_product_part_manufacturer = FAKER_GEN.random_element(list(manufacturer_keys))
                 base_product_part_vital = True if part_type in designations_dict[base_product.metadata["designation"]]["Vital Parts"] else False
-
-                # Creates 'base_product_part' Component(Node)
                 component_data = {
                     "name": f"{part_type} {FAKER_GEN.bothify('???#####')}",
                     "manufacturer": base_product_part_manufacturer,
@@ -279,34 +318,26 @@ def create_base_product_parts(
                     "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))],
                 }
                 base_product_part = Component(**component_data)
-
-                # Appends 'base_product_part' Component(Node) to the overall list of 'base_product_parts'
                 base_product_parts.append(base_product_part)
                 logger.debug(base_product_part)
                 logger.debug("")
-
                 for base_product_sprue in base_product_sprues:
                     if base_product_part.metadata["product"] == base_product_sprue.metadata["product"] \
                         and base_product_part.manufacturer == base_product_sprue.manufacturer:
                         logger.debug(f"{part_type} Edge:")
-
-                        # Creates 'base_product_sprue' to 'base_product_part' Requires(Edge)
                         base_product_part_edge = Requires(
                             start_node=base_product_sprue,
                             end_node=base_product_part,
                             base_model=True,
-                            lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                            lead_time=FAKER_GEN.random_int(1, 1000),
                         )
-
-                        # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
                         base_product_part_edges.append(base_product_part_edge)
                         logger.debug(base_product_part_edge)
                         logger.debug("")
-
-                        # If the part being added to that sprue is vital
-                        # Appends 'base_product_sprue' Component(Node) to the overall list of 'vital_base_product_sprues'
                         if base_product_part_vital:
                             vital_base_product_sprues.append(base_product_sprue)
+                # Recursively generate subparts if this part is also a designation
+                generate_subparts(base_product_part, part_category, base_product.metadata["designation"], base_product_part_manufacturer)
 
     return base_product_parts, base_product_part_edges, vital_base_product_sprues
 
