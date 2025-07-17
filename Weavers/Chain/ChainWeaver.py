@@ -257,15 +257,14 @@ def create_base_product_parts(
                 # Creates 'base_product_part' Component(Node)
                 component_data = {
                     "name": f"{part_type} {FAKER_GEN.bothify('???#####')}",
-                    "full_product": False,
                     "manufacturer": base_product_part_manufacturer,
                     "locations": FAKER_GEN.random_element(manufacturers_dict[base_product_part_manufacturer]["Locations"]),
-                    "product": base_product.id,
+                    "full_product": False,
+                    "component_type": "Part",
                     "variant": False,
+                    "product": base_product.id,
                     "variant_base_product": None,
                     "vital": base_product_part_vital,
-                    "designation": base_product.metadata["designation"],
-                    "popular_name": base_product.metadata["popular_name"],
                     "category": part_category,
                     "part_type": part_type,
                     "dimensions": [
@@ -680,20 +679,16 @@ def create_variant_parts(
 
                 # Generates variant product part data
                 variant_part_manufacturer = FAKER_GEN.random_element(needed_manufacturers[variant_product.id])
-                variant_part_vital = True if part_type in designations_dict[variant_product.metadata["designation"]]["Vital Parts"] else False
 
                 # Creates 'variant_product_part' Component(Node)
                 component_data = {
                     "name": f"{part_type}{FAKER_GEN.bothify('???#####')}",
-                    "full_product": False,
                     "manufacturer": variant_part_manufacturer,
                     "locations": FAKER_GEN.random_element(manufacturers_dict[variant_part_manufacturer]["Locations"]),
+                    "full_product": False,
+                    "component_type": "Part",
                     "product": variant_product.id,
                     "variant": True,
-                    "variant_base_product": None,
-                    "vital": variant_part_vital,
-                    "designation": variant_product.metadata["designation"],
-                    "popular_name": variant_product.metadata["popular_name"],
                     "category": part_category,
                     "part_type": part_type,
                     "dimensions": [
