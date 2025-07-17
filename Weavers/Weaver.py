@@ -1,6 +1,14 @@
 # Standard
-from abc import ABC, abstractmethod
 import logging
+import json
+from abc import ABC, abstractmethod
+from typing import List
+
+# Third-Party
+from kafka import KafkaProducer
+
+# Local
+from Weavers.graph_model import Edge, Node
 
 # -------------------------------------------------------------------------------------------
 #                                   LOGGING_SETTINGS
@@ -67,3 +75,26 @@ class Weaver(ABC):
         This method should be implemented by subclasses.
         :param path: The path to the CSV file.
         """
+
+    @staticmethod
+    def publish_to_kafka(
+        nodes: List[Node],
+        edges: List[Edge],
+        kafka_bootstrap_servers="localhost:9092",
+    ):
+        producer = KafkaProducer(
+            bootstrap_servers=kafka_bootstrap_servers,
+            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+        )
+        for node in nodes:
+            producer.send("nodes", node.metadata)
+        for edge in edges:
+            producer.send(
+                "edges",
+                {
+                    "start_node": edge.start_node.id,
+                    "end_node": edge.end_node.id,
+                },
+            )
+        producer.flush()
+        producer.close()
