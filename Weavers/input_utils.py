@@ -76,7 +76,7 @@ class InputError(Exception):
         message: Optional[str] = "Invalid Input", 
         value: Optional[Any] = None, 
         extra: Optional[Any] = None,
-        seperate: Optional[bool] = True
+        seperate: Optional[bool] = False
     ) -> None: 
         # [ ] Decide if Space or Docstring or what here
         self.message = message
@@ -128,6 +128,8 @@ class SanitationError(InputError):
     ) -> None:
         super().__init__(f"Unaccepted Characters Inputed in {message}", value, extra)
 
+# [ ] potentially add elifs for messages with messages and values blown out
+
 class NotFoundError(InputError):
     """
     Raised when an input fails sanitation rules.
@@ -159,12 +161,12 @@ class NotFoundError(InputError):
         elif issue_type == "Path":
             full_message = f"'{message}' Not Found" if message is not None else "Path Not Found"
             full_value = f"Check that '{message.name}' is in '{message.parent.name}' and that is in '{PARENT_DIR}'" if message is not None and message is Path else "Check Directory Structure"
-            full_extra - f"Check that '{FILE_NAME}' is in '{PARENT_DIR}'"
+            full_extra = f"Check that '{FILE_NAME}' is in '{PARENT_DIR}'"
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"{message} Not Found" if message is not None else "Input Location Not Found"
             full_seperate = True
-        super().__init__(full_message, full_value, full_seperate)
+        super().__init__(full_message, full_value, full_extra, full_seperate)
 
 class ValidationError(InputError):
 
@@ -172,47 +174,53 @@ class ValidationError(InputError):
         self, 
         message: Optional[str] = None, 
         value: Optional[Any] = None, 
+        extra: Optional[Any] = None,
         issue_type: Optional[str] = None
     ) -> None:
-        full_seperate = True
+        full_value = f"{value}" if value is not None else None
+        full_extra = f"{extra}" if extra is not None else None
+        # [ ] decide default true or false and why
+        full_seperate = False
         if issue_type == "File":
             full_message = f"'{message}' is Not a File" if message is not None else "Input is Not a File"
             full_value = f"Try Checking '{value}'" if value is not None else None
-            full_seperate = False if value is not None else True
         elif issue_type == "Mimetype":
             full_message = f"Mimetype '{value}' of '{message}' Not Accepted" if value is not None and message is not None else "Mimetype Not Accepted"
             full_value = None
+            full_extra = f"Allowed Mimetypes are '{extra}'" if extra is not None else None
         elif issue_type == "Extension":
             full_message = f"Extension '{value}' of '{message}' Not Accepted" if value is not None and message is not None else "Extension Not Accepted"
             full_value = None
+            full_extra = f"Allowed Extensions are '{extra}'" if extra is not None else None
         elif issue_type == "Matching":
             full_message = f"'{message}' and '{value}' Do Not Match" if value is not None and message is not None else "Suffix and Mimetype Do Not Match"
             full_value = None
+            full_extra = f"Allowed Mimetypes for '{message}' are '{extra}'" if message is not None and extra is not None else None
         elif issue_type == "Filename":
             full_message = f"'{message}' Not Accepted" if message is not None else "Filename Not Accepted"
             full_value = f"Renamed to '{value}'" if value is not None else "Renamed"
-            full_seperate = False
         elif issue_type == "Path":
             full_message = f"'{message}' Not Accepted" if message is not None else "Path Not Accepted"
             full_value = f"Moved  to '{value}'" if value is not None else "Moved"
-            full_seperate = False
         elif issue_type == "Dict":
             full_message = f"'{message}' is JSON but Not Dictionary" if message is not None else "Input is JSON but Not Dictionary"
-            full_value = f"{value}" if value is not None else None
         elif issue_type == "Decoding":
             full_message = f"Error Decoding JSON: {message}" if message is not None else "Error Decoding JSON: Check Foramtting"
-            full_value = f"{value}" if value is not None else None
+        # [ ] decide if seperate
         elif issue_type == "Schema":
-            full_message = f"Invalid File Structure -- {message}"
-            full_value = f"{value}" if value is not None else None
-            full_seperate = False
-        elif issue_type == "Designation":
-            full_message = f""
+            full_message = f"Invalid File Structure -- {message}" if message is not None else "Invalid File Structure"
+        elif issue_type == "PartNums":
+            full_message = f"'{message}' Number of Parts Mismatch" if message is not None else "Number of Parts Mismatch"
+            full_value = f"manual='{value}', computed='{extra}'" if value is not None and extra is not None else None
+            full_extra = None
+            full_seperate = True
+        elif issue_type == "MissingID":
+            full_message = f"'{message}' ID Missing" if message is not None else "Manufacturer ID Missing"
+            full_value = f"Generated New ID: '{value}'" if value is not None else "Generated New ID"
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"{message}" if message is not None else "Input Not Accepted"
-            full_value = f"{value}" if value is not None else None
-        super().__init__(full_message, full_value, full_seperate)
+        super().__init__(full_message, full_value, full_extra, full_seperate)
 
 
 class ExistsError(InputError):
@@ -221,18 +229,28 @@ class ExistsError(InputError):
         self, 
         message: Optional[str] = None, 
         value: Optional[Any] = None, 
+        extra: Optional[Any] = None,
         issue_type: Optional[str] = None
     ) -> None:
-        full_seperate = True
+        full_value = f"{value}" if value is not None else None
+        full_extra = f"{extra}" if extra is not None else None
+        full_seperate = False
         if issue_type == "File":
             full_message = f"'{message}' Already Exists" if message is not None else "File Already Exists"
             full_value = f"Renamed to '{value}'" if value is not None else "Renamed"
-            full_seperate = False
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"'{message}' Not Found" if message is not None else "Input Location Not Found"
-            full_value = f"{value}" if value is not None else None
-        super().__init__(full_message, full_value, full_seperate)
+        super().__init__(full_message, full_value, full_extra, full_seperate)
+
+class InterruptError(InputError):
+    def __init__(
+        self, 
+        message: Optional[str] = None, 
+        value: Optional[Any] = None,
+        extra: Optional[Any] = None
+    ) -> None:
+        super().__init__(f"Input Processing Interrupted by User", value, extra)
 
 # endregion
 
@@ -318,7 +336,7 @@ def preload(filename: str, quiet: Optional[bool] = False) -> Path:
         if not path.exists():
             raise NotFoundError(path, issue_type="Path")
         if not path.is_file():
-            raise ValidationError(filename, path, "File")
+            raise ValidationError(filename, path, issue_type="File")
         return path
     except NotFoundError as e:
         logger.warning(e)
@@ -334,7 +352,7 @@ def preload(filename: str, quiet: Optional[bool] = False) -> Path:
                 raise SystemExit(FAILURE)
         path = INPUT_DIR / filename_stem_matches[0]
         try:
-            raise NotFoundError(filename, path.name, "Extension")
+            raise NotFoundError(filename, path.name, issue_type="Extension")
         except Exception as e:
             logger.warning(e)
         logger.debug(f"'{path.name}' Path:       '{path}'")
@@ -360,12 +378,12 @@ def sanitize(filename) -> str:
         logger.debug(f"'{filename}' Sanitized Stem:       '{sanitized_stem}'")
 
         if not any(mimetype in types for types in ALLOWED_FILE_TYPES.values()):
-            raise ValidationError(filename, mimetype, "Mimetype")
+            raise ValidationError(filename, mimetype, list(ALLOWED_FILE_TYPES.values()), issue_type="Mimetype")
         if suffix:
             if suffix not in ALLOWED_FILE_TYPES.keys():
-                raise ValidationError(filename, suffix, "Extension")
+                raise ValidationError(filename, suffix, list(ALLOWED_FILE_TYPES.keys()), issue_type="Extension")
             if mimetype not in ALLOWED_FILE_TYPES[suffix]:
-                raise ValidationError(suffix, mimetype, "Matching")
+                raise ValidationError(suffix, mimetype, ALLOWED_FILE_TYPES[suffix], issue_type="Matching")
             sanitized_filename = sanitized_stem + suffix  
         else:
             sanitized_filename = sanitized_stem
@@ -373,7 +391,7 @@ def sanitize(filename) -> str:
 
         if Path(filename).name != sanitized_filename:
             try:
-                raise ValidationError(Path(filename).name, sanitized_filename, "Filename")
+                raise ValidationError(Path(filename).name, sanitized_filename, issue_type="Filename")
             except Exception as e:
                 logger.warning(e)
 
@@ -400,7 +418,7 @@ def sanitize_path(filename: str) -> Tuple[str, Path]:
                 except Exception as e:
                     logger.warning(e)
             try:
-                raise ValidationError(path, sanitized_path, "Path")
+                raise ValidationError(path, sanitized_path, issue_type="Path")
             except Exception as e:
                 logger.warning(e)
 
@@ -448,7 +466,7 @@ def validate_json(
     try:
         validate(inputdata, inputdata_schema)
     except SchemaValidationError as e:
-        raise ValidationError(e.message, traceback.format_exc(), "Schema")
+        raise ValidationError(e.message, traceback.format_exc(), issue_type="Schema")
 
     return inputdata
 
@@ -471,7 +489,10 @@ def resolve_json(
         parts_count = sum(len(part_list) for part_list in data["Parts"].values())
         if "Number of Parts" in data:
             if data["Number of Parts"] != parts_count:
-                logger.warning(f"{designation} Number of Parts Mismatch:        manual={data['Number of Parts']}, computed={parts_count}")
+                try:
+                    raise ValidationError(designation, data['Number of Parts'], parts_count, issue_type="PartNums")
+                except Exception as e:
+                    logger.warning(e)
         else:
             data["Number of Parts"] = parts_count
             logger.info(f"{designation} Number of Parts Added:      {parts_count}")
@@ -481,7 +502,10 @@ def resolve_json(
         if "ID" not in data:
             generated_id = str(uuid.uuid4())
             data["ID"] = generated_id
-            logger.info(f"{manufacturer} ID Missing -- Generated New ID:       {generated_id}")
+            try:
+                raise ValidationError(manufacturer, generated_id, issue_type="MissingID")
+            except Exception as e:
+                logger.warning(e)
 
     # Writes resolved_inputdata to 'resolved_inputdata.json' so the user can see both inputdata files
     with resolved_inputdata_path.open("w", encoding="utf-8") as f:
@@ -499,6 +523,9 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt as e:
-        logger.warning(f"{type(e).__name__}: Input Processing Interrupted by User -- Exiting")
+        try:
+            raise InterruptedError()
+        except Exception as e:
+            logger.warning(e)
         raise SystemExit(INTERRUPTED)
 
