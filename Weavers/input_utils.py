@@ -52,6 +52,9 @@ except ModuleNotFoundError as e:
     logger.critical(f"{type(e).__name__}: Missing Required Module '{e.name}' -- Try 'python -m pip install {e.name}' -- Exiting")
     raise SystemExit(FAILURE)
 
+FILE_NAME = "/input_utils.py"
+PARENT_DIR = "/Weavers"
+
 
 # -------------------------------------------------------------------------------------------
 #                                   EXCEPTION_CLASSES
@@ -72,11 +75,13 @@ class InputError(Exception):
         self, 
         message: Optional[str] = "Invalid Input", 
         value: Optional[Any] = None, 
+        extra: Optional[Any] = None,
         seperate: Optional[bool] = True
     ) -> None: 
         # [ ] Decide if Space or Docstring or what here
         self.message = message
-        self.value = value 
+        self.value = str(value) 
+        self.extra = str(extra)
         self.seperate = seperate
         super().__init__(message) 
     
@@ -92,15 +97,18 @@ class InputError(Exception):
         if self.seperate is True:  
             if self.value is not None:
                 parts.append(repr(self.value)) 
+            if self.extra is not None:
+                parts.append(repr(self.extra))
             return ": ".join(parts)
         else:
             main_message = ": ".join(parts)
             full_message = [main_message]
             if self.value is not None:
                 full_message.append(self.value)
-                return " -- ".join(full_message)
-            return main_message
-    
+            if self.extra is not None:
+                full_message.append(self.extra)
+            return " -- ".join(full_message)
+
 class SanitationError(InputError):
     """
     Raised when an input fails sanitation rules.
@@ -115,9 +123,10 @@ class SanitationError(InputError):
     def __init__(
         self, 
         message: Optional[str] = "Str", 
-        value: Optional[Any] = None
+        value: Optional[Any] = None,
+        extra: Optional[Any] = None
     ) -> None:
-        super().__init__(f"Unaccepted Characters Inputed in {message}", value)
+        super().__init__(f"Unaccepted Characters Inputed in {message}", value, extra)
 
 class NotFoundError(InputError):
     """
@@ -134,24 +143,27 @@ class NotFoundError(InputError):
         self, 
         message: Optional[Union[str, Path]] = None, 
         value: Optional[Any] = None, 
+        extra: Optional[Any] = None,
         issue_type: Optional[str] = None
     ) -> None:
-        full_seperate = True
+        full_value = f"{value}" if value is not None else None
+        full_extra = f"{extra}" if extra is not None else None
+        full_seperate = False
         if issue_type == "File":
-            full_message = f"'{message}' Not Found -- Try Ensuring '{message}' is in '{INPUT_DIR}'" if message is not None else "File Not Found"
-            full_value = f"{value}" if value is not None else None
+            full_message = f"'{message}' Not Found" if message is not None else "File Not Found"
+            full_value = f"Try Ensuring '{message}' is in '{value}'" if message is not None and value is not None else "Try Ensuring File is in the Input Directory"
+            full_extra = f"{value}" if message is None and value is not None else f"{extra}"
         elif issue_type == "Extension":
             full_message = f"'{message}' Extension Not Found" if message is not None else "Extension Not Found"
             full_value = f"Input Changed to '{value}'" if value is not None else "Input Changed"
-            full_seperate = False
         elif issue_type == "Path":
             full_message = f"'{message}' Not Found" if message is not None else "Path Not Found"
-            full_value = f"Check that '{message.name}' is in '{message.parent.name}' and that is in '/Weavers' -- Check that '/input_utils.py' is in '/Weavers'" if message is Path else "Check Directory Structure"
-            full_seperate = False
+            full_value = f"Check that '{message.name}' is in '{message.parent.name}' and that is in '{PARENT_DIR}'" if message is not None and message is Path else "Check Directory Structure"
+            full_extra - f"Check that '{FILE_NAME}' is in '{PARENT_DIR}'"
         # [ ] Change here later -- add more -- change else
         else:
-            full_message = f"'{message}' Not Found" if message is not None else "Input Location Not Found"
-            full_value = f"{value}" if value is not None else None
+            full_message = f"{message} Not Found" if message is not None else "Input Location Not Found"
+            full_seperate = True
         super().__init__(full_message, full_value, full_seperate)
 
 class ValidationError(InputError):
@@ -190,6 +202,12 @@ class ValidationError(InputError):
         elif issue_type == "Decoding":
             full_message = f"Error Decoding JSON: {message}" if message is not None else "Error Decoding JSON: Check Foramtting"
             full_value = f"{value}" if value is not None else None
+        elif issue_type == "Schema":
+            full_message = f"Invalid File Structure -- {message}"
+            full_value = f"{value}" if value is not None else None
+            full_seperate = False
+        elif issue_type == "Designation":
+            full_message = f""
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"{message}" if message is not None else "Input Not Accepted"
@@ -298,7 +316,7 @@ def preload(filename: str, quiet: Optional[bool] = False) -> Path:
         path = INPUT_DIR / filename
         logger.debug(f"'{filename}' Path:       '{path}'")
         if not path.exists():
-            raise NotFoundError(filename, path)
+            raise NotFoundError(path, issue_type="Path")
         if not path.is_file():
             raise ValidationError(filename, path, "File")
         return path
@@ -310,7 +328,7 @@ def preload(filename: str, quiet: Optional[bool] = False) -> Path:
         logger.debug(f"'{filename}' Stem Matches:       '{filename_stem_matches}'")
         if filename_stem_matches == []:
             try:
-                raise NotFoundError(filename, issue_type="File")
+                raise NotFoundError(filename, INPUT_DIR, issue_type="File")
             except Exception as e:
                 logger.critical(e)
                 raise SystemExit(FAILURE)
@@ -397,8 +415,9 @@ def sanitize_path(filename: str) -> Tuple[str, Path]:
 
 
 def load(filename: str) -> Union[dict, str]:
-    try:
-        sanitized_filename, path = sanitize_path(filename)
+    sanitized_filename, path = sanitize_path(filename)
+    # [ ] decide about extra try inside of function
+    try:    
         try:
             with path.open("r", encoding="utf-8") as f:
                 if path.suffix.lower() == ".json":
@@ -418,28 +437,34 @@ def load(filename: str) -> Union[dict, str]:
         raise SystemExit(FAILURE)
 
 
-def validate_json(json_file: str) -> dict:
+def validate_json(
+    json_file: str = "inputdata", 
+    json_schema: str = "inputdata_schema"
+) -> dict:
     inputdata = load(json_file)
-    assert isinstance(inputdata, dict), f"TypeError: '{json_file}' is Not a Dictionary -- Exiting"
+    inputdata_schema = load(json_schema)
 
+    # [ ] talk to corbin about in inputs or DATA_SCHEMA
     try:
-        validate(inputdata, DATA_SCHEMA)
-    except ValidationError as e:
-        raise InputError(f"{type(e).__name__}: Invalid File Structure -- {e.message} -- Exiting -- {traceback.format_exc()}")
+        validate(inputdata, inputdata_schema)
+    except SchemaValidationError as e:
+        raise ValidationError(e.message, traceback.format_exc(), "Schema")
 
     return inputdata
 
 
-def resolve_json(json_file: str) -> dict:
+def resolve_json(
+    json_file: str = "inputdata", 
+    json_schema: str = "inputdata_schema"
+) -> dict:
     try:
-        inputdata = validate_json(json_file)
+        inputdata = validate_json(json_file, json_schema)
     except Exception as e:
-        logger.critical(f"{type(e).__name__}: {e}")
+        logger.critical(e)
         raise SystemExit(FAILURE)
 
     resolved_inputdata = copy.deepcopy(inputdata)
-    inputdata_path = (Path(INPUT_DIR) / json_file).resolve()
-    resolved_inputdata_path = Path(INPUT_DIR) / f"resolved_{inputdata_path.name}"
+    resolved_inputdata_path = INPUT_DIR / f"resolved_{json_file}"
 
     # Resolves 'Number of Parts' for each designation by adding it if missing or warning the user if incorrect
     for designation, data in resolved_inputdata["Designations"].items():
