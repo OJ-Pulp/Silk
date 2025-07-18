@@ -76,12 +76,14 @@ class InputError(Exception):
         message: Optional[str] = "Invalid Input", 
         value: Optional[Any] = None, 
         extra: Optional[Any] = None,
-        seperate: Optional[bool] = False
+        exit: bool = True,
+        seperate: bool = False
     ) -> None: 
         # [ ] Decide if Space or Docstring or what here
         self.message = message
         self.value = str(value) 
         self.extra = str(extra)
+        self.exit = exit
         self.seperate = seperate
         super().__init__(message) 
     
@@ -99,6 +101,8 @@ class InputError(Exception):
                 parts.append(repr(self.value)) 
             if self.extra is not None:
                 parts.append(repr(self.extra))
+            if self.exit is True:
+                parts.append("Exiting")
             return ": ".join(parts)
         else:
             main_message = ": ".join(parts)
@@ -107,6 +111,8 @@ class InputError(Exception):
                 full_message.append(self.value)
             if self.extra is not None:
                 full_message.append(self.extra)
+            if self.exit is True:
+                full_message.append("Exiting")
             return " -- ".join(full_message)
 
 class SanitationError(InputError):
@@ -146,10 +152,12 @@ class NotFoundError(InputError):
         message: Optional[Union[str, Path]] = None, 
         value: Optional[Any] = None, 
         extra: Optional[Any] = None,
+        exiting: bool = True,
         issue_type: Optional[str] = None
     ) -> None:
         full_value = f"{value}" if value is not None else None
         full_extra = f"{extra}" if extra is not None else None
+        full_exit = True
         full_seperate = False
         if issue_type == "File":
             full_message = f"'{message}' Not Found" if message is not None else "File Not Found"
@@ -158,6 +166,7 @@ class NotFoundError(InputError):
         elif issue_type == "Extension":
             full_message = f"'{message}' Extension Not Found" if message is not None else "Extension Not Found"
             full_value = f"Input Changed to '{value}'" if value is not None else "Input Changed"
+            full_exit = False
         elif issue_type == "Path":
             full_message = f"'{message}' Not Found" if message is not None else "Path Not Found"
             full_value = f"Check that '{message.name}' is in '{message.parent.name}' and that is in '{PARENT_DIR}'" if message is not None and message is Path else "Check Directory Structure"
@@ -166,7 +175,7 @@ class NotFoundError(InputError):
         else:
             full_message = f"{message} Not Found" if message is not None else "Input Location Not Found"
             full_seperate = True
-        super().__init__(full_message, full_value, full_extra, full_seperate)
+        super().__init__(full_message, full_value, full_extra, full_exit, full_seperate)
 
 class ValidationError(InputError):
 
@@ -175,11 +184,13 @@ class ValidationError(InputError):
         message: Optional[str] = None, 
         value: Optional[Any] = None, 
         extra: Optional[Any] = None,
+        exit: bool = True,
         issue_type: Optional[str] = None
     ) -> None:
         full_value = f"{value}" if value is not None else None
         full_extra = f"{extra}" if extra is not None else None
         # [ ] decide default true or false and why
+        full_exit = True
         full_seperate = False
         if issue_type == "File":
             full_message = f"'{message}' is Not a File" if message is not None else "Input is Not a File"
@@ -199,13 +210,17 @@ class ValidationError(InputError):
         elif issue_type == "Filename":
             full_message = f"'{message}' Not Accepted" if message is not None else "Filename Not Accepted"
             full_value = f"Renamed to '{value}'" if value is not None else "Renamed"
+            full_exit = False
         elif issue_type == "Path":
             full_message = f"'{message}' Not Accepted" if message is not None else "Path Not Accepted"
             full_value = f"Moved  to '{value}'" if value is not None else "Moved"
+            full_exit = False
         elif issue_type == "Dict":
             full_message = f"'{message}' is JSON but Not Dictionary" if message is not None else "Input is JSON but Not Dictionary"
+            full_exit = False
         elif issue_type == "Decoding":
             full_message = f"Error Decoding JSON: {message}" if message is not None else "Error Decoding JSON: Check Foramtting"
+            full_exit = False
         # [ ] decide if seperate
         elif issue_type == "Schema":
             full_message = f"Invalid File Structure -- {message}" if message is not None else "Invalid File Structure"
@@ -213,14 +228,16 @@ class ValidationError(InputError):
             full_message = f"'{message}' Number of Parts Mismatch" if message is not None else "Number of Parts Mismatch"
             full_value = f"manual='{value}', computed='{extra}'" if value is not None and extra is not None else None
             full_extra = None
+            full_exit = False
             full_seperate = True
         elif issue_type == "MissingID":
             full_message = f"'{message}' ID Missing" if message is not None else "Manufacturer ID Missing"
             full_value = f"Generated New ID: '{value}'" if value is not None else "Generated New ID"
+            full_exit = False
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"{message}" if message is not None else "Input Not Accepted"
-        super().__init__(full_message, full_value, full_extra, full_seperate)
+        super().__init__(full_message, full_value, full_extra, full_exit, full_seperate)
 
 
 class ExistsError(InputError):
@@ -230,10 +247,12 @@ class ExistsError(InputError):
         message: Optional[str] = None, 
         value: Optional[Any] = None, 
         extra: Optional[Any] = None,
+        exit: bool = True,
         issue_type: Optional[str] = None
     ) -> None:
         full_value = f"{value}" if value is not None else None
         full_extra = f"{extra}" if extra is not None else None
+        full_exit = False
         full_seperate = False
         if issue_type == "File":
             full_message = f"'{message}' Already Exists" if message is not None else "File Already Exists"
@@ -241,16 +260,17 @@ class ExistsError(InputError):
         # [ ] Change here later -- add more -- change else
         else:
             full_message = f"'{message}' Not Found" if message is not None else "Input Location Not Found"
-        super().__init__(full_message, full_value, full_extra, full_seperate)
+        super().__init__(full_message, full_value, full_extra, full_exit, full_seperate)
 
 class InterruptError(InputError):
     def __init__(
         self, 
         message: Optional[str] = None, 
         value: Optional[Any] = None,
-        extra: Optional[Any] = None
+        extra: Optional[Any] = None,
+        exit: bool = True
     ) -> None:
-        super().__init__(f"Input Processing Interrupted by User", value, extra)
+        super().__init__(f"Input Processing Interrupted by User", value, extra, exit)
 
 # endregion
 
