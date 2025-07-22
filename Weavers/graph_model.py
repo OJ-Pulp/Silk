@@ -70,20 +70,6 @@ class Node(ABC):
 
         return row
 
-    @staticmethod
-    def write_to_csv(nodes, filename: Path):
-        """
-        Converts the passed Nodes to a CSV file.
-
-        :param filename: The path to the CSV file to write.
-        :type filename: Path
-        :raises FileNotFoundError: If the directory for the filename does not exist.
-        """
-        filename.parent.mkdir(parents=True, exist_ok=True)
-        rows = [c.to_dict() for c in nodes]
-        df = pd.DataFrame(rows)
-        df.to_csv(filename, index=False)
-
 
 class Edge(ABC):
     """
