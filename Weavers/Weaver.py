@@ -88,25 +88,3 @@ class Weaver(ABC):
         :param path: The path to the CSV file.
         """
 
-    # I need to reimplement this to avoid filling the memory with nodes and edges, and instead publish them directly to Kafka stream in the loops.
-    # I am not sure how this will work with the current implementation of ChainWeaver
-    def publish_to_kafka(
-        self,
-        kafka_bootstrap_servers="localhost:9092"
-    ):
-        producer = KafkaProducer(
-            bootstrap_servers=kafka_bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        )
-        for node in self.nodes:
-            producer.send("nodes", node.metadata)
-        for edge in self.edges:
-            producer.send(
-                "edges",
-                {
-                    "start_node": edge.start_node.id,
-                    "end_node": edge.end_node.id,
-                },
-            )
-        producer.flush()
-        producer.close()
