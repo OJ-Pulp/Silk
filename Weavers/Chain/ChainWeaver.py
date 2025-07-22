@@ -24,12 +24,23 @@ class ChainWeaver(Weaver):
         super().__init__([], [])
         self.num_products = num_products
         self.variant_distribution = variant_distribution
+
+        # Validates and resolves 'inputdata.json'
+        try:
+            resolved_inputdata = resolve_json("inputdata.json")
+        except Exception as e:
+            logger.critical(f"{type(e).__name__}: {e}")
+            raise SystemExit(FAILURE)
+
+        logger.info("Inputs Accepted")
+        
+        self.designations_dict = resolved_inputdata["Designations"]
+        self.manufacturers_dict = resolved_inputdata["Manufacturers"]
+
         self.base_edges = []
         self.variant_edges = []
         self.base_components = []
         self.variant_components = []
-        self.manufacturers_dict = {}
-        self.designations_dict = {}
 
 # -------------------------------------------------------------------------------------------
 #                                      BASE_PRODUCTS
@@ -201,10 +212,6 @@ class ChainWeaver(Weaver):
         :type `base_products`: List[Component]
         :param `base_product_sprues`: A list of base product sprues and their data.
         :type `base_product_sprues`: List[Component]
-        :param `designations_dict`: The 'Designation' category of 'resolved_inputdata'.
-        :type `designations_dict`: dict
-        :param `manufacturers_dict`: The 'Manufacturer' category of 'resolved_inputdata'.
-        :type `manufacturers_dict`: dict
 
         :return: A list of base product parts.
         :rtype: List[Component]
@@ -397,17 +404,6 @@ class ChainWeaver(Weaver):
         # Converts back to chr and outputs as a string of a standard capital letter
         return chr(next_char_code)
 
-    def get_next_test_output_filename(self, base_name: str, extension: str, output_dir: Path = Path("output")) -> Path:
-        output_dir.mkdir(parents=True, exist_ok=True)
-        index = 1
-        if not extension.startswith("."):
-            extension = "." + extension
-        while True:
-            filename = output_dir / f"test{index}_{base_name}{extension}"
-            if not filename.exists():
-                logger.warning(index)
-                return filename
-            index += 1
 
 # endregion
 
@@ -527,7 +523,7 @@ class ChainWeaver(Weaver):
             component_data = {
                 "name": f"{variant_base_product.metadata['popular_name']} {variant_designation}", 
                 "manufacturer": variant_manufacturer,
-                "locations": FAKER_GEN.random_element(list(manufacturers_dict[variant_manufacturer]["Locations"])),
+                "locations": FAKER_GEN.random_element(list(self.manufacturers_dict[variant_manufacturer]["Locations"])),
                 "full_product": True,
                 "component_type": "Product",
                 "variant": True,
@@ -566,8 +562,6 @@ class ChainWeaver(Weaver):
         variant_products: List[Component],
         vital_base_product_sprues: List[Component],
         base_product_part_edges: List[Requires],
-        designations_dict: dict,
-        manufacturers_dict: dict
     )  -> Tuple[List[Component], List[Requires], dict, dict]:
         """
         INSERT STUFF
@@ -584,13 +578,13 @@ class ChainWeaver(Weaver):
             logger.debug(f"Variant Product {i}:")
 
             individual_needed_parts = set()
-            designation = designations_dict.get(variant_product.metadata["designation"])
+            designation = self.designations_dict.get(variant_product.metadata["designation"])
             if designation:
                 parts = designation.get("Parts")
                 for part_list in parts.values():
                     individual_needed_parts.update(part_list)
             
-            individual_needed_manufacturers = set(manufacturers_dict.keys())
+            individual_needed_manufacturers = set(self.manufacturers_dict.keys())
 
             for vital_sprue in vital_base_product_sprues:
                 if variant_product.metadata["variant_base_product"] == vital_sprue.metadata["product"]:
@@ -621,7 +615,7 @@ class ChainWeaver(Weaver):
                 component_data = {
                     "name": f"Sprue {FAKER_GEN.bothify(text='???########')}",
                     "manufacturer": manufacturer,
-                    "locations": FAKER_GEN.random_element(manufacturers_dict[manufacturer]["Locations"]),
+                    "locations": FAKER_GEN.random_element(self.manufacturers_dict[manufacturer]["Locations"]),
                     "full_product": False,
                     "component_type": "Sprue",
                     "variant": True,
@@ -668,8 +662,6 @@ class ChainWeaver(Weaver):
         variant_sprues: List[Component], 
         needed_parts: dict, 
         needed_manufacturers: dict,
-        designations_dict: dict,
-        manufacturers_dict: dict
     ) -> Tuple[List[Component], List[Requires]]:
         """
         INSERT HERE
@@ -682,7 +674,7 @@ class ChainWeaver(Weaver):
         for i, variant_product in enumerate(variant_products, start=1):
             logger.debug(f"Variant Product {i}:")
 
-            parts_categories = designations_dict[variant_product.metadata["designation"]]["Parts"]
+            parts_categories = self.designations_dict[variant_product.metadata["designation"]]["Parts"]
             for part_category, _ in parts_categories.items():
                 for part_type in needed_parts[variant_product.id]:
                     logger.debug(f"{part_type}:")
@@ -694,7 +686,7 @@ class ChainWeaver(Weaver):
                     component_data = {
                         "name": f"{part_type}{FAKER_GEN.bothify('???#####')}",
                         "manufacturer": variant_part_manufacturer,
-                        "locations": FAKER_GEN.random_element(manufacturers_dict[variant_part_manufacturer]["Locations"]),
+                        "locations": FAKER_GEN.random_element(self.manufacturers_dict[variant_part_manufacturer]["Locations"]),
                         "full_product": False,
                         "component_type": "Part",
                         "product": variant_product.id,
@@ -746,14 +738,6 @@ class ChainWeaver(Weaver):
         """
         logger.info("Main Start")
 
-        # Validates and resolves 'inputdata.json'
-        try:
-            resolved_inputdata = resolve_json("inputdata.json")
-        except Exception as e:
-            logger.critical(f"{type(e).__name__}: {e}")
-            raise SystemExit(FAILURE)
-
-        logger.info("Inputs Accepted")
 
         # Sets overall variables
         logger.debug("Local Main Variables: ")
@@ -763,23 +747,21 @@ class ChainWeaver(Weaver):
         logger.debug(f"Num_Variants:        {num_variants}")
         num_base_products = self.num_products - num_variants
         logger.debug(f"Num_Base_Products:        {num_base_products}")
-        designations_dict = resolved_inputdata["Designations"]
-        manufacturers_dict = resolved_inputdata["Manufacturers"]
         logger.info("Local Main Variables Set")
 
-        base_products = self.create_base_products(num_base_products, designations_dict, manufacturers_dict)
+        base_products = self.create_base_products(num_base_products)
         logger.info("Base Products Created")
-        base_product_sprues, base_product_sprue_edges = self.create_base_product_sprues(base_products, manufacturers_dict)
+        base_product_sprues, base_product_sprue_edges = self.create_base_product_sprues(base_products)
         logger.info("Base Product Sprues Created")
-        base_product_parts, base_product_part_edges, vital_base_product_sprues =  self.create_base_product_parts(base_products, base_product_sprues, designations_dict, manufacturers_dict)
+        base_product_parts, base_product_part_edges, vital_base_product_sprues =  self.create_base_product_parts(base_products, base_product_sprues)
         logger.info("Base Product Parts Created")
         resolved_base_product_sprues, resolved_base_product_sprue_edges = self.resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
         logger.info("Base Product Sprues Resolved")
-        variant_products = self.create_variant_products(base_products, manufacturers_dict, num_variants)
+        variant_products = self.create_variant_products(base_products, num_variants)
         logger.info("Variant Products Created")
-        variant_sprues, variant_sprue_edges, needed_parts, needed_manufacturers = self.create_variant_product_sprues(variant_products, vital_base_product_sprues, base_product_part_edges, designations_dict, manufacturers_dict)
+        variant_sprues, variant_sprue_edges, needed_parts, needed_manufacturers = self.create_variant_product_sprues(variant_products, vital_base_product_sprues, base_product_part_edges)
         logger.info("Variant Sprues Created")
-        variant_parts, variant_part_edges = self.create_variant_parts(variant_products, variant_sprues, needed_parts, needed_manufacturers, designations_dict, manufacturers_dict)
+        variant_parts, variant_part_edges = self.create_variant_parts(variant_products, variant_sprues, needed_parts, needed_manufacturers)
         logger.info("Variant Parts Created")
 
         # Collect all components and edges
@@ -797,20 +779,19 @@ class ChainWeaver(Weaver):
     def generate_edges(self) -> dict:
         return {"base": self.base_edges, "variant": self.variant_edges}
 
-    def write_to_csv(self, path: str = "output"):
-        if not self.components or not self.base_edges:
-            logger.warning("No components or edges to write. Did you call weave()?")
-            return
-        Component.write_to_csv(self.components, self.get_next_test_output_filename("components", "csv", Path(path)))
-        Requires.write_to_csv(self.base_edges + self.variant_edges, self.get_next_test_output_filename("edges", "csv", Path(path)))
-        logger.info("CSV Files Created")
+    # def write_to_csv(self, path: str = "output"):
+    #     if not self.components or not self.base_edges:
+    #         logger.warning("No components or edges to write. Did you call weave()?")
+    #         return
+    #     Component.write_to_csv(self.components, self.get_next_test_output_filename("components", "csv", Path(path)))
+    #     Requires.write_to_csv(self.base_edges + self.variant_edges, self.get_next_test_output_filename("edges", "csv", Path(path)))
+    #     logger.info("CSV Files Created")
 
 
 def main(num_products: int = 40, variant_distribution: float = 0.25):
     weaver = ChainWeaver(num_products, variant_distribution)
     weaver.weave()
-    weaver.write_to_csv()
-    weaver.publish_to_kafka()
+    # weaver.write_to_csv()
 
 # endregion
 
