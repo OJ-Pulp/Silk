@@ -1,11 +1,12 @@
 # Standard
 import logging
 import json
+import csv
 from abc import ABC, abstractmethod
 from typing import List
+from pathlib import Path
 
 # Third-Party
-from kafka import KafkaProducer
 import faker
 
 # Local
@@ -79,12 +80,38 @@ class Weaver(ABC):
         Generate edges for the weaver.
         This method should be implemented by subclasses.
         """
+    
+    @staticmethod
+    def get_output_filename(base_name: str, extension: str, output_dir: Path = Path("output")) -> Path:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        index = 1
+        if not extension.startswith("."):
+            extension = "." + extension
+        while True:
+            filename = output_dir / f"test{index}_{base_name}{extension}"
+            if not filename.exists():
+                logger.warning(index)
+                return filename
+            index += 1
 
-    @abstractmethod
-    def write_to_csv(self, path: str):
+    def write_to_csv(self, data: List[dict]):
         """
         Write the generated nodes and edges to a CSV file.
         This method should be implemented by subclasses.
         :param path: The path to the CSV file.
         """
+
+        path = Weaver.get_output_filename(base_name="components", extension="csv")
+        file = open(path, "a", newline="") # Open file once
+
+        writer = csv.DictWriter(file, fieldnames=data[0].keys())
+
+        # Only write header if file is empty
+        if file.tell() == 0:
+            writer.writeheader()
+
+        for dicts in data:
+            writer.writerow(dicts)
+
+        file.close() # Don’t forget to close the file!
 
