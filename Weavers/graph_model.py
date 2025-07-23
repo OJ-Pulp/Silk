@@ -19,7 +19,8 @@ class Node(ABC):
     - Manufacturer nodes might use the name of the company (ex. "Ford Motor Company").
     """
 
-    __csv_fields__: Optional[List[str]] = None  # Can (and should) be overridden
+    # Must be overridden in subclasses to specify which fields to export
+    __csv_fields__: List[str]
 
     def __init__(self, name: str, id: Optional[str] = None):
         """
