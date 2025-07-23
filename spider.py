@@ -8,68 +8,157 @@ tool functions for answering network questions.
 
 from config import DEFAULT_PATH, SCHEMA_FILE, join_paths
 from Web.db import GraphDB
-from Web.webmath import markov_chain, max_profit_route, mcl, mcc
+from Web.webmath.math import markov_chain, max_profit_route, mcl, mcc
 import numpy as np
+from typing import List
 
 
 class Spider:
-    def __init__(self, db_name: str, db_path: str = None):
-        # Initialize the GraphDB with the provided paths.
+    def __init__(self, db_name: str = None, db_path: str = None):
+        self.current_state = {
+            "graph": {
+                "graph_filter": [],
+                "node_filter": {},
+                "edge_filter": {},
+            },
+            "Tools": {
+                "Weight Nodes": None,
+                "Weight Edges": None,
+                "Traverse Graph": None,
+                "Cluster Graph": None,
+                "Compare Graphs": None,
+            },
+        }
         if db_path is None:
-            self.graph = GraphDB(join_paths(DEFAULT_PATH, db_name), SCHEMA_FILE)
+            self.current_db_path = None
+            self.graph = None
         else:
-            self.graph = GraphDB(join_paths(db_path, db_name), SCHEMA_FILE)
+            self.current_db_path = join_paths(db_path, db_name)
+            self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
-    # TOOL FUNCTIONS
-    # NOTE: These are our base tools for answering network questions.
-    #       If we need more complex tools, we can add them later.
-    # For the tool functions, I need to use the get node and get edge functions to make sure that the data and not the index
-    # are returned.
+    # ----------------------------
+    # Persistence Methods
+    # ----------------------------
+    def create_database(self, filepath):
+        self.current_db_path = filepath
+        self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
-    def get_web(self, graph_ids: list, node_filter: str, edge_filter: str):
+    def change_database(self, filepath):
+        self.current_db_path = filepath
+        self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
+
+    def disconnect(self):
+        if self.graph is not None:
+            self.graph.close()
+            self.graph = None
+        else:
+            print("No active database connection to close.")
+
+    def reconnect(self):
+        if self.current_db_path is not None:
+            self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
+        else:
+            print("No active database connection to reconnect.")
+
+    def is_database(self):
+        return self.graph is not None and self.current_db_path is not None
+
+    def check_id(self, id):
         """
-        Get a subgraph from the web database based on node and edge filters.
-        Args:
-            node_filter: a dictionary where keys are node attributes and values are the values to filter by.
-            edge_filter: a dictionary where keys are edge attributes and values are the values to filter by.
-
-        returns:
-            edges_matrix: a 2D numpy array representing the edges of the subgraph.
-            node_weights: a 1D numpy array representing the weights of the nodes in the subgraph.
-            key: a list of original node indexes where the list index corresponds
-                 to the location in the subgraph and the value is the original index.
+        Check if an ID exists in the current database.
         """
+        if self.graph is None:
+            print("No active database connection.")
+            return True
+        return self.graph.check_id(id)
+
+    def get_graphs(self):
+        """
+        Get all graphs in the current database.
+        """
+        if self.graph is None:
+            print("No active database connection.")
+            return []
+        return self.graph.get_graphs()
+
+    # ----------------------------
+    # Entity/Node/Edge Creation
+    # ----------------------------
+    def create_node(self, graph_ids, node_id, **kwargs):
+        self.graph.add_node(graph_ids, node_id, **kwargs)
+
+    def create_edge(self, source, target, **kwargs):
+        self.graph.add_edge(source, target, **kwargs)
+
+    def change_node(self, node_id, **kwargs):
+        self.graph.edit_node(node_id, **kwargs)
+
+    def change_edge(self, edge_id, **kwargs):
+        self.graph.edit_edge(edge_id, **kwargs)
+
+    def delete_node(self, node_id):
+        self.graph.delete_node(node_id)
+
+    def delete_edge(self, edge_id):
+        self.graph.delete_edge(edge_id)
+
+    def get_node(self, node_id):
+        return self.graph.get_node(node_id)
+
+    def get_edge(self, source: str, target: str):
+        return self.graph.get_edge(source, target)
+
+    # ----------------------------
+    # Graph Management
+    # ----------------------------
+    def create_graph(self, id):
+        self.graph.add_graph(id)
+
+    def delete_graph(self, id):
+        self.graph.delete_graph(id)
+
+    def get_current_graph(self):
+        return self.filter_graphs(**self.current_state["graph"])
+
+    def save_current_graph(self, graph_id):
+        """
+        Save the current graph state to the database.
+        """
+        _edge_matrix, _node_weights, node_idxs = self.filter_graphs(
+            **self.current_state["graph"]
+        )
+        print(f"Saving current graph as '{graph_id}' with nodes: {node_idxs}")
+        self.graph.add_graph(graph_id, node_idxs)
+
+    def filter_graphs(
+        self,
+        graph_filter: List[str] = None,
+        node_filter: str = None,
+        edge_filter: str = None,
+    ):
+
+        self.current_state["graph"]["graph_filter"] = graph_filter or []
+        self.current_state["graph"]["node_filter"] = node_filter or {}
+        self.current_state["graph"]["edge_filter"] = edge_filter or {}
         edge_matrix, node_weights, node_idxs = self.graph.create_graph(
-            graph_ids=graph_ids, node_filter=node_filter, edge_filter=edge_filter
+            graph_filter=graph_filter, node_filter=node_filter, edge_filter=edge_filter
         )
         return edge_matrix, node_weights, node_idxs
 
-    def weight_nodes(self, node_filter: str, edge_filter: str) -> np.ndarray:
-        """Implement a node weighting algorithm (PageRank) and return the weighted node array."""
+    # ----------------------------
+    # Tool Methods (Graph Algorithms)
+    # ----------------------------
 
-        # Create a subgraph based on the filters provided.
-        edge_matrix, node_weights, index_keys = self.get_web(node_filter, edge_filter)
-
-        # If the edge matrix or node vector is None, return None.
+    def weight_nodes(self, edge_matrix, node_vector, index_keys):
         if edge_matrix is None or edge_matrix.size == 0:
             return None
+        weights = markov_chain(edge_matrix)
+        return list(zip(index_keys, weights))
 
-        # Use the Markov chain algorithm to compute the node weights.
-        node_weights = markov_chain(edge_matrix)
-
-        return list(zip(index_keys, node_weights))
-
-    def weight_edges(self, node_filter: str, edge_filter: str) -> np.ndarray:
-        """Implement an edge weighting algorithm (betweenness/gravity) and return the weighted edge array."""
-        # Create a subgraph based on the filters provided.
-        edge_matrix, node_vector, index_keys = self.get_web(node_filter, edge_filter)
-        # If the edge matrix or node vector is None, return None.
+    def weight_edges(self, edge_matrix, node_vector, index_keys):
         if edge_matrix is None or edge_matrix.size == 0:
             return None
-
-        # Use the Markov chain algorithm to compute the edge weights.
         edge_weights = mcc(edge_matrix, node_vector)
-        # Return the edge weights as a list of tuples ((from_node, to_node), weight).
         return [
             ((index_keys[i], index_keys[j]), edge_weights[i, j])
             for i in range(edge_weights.shape[0])
@@ -77,92 +166,26 @@ class Spider:
             if not np.isinf(edge_weights[i, j]) and edge_weights[i, j] != 0
         ]
 
-    def cluster(self, node_filter: str, edge_filter: str) -> list:
-        """Implement a graph clustering algorithm and return the index of the clusters."""
-        # Create a subgraph based on the filters provided.
-        edge_matrix, node_vector, index_keys = self.get_web(node_filter, edge_filter)
-
-        # If the edge matrix or node vector is None, return None.
-        if edge_matrix is None or edge_matrix.size == 0:
+    def traverse_graph(self, edge_matrix, node_vector, index_keys, **kwargs):
+        start = kwargs.get("start")
+        end = kwargs.get("end")
+        K = kwargs.get("num_hops")
+        route = max_profit_route(edge_matrix, node_vector, start, end, K)
+        if route is None:
             return None
+        return [index_keys[i] for i in route]
 
-        # Use the Markov chain algorithm to compute the clusters.
+    def cluster_graph(self, edge_matrix, node_vector, index_keys):
         clusters = mcl(edge_matrix)
-        # Convert the clusters from the subgraph index to the original index.
         if clusters is None or len(clusters) == 0:
             return None
         return [
             [index_keys[i] for i in cluster] for cluster in clusters if len(cluster) > 0
         ]
 
-    def traverse(
-        self,
-        start: int,
-        end: int,
-        node_filter: str,
-        edge_filter: str,
-        num_hops: int = None,
-    ) -> list:
-        """Implement a cost-benefit analysis algorithm to find the best path."""
-        # Create a subgraph based on the filters provided.
-        edge_matrix, node_vector, index_keys = self.get_web(node_filter, edge_filter)
+    def compare_graphs(self, graph1_id, graph2_id):
+        return self.graph.compare_graphs(graph1_id, graph2_id)
 
-        route = max_profit_route(
-            cost_matrix=edge_matrix,
-            reward=node_vector,
-            start=start,
-            end=end,
-            K=num_hops,
-        )
-        # Convert the route from the subgraph index to the original index.
-        if route is None or len(route) == 0:
-            return None
-        else:
-            return [index_keys[i] for i in route]
-
-    # WRAPPER FUNCTIONS FOR WEBDB
-    def add_node(self, **kwargs) -> int:
-        """Add a node to the web database and return the index of the node."""
-        return self.web.add_node(**kwargs)
-
-    def delete_node(self, node_index: int):
-        """Delete a node from the web database."""
-        self.web.delete_node(node_index)
-
-    def add_edge(self, from_node: int, to_node: int, **kwargs) -> int:
-        """Add an edge to the web database and return the index of the edge."""
-        return self.web.add_edge(from_node, to_node, **kwargs)
-
-    def delete_edge(self, from_node: int, to_node: int):
-        """Delete an edge from the web database."""
-        self.web.delete_edge(from_node, to_node)
-
-    def get_node(self, node_index: list = None) -> np.ndarray:
-        """Get nodes from the web database. If no indices are provided, return all nodes."""
-        return self.web.get_node(node_index)
-
-    def get_edge(self, from_node: int, to_node: int) -> np.ndarray:
-        """Get an edge from the web database."""
-        return self.web.get_edge(from_node, to_node)
-
-    def get_schema(self) -> dict:
-        """Returns the schema of the web database from the sql schema file."""
-        return self.web.get_schema()
-
-    def change_schema(self, new_schema: str):
-        """Change the schema of the web database."""
-        self.web.change_schema(new_schema)
-
-    def delete_web(self):
-        """Delete the web database."""
-        self.web.delete_db()
-        self.web = None
-
-    def change_web(self, web_path: str):
-        """Change the current web database to a new one."""
-        self.web.close()
-        self.load_web(web_path)
-
-    def load_web(self, web_path: str):
-        """Load a web database by name."""
-        return WebDB(web_path, SCHEMA_FILE)
+    def get_tools(self):
+        # Placeholder; implement dynamic tool discovery if needed
+        return ["Tool1", "Tool2", "Tool3"]

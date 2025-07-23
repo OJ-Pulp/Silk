@@ -12,8 +12,8 @@ class GraphDB:
         # Initialize the database connection and schema.
         if not os.path.exists(db_name):
             self.connection = sqlite3.connect(db_name)
-            self._initialize_db(schema_path)
             self.cursor = self.connection.cursor()
+            self._initialize_db(schema_path)
         else:
             self.connection = sqlite3.connect(db_name)
             self.cursor = self.connection.cursor()
@@ -25,20 +25,33 @@ class GraphDB:
             self.cursor.executescript(schema_sql)
         self.connection.commit()
 
-    def add_graph(self, **kwargs) -> int:
+    def add_graph(
+        self, graph_id: str = None, node_ids: List[str] = None, **kwargs
+    ) -> int:
         """
         Add a new graph to the web database and return its ID.
 
         Parameters:
+            graph_id (str, optional): ID of the graph. If None, a new UUID will be generated.
+            node_ids (List[str], optional): List of node IDs to associate with the graph.
             **kwargs: Entity and value pairs of the graph following the schema.
                     Example: name="Graph1", description="A sample graph", etc.
         Returns:
             int: ID of the newly added graph.
         """
-        graph_id = str(uuid.uuid4())
-        self.cursor.execute(
-            "INSERT INTO Graph_Nodes (Graph_ID) VALUES (?)", (graph_id,)
-        )
+        if graph_id is None:
+            graph_id = str(uuid.uuid4())
+        if not node_ids:
+            node_ids = []
+            self.cursor.execute(
+                "INSERT INTO Graph_Nodes (Graph_ID) VALUES (?)", (graph_id,)
+            )
+        else:
+            for node_id in node_ids:
+                self.cursor.execute(
+                    "INSERT INTO Graph_Nodes (Graph_ID, Node_ID) VALUES (?, ?)",
+                    (graph_id, node_id),
+                )
         self.connection.commit()
         # Insert kwargs into the Graph_Entities Table
         self._add_entities(graph_id, "graph", **kwargs)
@@ -74,22 +87,36 @@ class GraphDB:
 
         self.connection.commit()
 
-    def add_node(self, graph_id: int, **kwargs) -> int:
+    def get_graphs(self) -> List[str]:
+        """
+        Retrieve all graph IDs from the database.
+        Returns:
+            List[str]: A list of graph IDs.
+        """
+        self.cursor.execute("SELECT DISTINCT Graph_ID FROM Graph_Nodes")
+        return [row[0] for row in self.cursor.fetchall() if row[0] is not None]
+
+    def add_node(self, graph_ids: List[str], node_id: str = None, **kwargs) -> int:
         """
         Add a node to the web database.
 
         Parameters:
+            graph_ids (List[str]): List of graph IDs to which the node belongs.
+            node_id (str, optional): ID of the node. If None, a new UUID will be generated.
             **kwargs: Entity and value pairs of nodes following the schema.
                     Example: name="Node1", location="USA", company="Acme", etc.
 
         Returns:
             str: ID of the newly added node.
         """
-        node_id = str(uuid.uuid4())
-        self.cursor.execute(
-            "INSERT INTO Graph_Nodes (Graph_ID, Node_ID) VALUES (?, ?)",
-            (graph_id, node_id),
-        )
+        if node_id is None:
+            node_id = str(uuid.uuid4())
+
+        for graph_id in graph_ids:
+            self.cursor.execute(
+                "INSERT INTO Graph_Nodes (Graph_ID, Node_ID) VALUES (?, ?)",
+                (graph_id, node_id),
+            )
         self.connection.commit()
         # Insert kwargs into the Node_Entities Table
         self._add_entities(node_id, "node", **kwargs)
@@ -103,10 +130,58 @@ class GraphDB:
             node_id (str): ID of the node to delete.
         """
         # Delete the node from the Nodes table
-        self.cursor.execute("DELETE FROM Graph_Nodes WHERE Node_ID = ?", (node_id,))
+        self.cursor.execute(
+            "DELETE FROM Graph_Nodes WHERE Node_ID = ?",
+            (node_id,),
+        )
+        # Delete all related entities from each of the Node_Entities tables
+        self._delete_entities(node_id, "node")
+
+        # Delete all edges associated with this node
+        self.cursor.execute(
+            "DELETE FROM Edges WHERE SourceID = ? OR TargetID = ?", (node_id, node_id)
+        )
+
+        self.connection.commit()
+
+    def edit_node(self, node_id: str, **kwargs):
+        """
+        Edit a node in the web database.
+
+        Parameters:
+            node_id (str): ID of the node to edit.
+            **kwargs: Updated entity and value pairs for the node.
+        """
         # Delete all related entities from each of the Node_Entities tables
         self._delete_entities(node_id, "node")
         self.connection.commit()
+        # Re-add the node with updated values
+        self._add_entities(node_id, "node", **kwargs)
+
+    def get_node(self, node_id: str) -> Dict[str, Any]:
+        """
+        Retrieve a node from the web database.
+
+        Parameters:
+            node_id (str): ID of the node to retrieve.
+
+        Returns:
+            dict: A dictionary containing node attributes and values.
+        """
+        self.cursor.execute(
+            "SELECT Graph_ID FROM Graph_Nodes WHERE Node_ID = ?",
+            (node_id,),
+        )
+        if not self.cursor.fetchone():
+            return {}
+
+        # Get the node entities
+        entities = self._get_entities(node_id, "node")
+        return {
+            "graph_ids": [row[0] for row in self.cursor.fetchall()],
+            "node_id": node_id,
+            **entities,
+        }
 
     def add_edge(self, from_node: str, to_node: str, **kwargs) -> str:
         """
@@ -143,11 +218,50 @@ class GraphDB:
         self._delete_entities(edge_id, "edge")
         self.connection.commit()
 
+    def edit_edge(self, edge_id: str, **kwargs):
+        """
+        Edit an edge in the web database.
+
+        Parameters:
+            edge_id (str): ID of the edge to edit.
+            **kwargs: Updated edge attributes (e.g., weight=2.5, type="friendship")
+        """
+        # Delete all related entities from each of the Edge_Entities tables
+        self._delete_entities(edge_id, "edge")
+        self.connection.commit()
+        # Re-add the edge with updated values
+        self._add_entities(edge_id, "edge", **kwargs)
+
+    def get_edge(self, source: str, target: str) -> Dict[str, Any]:
+        """
+        Retrieve an edge between two nodes.
+
+        Parameters:
+            source (str): ID of the source node.
+            target (str): ID of the target node.
+
+        Returns:
+            dict: A dictionary containing edge attributes and values.
+        """
+        self.cursor.execute(
+            "SELECT ID FROM Edges WHERE SourceID = ? AND TargetID = ?",
+            (source, target),
+        )
+
+        edge_id = self.cursor.fetchone()
+
+        if not edge_id:
+            return {}
+
+        # Get the edge entities
+        entities = self._get_entities(edge_id, "edge")
+        return {"id": edge_id, "source": source, "target": target, **entities}
+
     def create_graph(
         self,
-        graph_ids: List[str] = None,
-        node_conditions: Dict[str, List[str]] = None,
-        edge_conditions: Dict[str, List[str]] = None,
+        graph_filter: List[str] = None,
+        node_filter: Dict[str, List[str]] = None,
+        edge_filter: Dict[str, List[str]] = None,
     ):
         """
         Create a network based on the specified graph IDs and conditions.
@@ -163,8 +277,8 @@ class GraphDB:
             Edge_Weights: np.ndarray
             Node_Ids: List[str]
         """
-        node_weights, node_ids = self._weight_nodes(node_conditions, graph_ids)
-        edge_weights, _ = self._weight_edges(edge_conditions, node_ids)
+        node_weights, node_ids = self._weight_nodes(node_filter, graph_filter)
+        edge_weights, _ = self._weight_edges(edge_filter, node_ids)
         return node_weights, edge_weights, node_ids
 
     def _weight_nodes(
@@ -434,6 +548,22 @@ class GraphDB:
                 entities[entity_name] = value
 
         return entities
+
+    def check_id(self, id: str) -> bool:
+        """
+        Check if an ID exists in the current database.
+
+        Parameters:
+            id (str): The ID to check.
+
+        Returns:
+            bool: True if the ID exists, False otherwise.
+        """
+        self.cursor.execute(
+            "SELECT 1 FROM Graph_Nodes WHERE Node_ID = ? OR Graph_ID = ?",
+            (id, id),
+        )
+        return self.cursor.fetchone() is not None
 
     def delete_db(self):
         """Delete the database file."""

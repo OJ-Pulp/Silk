@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Silk</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <!-- Tooltip & Popup for node/edge metadata -->
+  <div id="tooltip" class="tooltip"></div>
+  <div id="popup" class="popup hidden"></div>
+
+  <!-- Topbar Menu -->
+  <div class="topbar">
+    <div class="menu">
+      <div class="menu-title">File</div>
+      <div class="dropdown">
+        <div class="dropdown-item" id="newDatabaseBtn">New Database</div>
+        <div class="dropdown-item" id="openDatabaseBtn">Upload Database</div>
+        <hr class="dropdown-divider">
+        <div class="dropdown-item" id="importDataBtn">Import Data</div>
+        <div class="dropdown-item" id="exportDataBtn">Export Data</div>
+      </div>
+    </div>
+
+    <div class="menu">
+      <div class="menu-title">Graph</div>
+      <div class="dropdown">
+        <div class="dropdown-item">New Graph</div>
+        <div class="dropdown-item">Delete Graph</div>
+        <div class="dropdown-item">Save Graph</div>
+        <div class="dropdown-item">Show Graph</div>
+        <hr class="dropdown-divider">
+        <div class="dropdown-item">Add Node</div>
+        <div class="dropdown-item">Add Edge</div>
+
+      </div>
+    </div>
+
+    <div class="menu">
+      <div class="menu-title">View</div>
+      <div class="dropdown">
+        <div class="dropdown-item" id="invertNodesBtn">Invert Nodes</div>
+        <div class="dropdown-item" id="invertEdgesBtn">Invert Edges</div>
+        <hr class="dropdown-divider">
+        <div class="dropdown-item" id="showIDsBtn">Show IDs</div>
+      </div>
+    </div>
+
+    <div class="menu">
+      <div class="menu-title">Tools</div>
+      <div class="dropdown">
+        <div class="dropdown-item" id="editToolbarBtn">Edit Toolbar</div>
+        <hr class="dropdown-divider">
+        <div class="dropdown-item" id="rectSelectBtn">Rectangular Selection</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="main">
+    <!-- Sidebar with icons -->
+    <div class="sidebar">
+      <div class="sidebar-button" data-tooltip="Weight Nodes">
+        <img class="icon" src="images/NodeWeight.png" alt="Weight Nodes" />
+      </div>
+      <div class="sidebar-button" data-tooltip="Weight Edges">
+        <img class="icon" src="images/WeightEdges.png" alt="Weight Edges" />
+      </div>
+      <div class="sidebar-button" data-tooltip="Traverse Graph">
+        <img class="icon" src="images/TraverseGraph.png" alt="Traverse Graph" />
+      </div>
+      <div class="sidebar-button" data-tooltip="Cluster Graph">
+        <img class="icon" src="images/ClusterGraphs.png" alt="Cluster Graph" />
+      </div>
+      <div class="sidebar-button" data-tooltip="Compare Graphs">
+        <img class="icon" src="images/CompareGraphs.png" alt="Compare Graphs" />
+      </div>
+    </div>
+
+    <!-- Graph Area -->
+    <div class="content">
+      <svg id="graph"></svg>
+    </div>
+  </div>
+  <!-- Survey Modal Popup -->
+  <div id="survey-modal" class="survey-modal hidden">
+    <div class="survey-popup">
+      <button id="close-survey" class="close-btn">×</button>
+      <hr class="popup-divider" />
+      <form id="survey-form-container"></form>
+      <!-- Add Save button below the form -->
+      <div class="form-actions">
+        <button id="save-survey" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Script Modules -->
+  <script type="module" src="./js/popup.js"></script>
+  <script type="module" src="./js/data.js"></script>
+  <script type="module" src="./js/graph.js"></script>
+  <script type="module" src="./js/topbar.js"></script>
+  
+</body>
+</html>
