@@ -46,26 +46,18 @@ class ChainWeaver(Weaver):
     #                                      BASE_PRODUCTS
     # -------------------------------------------------------------------------------------------
     # region BASE_PRODUCTS
-    def create_base_products(
-        self,
-        num_base_products: int,
-    ) -> List[Component]:
+    def create_base_products(self, num_base_products: int):
         """
         Generates a fake dataset of base products and their data.
 
         :param `num_base_products`: The total number of unique base products to include in the supply chain.
         :type `num_base_products`: int
-        :param `designations_dict`: The 'Designation' category of 'resolved_inputdata'.
-        :type `designations_dict`: dict
-        :param `manufacturers_dict`: The 'Manufacturer' category of 'resolved_inputdata'.
-        :type `manufacturers_dict`: dict
 
         :return: A list of base products.
         :rtype: List[Component]
         """
 
         # Sets empty lists to collect products along with other necessary variables
-        base_products = []
         designation_keys = list(self.designations.keys())
         manufacturer_keys = list(self.manufacturers.keys())
         designation_counter = {
@@ -116,12 +108,7 @@ class ChainWeaver(Weaver):
             }
             base_product = Component(**component_data)
 
-            # Appends 'base_product' Component(Node) to the overall list of 'base_products'
-            base_products.append(base_product)
-            logger.debug(base_product)
-            logger.debug("")
-
-        return base_products
+            self.write_node(base_product)
 
     # endregion
 
@@ -915,7 +902,7 @@ class ChainWeaver(Weaver):
         self.components = self.base_components + self.variant_components
         self.base_edges = resolved_base_product_sprue_edges + base_product_part_edges
         self.variant_edges = variant_sprue_edges + variant_part_edges
-        self.edges = self.base_edges + self.variant_edges
+        # self.edges = self.base_edges + self.variant_edges
         logger.info("Lists Consolidated")
 
     def generate_nodes(self) -> dict:
@@ -935,8 +922,10 @@ class ChainWeaver(Weaver):
 
 def main(num_products: int = 40, variant_distribution: float = 0.25):
     weaver = ChainWeaver(num_products, variant_distribution)
+    weaver.set_writers(Component, Requires)
     weaver.weave()
-    # weaver.write_to_csv()
+    weaver.node_output_file.close()
+    weaver.edge_output_file.close()
 
 
 # endregion
