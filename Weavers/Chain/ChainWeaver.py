@@ -131,14 +131,12 @@ class ChainWeaver(Weaver):
     def create_base_product_sprues(
         self,
         base_products: List[Component],
-    ) -> Tuple[List[Component], List[Requires]]:
+    ) -> List[Component]:
         """
         Generates a fake dataset of base product sprues and sprue edges and their data.
 
         :param `base_products`: A list of base products and their data.
         :type `base_products`: List[Component]
-        :param `manufacturers_dict`: The 'Manufacturer' category of 'resolved_inputdata'.
-        :type `manufacturers_dict`: dict
 
         :return: A list of base product sprues.
         :rtype: List[Component]
@@ -148,8 +146,7 @@ class ChainWeaver(Weaver):
 
         # Sets empty lists to collect sprues and edges along with other necessary variables
         base_product_sprues = []
-        base_product_sprue_edges = []
-        manufacturer_keys = list(self.manufacturers.keys())
+        manufacturer_keys = self.manufacturers.keys()
 
         # Creates all base product sprues and edges
         for i, base_product in enumerate(base_products, start=1):
@@ -188,6 +185,8 @@ class ChainWeaver(Weaver):
                 }
                 base_product_sprue = Component(**component_data)
 
+                self.write_node(base_product_sprue)
+
                 # Appends 'base_product_sprue' Component(Node) to the overall list of 'base_product_sprues'
                 base_product_sprues.append(base_product_sprue)
                 logger.debug(base_product_sprue)
@@ -203,12 +202,9 @@ class ChainWeaver(Weaver):
                     lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
                 )
 
-                # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
-                base_product_sprue_edges.append(base_product_sprue_edge)
-                logger.debug(base_product_sprue_edge)
-                logger.debug("")
+                self.write_edge(base_product_sprue_edge)
 
-        return base_product_sprues, base_product_sprue_edges
+        return base_product_sprues
 
     # endregion
 
@@ -221,7 +217,7 @@ class ChainWeaver(Weaver):
         self,
         base_products: List[Component],
         base_product_sprues: List[Component],
-    ) -> Tuple[List[Component], List[Requires], List[Component]]:
+    ) -> Tuple[List[Requires], List[Component]]:
         """
         Generates a fake dataset of base product parts and part edges and their data.
         Supports recursive subcomponent generation for parts that have their own parts.
@@ -231,8 +227,6 @@ class ChainWeaver(Weaver):
         :param `base_product_sprues`: A list of base product sprues and their data.
         :type `base_product_sprues`: List[Component]
 
-        :return: A list of base product parts.
-        :rtype: List[Component]
         :return: A list of edges between base product sprues and base product parts.
         :rtype: List[Requires]
         :return: A list of sprues that contain vital base product parts.
@@ -243,7 +237,7 @@ class ChainWeaver(Weaver):
         base_product_parts = []
         base_product_part_edges = []
         vital_base_product_sprues = []
-        manufacturer_keys = list(self.manufacturers.keys())
+        manufacturer_keys = self.manufacturers.keys()
 
         def generate_subparts(
             parent_part, parent_category, parent_designation, parent_manufacturer
@@ -293,7 +287,10 @@ class ChainWeaver(Weaver):
                             ],
                         }
                         sub_part = Component(**component_data)
+
+                        self.write_node(sub_part)
                         base_product_parts.append(sub_part)
+
                         # Edge from parent_part to sub_part
                         edge = Requires(
                             start_node=parent_part,
@@ -301,7 +298,10 @@ class ChainWeaver(Weaver):
                             base_model=True,
                             lead_time=FAKER_GEN.random_int(1, 1000),
                         )
+
+                        self.write_edge(edge)
                         base_product_part_edges.append(edge)
+
                         # Recurse further if needed
                         generate_subparts(
                             sub_part,
@@ -367,7 +367,10 @@ class ChainWeaver(Weaver):
                         ],
                     }
                     base_product_part = Component(**component_data)
+
+                    self.write_node(base_product_part)
                     base_product_parts.append(base_product_part)
+
                     logger.debug(base_product_part)
                     logger.debug("")
                     for base_product_sprue in base_product_sprues:
@@ -384,7 +387,10 @@ class ChainWeaver(Weaver):
                                 base_model=True,
                                 lead_time=FAKER_GEN.random_int(1, 1000),
                             )
+
+                            self.write_edge(base_product_part_edge)
                             base_product_part_edges.append(base_product_part_edge)
+
                             logger.debug(base_product_part_edge)
                             logger.debug("")
                             if base_product_part_vital:
@@ -397,7 +403,7 @@ class ChainWeaver(Weaver):
                         base_product_part_manufacturer,
                     )
 
-        return base_product_parts, base_product_part_edges, vital_base_product_sprues
+        return base_product_part_edges, vital_base_product_sprues
 
     # endregion
 
@@ -637,6 +643,8 @@ class ChainWeaver(Weaver):
             }
             variant_product = Component(**component_data)
 
+            self.write_node(variant_product)
+
             # Appends 'variant_product' Component(Node) to the overall list of 'variant_products'
             variant_products.append(variant_product)
             logger.debug(variant_product)
@@ -656,14 +664,13 @@ class ChainWeaver(Weaver):
         variant_products: List[Component],
         vital_base_product_sprues: List[Component],
         base_product_part_edges: List[Requires],
-    ) -> Tuple[List[Component], List[Requires], dict, dict]:
+    ) -> Tuple[List[Component], dict, dict]:
         """
         INSERT STUFF
         """
 
         # Sets empty list to collect variant sprues and edges along with other necessary variables
         variant_sprues = []
-        variant_sprue_edges = []
         needed_parts = {}
         needed_manufacturers = {}
 
@@ -693,8 +700,7 @@ class ChainWeaver(Weaver):
                         base_model=True,
                         lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
                     )
-
-                    variant_sprue_edges.append(variant_sprue_edge)
+                    self.write_edge(variant_sprue_edge)
 
                     individual_needed_manufacturers.discard(vital_sprue.manufacturer)
 
@@ -739,7 +745,8 @@ class ChainWeaver(Weaver):
                     ],
                 }
                 variant_sprue = Component(**component_data)
-
+                
+                self.write_node(variant_sprue)
                 variant_sprues.append(variant_sprue)
 
                 logger.debug(f"{manufacturer} Variant Sprue Edge:")
@@ -751,10 +758,9 @@ class ChainWeaver(Weaver):
                     base_model=True,
                     lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
                 )
+                self.write_edge(variant_sprue_edge)
 
-                variant_sprue_edges.append(variant_sprue_edge)
-
-        return variant_sprues, variant_sprue_edges, needed_parts, needed_manufacturers
+        return variant_sprues, needed_parts, needed_manufacturers
 
     # endregion
 
@@ -769,13 +775,10 @@ class ChainWeaver(Weaver):
         variant_sprues: List[Component],
         needed_parts: dict,
         needed_manufacturers: dict,
-    ) -> Tuple[List[Component], List[Requires]]:
+    ):
         """
         INSERT HERE
         """
-
-        variant_parts = []
-        variant_part_edges = []
 
         # Creates all variant product parts and edges
         for i, variant_product in enumerate(variant_products, start=1):
@@ -828,8 +831,8 @@ class ChainWeaver(Weaver):
                         ],
                     }
                     variant_part = Component(**component_data)
-
-                    variant_parts.append(variant_part)
+                    
+                    self.write_node(variant_part)
 
                     for variant_sprue in variant_sprues:
                         if (
@@ -849,10 +852,7 @@ class ChainWeaver(Weaver):
                                 ),  # In Business Days
                             )
 
-                            # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
-                            variant_part_edges.append(variant_part_edge)
-
-        return variant_parts, variant_part_edges
+                            self.write_edge(variant_part_edge)
 
     def weave(self):
         """
@@ -878,60 +878,52 @@ class ChainWeaver(Weaver):
 
         base_products = self.create_base_products(num_base_products)
         logger.info("Base Products Created")
-        base_product_sprues, base_product_sprue_edges = self.create_base_product_sprues(
+        
+        base_product_sprues = self.create_base_product_sprues(
             base_products
         )
         logger.info("Base Product Sprues Created")
-        base_product_parts, base_product_part_edges, vital_base_product_sprues = (
+        
+        base_product_part_edges, vital_base_product_sprues = (
             self.create_base_product_parts(base_products, base_product_sprues)
         )
         logger.info("Base Product Parts Created")
-        resolved_base_product_sprues, resolved_base_product_sprue_edges = (
-            self.resolve_base_product_sprues(
-                base_product_sprues, base_product_sprue_edges, base_product_part_edges
-            )
-        )
-        logger.info("Base Product Sprues Resolved")
+        
+        # resolved_base_product_sprues, resolved_base_product_sprue_edges = (
+        #     self.resolve_base_product_sprues(
+        #         base_product_sprues, base_product_sprue_edges, base_product_part_edges
+        #     )
+        # )
+        # logger.info("Base Product Sprues Resolved")
+
+        del base_product_sprues
+
         variant_products = self.create_variant_products(base_products, num_variants)
         
         del base_products # Free up memory by removing base products from the list
 
         logger.info("Variant Products Created")
-        variant_sprues, variant_sprue_edges, needed_parts, needed_manufacturers = (
+        variant_sprues, needed_parts, needed_manufacturers = (
             self.create_variant_product_sprues(
                 variant_products, vital_base_product_sprues, base_product_part_edges
             )
         )
+        
+        del vital_base_product_sprues
+        del base_product_part_edges
+
         logger.info("Variant Sprues Created")
-        variant_parts, variant_part_edges = self.create_variant_parts(
+        self.create_variant_parts(
             variant_products, variant_sprues, needed_parts, needed_manufacturers
         )
         logger.info("Variant Parts Created")
 
-        # Collect all components and edges
-        # self.base_components = (
-        #     base_products + resolved_base_product_sprues + base_product_parts
-        # )
-        # self.variant_components = variant_products + variant_sprues + variant_parts
-        # self.components = self.base_components + self.variant_components
-        # self.base_edges = resolved_base_product_sprue_edges + base_product_part_edges
-        # self.variant_edges = variant_sprue_edges + variant_part_edges
-        # self.edges = self.base_edges + self.variant_edges
-        # logger.info("Lists Consolidated")
 
     def generate_nodes(self) -> dict:
         return {"base": self.base_components, "variant": self.variant_components}
 
     def generate_edges(self) -> dict:
         return {"base": self.base_edges, "variant": self.variant_edges}
-
-    # def write_to_csv(self, path: str = "output"):
-    #     if not self.components or not self.base_edges:
-    #         logger.warning("No components or edges to write. Did you call weave()?")
-    #         return
-    #     Component.write_to_csv(self.components, self.get_next_test_output_filename("components", "csv", Path(path)))
-    #     Requires.write_to_csv(self.base_edges + self.variant_edges, self.get_next_test_output_filename("edges", "csv", Path(path)))
-    #     logger.info("CSV Files Created")
 
 
 def main(num_products: int = 40, variant_distribution: float = 0.25):
