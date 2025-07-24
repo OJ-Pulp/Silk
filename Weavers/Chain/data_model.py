@@ -1,17 +1,17 @@
-"""Data model for components and their requirement relationships in the supply chain.
-"""
+"""Data model for components and their requirement relationships in the supply chain."""
 
+from dataclasses import dataclass
 from typing import List, Optional
 
 from Weavers.graph_model import Node, Edge
 
 # This JSON schema defines the structure for this specific data model.
 # It changes depending on which Weaver is being used.
-# This should only be touched by engineers who are familiar with the 
+# This should only be touched by engineers who are familiar with the
 # data model and its requirements, and not by end users.
 # It is used to validate the data before it is saved to the database,
 # and defines how the end user is expected to enter the data.
-DATA_SCHEMA =  {
+DATA_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
@@ -27,7 +27,7 @@ DATA_SCHEMA =  {
                         "Vital Parts": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "minItems": 1
+                            "minItems": 1,
                         },
                         "Parts": {
                             "type": "object",
@@ -35,14 +35,14 @@ DATA_SCHEMA =  {
                             "additionalProperties": {
                                 "type": "array",
                                 "items": {"type": "string"},
-                                "minItems": 1
-                            }
-                        }
+                                "minItems": 1,
+                            },
+                        },
                     },
                     "required": ["Vital Parts", "Parts"],
-                    "additionalProperties": False
+                    "additionalProperties": False,
                 }
-            }
+            },
         },
         "Manufacturers": {
             "type": "object",
@@ -53,22 +53,22 @@ DATA_SCHEMA =  {
                     "properties": {
                         "ID": {
                             "type": "string",
-                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
                         },
                         "Locations": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "minItems": 1
-                        }
+                            "minItems": 1,
+                        },
                     },
                     "required": ["Locations"],
-                    "additionalProperties": False
+                    "additionalProperties": False,
                 }
-            }
-        }
+            },
+        },
     },
     "required": ["Designations", "Manufacturers"],
-    "additionalProperties": False
+    "additionalProperties": False,
 }
 
 
@@ -76,30 +76,65 @@ class Component(Node):
     """
     Represents a physical component in the system.
 
-    Includes attributes like dimensions, cost, failure rate, and more. Required attributes are defined in the constructor. Class attribute csv fields define the fields to be exported to CSV.
+    Includes attributes like dimensions, cost, failure rate, and more. 
     """
 
-    __csv_fields__ = [
-        "id",
-        "name",
-        "manufacturer",
-        "locations",
-        "full_product",
-        "component_type",
-        "variant",
-        "variant_base_product",
-        "vital",
-        "designation",
-        "popular_name",
-        "category",
-        "part_type",
-        "dimensions",
-        "cost",
-        "failure_rate",
-        "substitutions",
-        "breakability",
-        "year_range",
-    ]
+    id: str 
+    """Unique identifier for the component, generated if not provided."""
+
+    name: str 
+    """Name of the node to be displayed in GUI tools."""
+
+    manufacturer: str 
+    """The manufacturer that produces this component."""
+
+    locations: str | List[str] 
+    """The location(s) that this component is produced in."""
+
+    full_product: bool 
+    """Whether or not this component is a full product to be sold to customers."""
+
+    component_type: Optional[str] = None 
+    """Level of the component in relation to other components (e.g., sprue, part, assembly)"""
+
+    variant: Optional[bool] = None 
+    """Whether or not this component is a variant of another component. False if it is the base model."""
+
+    variant_base_product: Optional[str] = None 
+    """The base product that the variant is a subset of"""
+
+    vital: Optional[bool] = None 
+    """Indicates whether the component is vital for a variant"""
+
+    designation: Optional[str] = None 
+    """Specific designation of the component used for any external purposes"""
+
+    popular_name: Optional[str] = None 
+    """More commonly used name for the component"""
+
+    category: Optional[str] = None 
+    """Category of the component (e.g., electronics, mechanical)"""
+
+    part_type: Optional[str] = None 
+    """General type of the component"""
+
+    dimensions: Optional[List[int]] = None  
+    """List of [length, width, height]"""
+
+    cost: Optional[float] = None  
+    """Monetary cost of the component"""
+
+    failure_rate: Optional[float] = None  
+    """Expected failure rate (e.g., failures/hour)"""
+
+    substitutions: Optional[List[str]] = None  
+    """List of substitute component IDs"""
+
+    breakability: Optional[float] = None  
+    """Likelihood of breakage (0–1)"""
+
+    year_range: Optional[List[int]] = None  
+    """Range of years this component was produced"""
 
     def _validate_metadata_entry(self, key: str, value):
         """
