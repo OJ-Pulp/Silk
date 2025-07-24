@@ -336,22 +336,26 @@ class Requires(Edge):
     """
     :REQUIRES is the relationship that relates components to components.
     It states that the source component requires the target component along the supply chain.
-        row = {
-            "id": self.id,
-            "start_id": getattr(self.start_node, "id", None),
-            "end_id": getattr(self.end_node, "id", None),
-        }
 
     Includes if a component is a part of the base model of another component.
     Additionally includes lead time variable, specific use case determined by the user.
     """
+    
+    start_node: Node
+    """The source node of the edge (must be a Node subclass)."""
 
-    __csv_fields__ = [
-        "start_id",
-        "end_id",
-        "base_model",
-        "lead_time",
-    ]
+    end_node: Node
+    """The target node of the edge (must be a Node subclass)."""
+
+    weight: float
+    """The weight of the edge, default is 1.0."""
+
+    base_model: bool
+    """Indicates if the target component is in the base model of the source component."""
+
+    lead_time: int
+    """The time it takes for the target component to be shipped & fabricated into the source component (in hours, days, business days)."""
+
 
     def __init__(
         self,
