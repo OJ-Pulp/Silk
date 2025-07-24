@@ -140,80 +140,7 @@ class Component(Node):
     year_range: Optional[List[int]] = None  
     """Range of years this component was produced"""
 
-    # def _validate_metadata_entry(self, key: str, value):
-    #     """
-    #     Internal method to validate a single metadata key-value pair.
-    #
-    #     Raises:
-    #         ValueError, TypeError, or KeyError if validation fails.
-    #     """
-    #     validators = {
-    #         "variant": lambda v: isinstance(v, bool),
-    #         "variant_base_product": lambda v: isinstance(v, str) and bool(v),
-    #         "vital": lambda v: isinstance(v, bool),
-    #         "designation": lambda v: isinstance(v, str) and bool(v),
-    #         "popular_name": lambda v: isinstance(v, str),
-    #         "category": lambda v: isinstance(v, str) and bool(v),
-    #         "part_type": lambda v: isinstance(v, str) and bool(v),
-    #         "dimensions": lambda v: isinstance(v, list)
-    #         and len(v) == 3
-    #         and all(isinstance(x, int) for x in v),
-    #         "cost": lambda v: isinstance(v, (int, float)) and v >= 0,
-    #         "failure_rate": lambda v: isinstance(v, (int, float)) and v >= 0,
-    #         "substitutions": lambda v: isinstance(v, list)
-    #         and all(isinstance(x, str) for x in v),
-    #         "breakability": lambda v: isinstance(v, (int, float)) and 0 <= v <= 1,
-    #         "year_range": lambda v: isinstance(v, list)
-    #         and all(isinstance(x, int) for x in v),
-    #     }
-    #     error_msgs = {
-    #         "variant": "variant must be boolean data type",
-    #         "variant_base_product": "variant_base_product must be a non-empty string",
-    #         "vital": "vital must be boolean data type",
-    #         "designation": "designation must be a non-empty string",
-    #         "popular_name": "popular_name must be a string",
-    #         "category": "category must be a non-empty string",
-    #         "part_type": "part_type must be a non-empty string",
-    #         "dimensions": "dimensions must be a list of 3 integers",
-    #         "cost": "cost must be a non-negative number",
-    #         "failure_rate": "failure_rate must be a non-negative number",
-    #         "substitutions": "substitutions must be a list of strings",
-    #         "breakability": "breakability must be between 0 and 1",
-    #         "year_range": "year_range must be a list of integers",
-    #     }
-    #     if key in validators:
-    #         if not validators[key](value):
-    #             # Use TypeError for substitutions/year_range, ValueError otherwise
-    #             if key in {"substitutions", "year_range"}:
-    #                 raise TypeError(error_msgs[key])
-    #             else:
-    #                 raise ValueError(error_msgs[key])
-    #     else:
-    #         return True
 
-    # def __init__(
-    #     self,
-    #     name: str,
-    #     manufacturer: str,
-    #     locations: str | List[str],
-    #     full_product: bool,
-    #     id: Optional[str] = None,
-    #     component_type: Optional[str] = None,
-    #     variant: Optional[bool] = None,
-    #     designation: Optional[str] = None,
-    #     popular_name: Optional[str] = None,
-    #     product: Optional[str] = None,
-    #     variant_base_product: Optional[str] = None,
-    #     vital: Optional[bool] = None,
-    #     category: Optional[str] = None,
-    #     part_type: Optional[str] = None,
-    #     dimensions: Optional[List[int]] = None,
-    #     cost: Optional[float] = None,
-    #     failure_rate: Optional[float] = None,
-    #     substitutions: Optional[List[str]] = None,
-    #     breakability: Optional[float] = None,
-    #     year_range: Optional[List[int]] = None,
-    # ):
     #     """
     #     Initialize a Component with specific attributes.
     #
@@ -238,70 +165,6 @@ class Component(Node):
     #     :param breakability: Value (0–1) indicating likelihood of breakage.
     #     :param year_range: The range of years this component was produced. Each year must be in the list.
     #     """
-    #     super().__init__(name, id)
-    #
-    #     # PLAIN NODE DATA
-    #     # These attributes of each component are NOT OPTIONAL
-    #     self.full_product = full_product
-    #     self.manufacturer = manufacturer
-    #     self.locations = locations
-    #
-    #     # METADATA
-    #     # All metadata is completely OPTIONAL
-    #     # Include runtime validation for supported arguments
-    #     self.metadata = {}
-    #
-    #     for k, v in {
-    #         "component_type": component_type,
-    #         "product": product,
-    #         "variant": variant,
-    #         "variant_base_product": variant_base_product,
-    #         "vital": vital,
-    #         "designation": designation,
-    #         "popular_name": popular_name,
-    #         "category": category,
-    #         "part_type": part_type,
-    #         "dimensions": dimensions,
-    #         "cost": cost,
-    #         "failure_rate": failure_rate,
-    #         "substitutions": substitutions,
-    #         "breakability": breakability,
-    #         "year_range": year_range,
-    #     }.items():
-    #         if v is not None:
-    #             self._validate_metadata_entry(k, v)
-    #             self.metadata[k] = v
-
-    # def set_metadata(self, key: str, value):
-    #     """
-    #     Add or update a metadata entry for the component.
-    #
-    #     Valid keys:
-    #         - "component_type": str
-    #         - "product": str
-    #         - "variant": bool
-    #         - "variant_base_product": str
-    #         -"vital": bool,
-    #         - "designation": str
-    #         - "popular_name": str
-    #         - "category": str
-    #         - "part_type": str
-    #         - "dimensions": List[int] of length 3
-    #         - "cost": float >= 0
-    #         - "failure_rate": float >= 0
-    #         - "substitutions": List[str]
-    #         - "breakability": float in [0, 1]
-    #         - "year_range": List[int]
-    #
-    #     :param key: The metadata key to add or update.
-    #     :param value: The value to assign for the given key.
-    #     :raises ValueError, TypeError: If the value is invalid for the given key.
-    #     """
-    #
-    #     self._validate_metadata_entry(key, value)
-    #     self.metadata[key] = value
-
-
 @dataclass
 class Requires(Edge):
     """
@@ -323,16 +186,6 @@ class Requires(Edge):
 
     lead_time: int
     """The time it takes for the target component to be shipped & fabricated into the source component (in hours, days, business days)."""
-
-
-    # def __init__(
-    #     self,
-    #     start_node: Component,
-    #     end_node: Component,
-    #     base_model: bool,
-    #     lead_time: int,
-    # ):
-    #     """
     #     Creates a :REQUIRES relationship from one component to another.
     #     The start node requires the target node.
     #
@@ -340,8 +193,3 @@ class Requires(Edge):
     #     :param end_node: The target node (must be a Component).
     #     :param base_model: The target component is in the base model of the source component. When the target component can be replaced by a different component, it is interchangeable and those parts that can replace the base model component have this property set to False. If the source component comes with the target component by default, say when you purchase that component as a customer, this property is set to True. (Ex. In a Ford F-150, the engine that comes in the car when you buy it from a dealership is considered the base model, and the REQUIRES relationship between the car and the engine has the base_model property set to True. If the engine is able to be replaced with a different engine, it is interchangeable, and the REQUIRES relationship between the car and that different engine has base_model set to False.)
     #     :param lead_time: The time it takes for the target component to be shipped & fabricated into the source component. (hours, days, business days)
-    #     """
-    #
-    #     super().__init__(start_node, end_node)
-    #     self.base_model = base_model
-    #     self.lead_time = lead_time

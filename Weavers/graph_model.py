@@ -6,8 +6,6 @@ from abc import ABC
 from typing import Optional
 import uuid
 from dataclasses import dataclass, field
-from pathlib import Path
-import pandas as pd
 
 
 @dataclass
@@ -34,18 +32,6 @@ class Node(ABC):
     weight: Optional[float] = field(default_factory=lambda:1.0, init=False)
     """Weight of the node, default is 1.0."""
 
-    # def __init__(self, name: str, id: Optional[str] = None, weight: Optional[float] = 1.0):
-    #     """
-    #     Initialize a Node with a name.
-    #
-    #     :param name: The label or identifier of the node.
-    #     """
-    #     self.id = id if id is not None else str(uuid.uuid4())
-    #     self.name = name
-    #     # if weight is not None:
-    #         # self.weight = weight
-    #     self.metadata: dict
-
     def to_dict(self) -> dict:
         """
         Convert any Node subclass to a flat dictionary.
@@ -68,10 +54,6 @@ class Node(ABC):
             else:
                 row[k] = v
 
-        # # Add metadata
-        # if hasattr(self, "metadata"):
-        #     for k, v in self.metadata.items():
-        #         row[k] = v
 
         return row
 
@@ -121,19 +103,3 @@ class Edge(ABC):
             row[k] = v
 
         return row
-
-    @staticmethod
-    def write_to_csv(edges, filename: Path):
-        """
-        Converts the passed Edges to a CSV file.
-
-        :param edges: A list of Edge instances to write to CSV.
-        :type edges: List[Edge]
-        :param filename: The path to the CSV file to write.
-        :type filename: Path
-        :raises FileNotFoundError: If the directory for the filename does not exist.
-        """
-        filename.parent.mkdir(parents=True, exist_ok=True)
-        rows = [e.to_dict() for e in edges]
-        df = pd.DataFrame(rows)
-        df.to_csv(filename, index=False)
