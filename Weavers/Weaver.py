@@ -121,31 +121,31 @@ class Weaver(ABC):
                 return filename
             index += 1
 
-    def write_to_csv(self, data: Node | Edge):
+    def write_node(self, node: Node):
         """
-        Write the generated node / edge to the output CSV file.
+        Write the generated node to the output CSV file.
 
-        :param data: The Node or Edge object to write to the CSV file.
+        :param node: The Node object to write to the CSV file.
         """
 
-        if self.node_writer is None or self.edge_writer is None:
+        if self.node_writer is None:
             raise ValueError("Writers not set. Call set_writers() first.")
 
-        if isinstance(data, Node):
-            # Only write header if file is empty
-            if self.node_output_file.tell() == 0:
-                self.node_writer.writeheader()
+        self.node_writer.writerow(node.to_dict())
 
-            self.node_writer.writerow(data.to_dict())
-            self.node_output_file.close()  # Don’t forget to close the file!
+    def write_edge(self, edge: Edge):
+        """
+        Write the generated edge to the output CSV file.
 
-        else:  # isinstance(data, Edge):
-            # Only write header if file is empty
-            if self.edge_output_file.tell() == 0:
-                self.edge_writer.writeheader()
+        :param edge: The Edge object to write to the CSV file.
+        """
 
-            self.edge_writer.writerow(data.to_dict())
-            self.edge_output_file.close()  # Don’t forget to close the file!
+        if self.edge_writer is None:
+            raise ValueError("Writers not set. Call set_writers() first.")
+
+        self.edge_writer.writerow(edge.to_dict())
+
+    
 
     @abstractmethod
     def weave(self):
