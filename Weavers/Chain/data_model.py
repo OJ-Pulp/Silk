@@ -79,10 +79,6 @@ class Component(Node):
     Includes attributes like dimensions, cost, failure rate, and more. 
     """
 
-    # id: str 
-    # field(init=False) 
-    # """Unique identifier for the component, generated if not provided."""
-
     name: str 
     """Name of the node to be displayed in GUI tools."""
 
@@ -117,19 +113,19 @@ class Component(Node):
     """More commonly used name for the component"""
 
     category: Optional[str] = None 
-    """Category of the component (e.g., electronics, mechanical)"""
+    """Category of the component (e.g., electronics, mechanical). Definition of category determined by user."""
 
     part_type: Optional[str] = None 
-    """General type of the component"""
+    """The general type of the component. Specific definition of part type is determined by user."""
 
     dimensions: Optional[List[int]] = None  
     """List of [length, width, height]"""
 
     cost: Optional[float] = None  
-    """Monetary cost of the component"""
+    """Monetary cost of the component. Currency used determined by user."""
 
     failure_rate: Optional[float] = None  
-    """Expected failure rate (e.g., failures/hour)"""
+    """Expected failure rate (e.g., failures/hour). Rate determined by user."""
 
     substitutions: Optional[List[str]] = None  
     """List of substitute component IDs"""
@@ -138,33 +134,9 @@ class Component(Node):
     """Likelihood of breakage (0–1)"""
 
     year_range: Optional[List[int]] = None  
-    """Range of years this component was produced"""
+    """The range of years this component was produced. Each year must be in the list."""
 
 
-    #     """
-    #     Initialize a Component with specific attributes.
-    #
-    #     :param name: Name of the component.
-    #     :param manufacturer: The manufacturer that produces this component.
-    #     :param locations: The location(s) that this component is produced in.
-    #     :param full_product: Whether or not this component is a full product to be sold to customers.
-    #     :param id: If the user wants to input an id instead of having a randomly generated one.
-    #     :param component_type: Level of the component in relation to other components.
-    #     :param product: The product that the non full_product component is a component of.
-    #     :param variant: Whether or not this component is a variant of another or is the base_model.
-    #     :param variant_base_product: The base_product that the variant is a subset of.
-    #     :param vital: Indicates whether or not the component is vital for a variant.
-    #     :param designation: A specific designation of the component used for any external purposes.
-    #     :param popular_name: The popular name, or more generally used name, of this component.
-    #     :param category: The category of this component. Definition of category determined by user.
-    #     :param part_type: The general type of the component. Specific definition of part type is determined by user.
-    #     :param dimensions: A list of three integers [length, width, height]. Dimensions are determined by user.
-    #     :param cost: Monetary cost of the component (float). Currency used determined by user.
-    #     :param failure_rate: Expected failure rate (e.g., failures/hour). Rate determined by user.
-    #     :param substitutions: List of substitute component IDs.
-    #     :param breakability: Value (0–1) indicating likelihood of breakage.
-    #     :param year_range: The range of years this component was produced. Each year must be in the list.
-    #     """
 @dataclass
 class Requires(Edge):
     """
@@ -182,14 +154,7 @@ class Requires(Edge):
     """The target node of the edge (must be a Node subclass)."""
 
     base_model: bool
-    """Indicates if the target component is in the base model of the source component."""
+    """The target component is in the base model of the source component. When the target component can be replaced by a different component, it is interchangeable and those parts that can replace the base model component have this property set to False. If the source component comes with the target component by default, say when you purchase that component as a customer, this property is set to True. (Ex. In a Ford F-150, the engine that comes in the car when you buy it from a dealership is considered the base model, and the REQUIRES relationship between the car and the engine has the base_model property set to True. If the engine is able to be replaced with a different engine, it is interchangeable, and the REQUIRES relationship between the car and that different engine has base_model set to False.)"""
 
     lead_time: int
     """The time it takes for the target component to be shipped & fabricated into the source component (in hours, days, business days)."""
-    #     Creates a :REQUIRES relationship from one component to another.
-    #     The start node requires the target node.
-    #
-    #     :param start_node: The source node (must be a Component).
-    #     :param end_node: The target node (must be a Component).
-    #     :param base_model: The target component is in the base model of the source component. When the target component can be replaced by a different component, it is interchangeable and those parts that can replace the base model component have this property set to False. If the source component comes with the target component by default, say when you purchase that component as a customer, this property is set to True. (Ex. In a Ford F-150, the engine that comes in the car when you buy it from a dealership is considered the base model, and the REQUIRES relationship between the car and the engine has the base_model property set to True. If the engine is able to be replaced with a different engine, it is interchangeable, and the REQUIRES relationship between the car and that different engine has base_model set to False.)
-    #     :param lead_time: The time it takes for the target component to be shipped & fabricated into the source component. (hours, days, business days)
