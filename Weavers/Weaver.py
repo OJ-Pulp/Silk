@@ -86,20 +86,25 @@ class Weaver(ABC):
         :param node_object: Pass the Node subclass for this Weaver type for headers.
         :param edge_object: Pass the Edge subclass for this Weaver type for headers.
         """
+
         self.node_output_file = open(file=self.node_output_path, mode="a", newline="")
         self.node_writer = csv.DictWriter(
             self.node_output_file, fieldnames=node_subclass.__annotations__.keys()
         )
+        self.node_writer.writeheader()
+
         logger.debug("annotation keys: " + str(node_subclass.__annotations__.keys()))
         logger.info("Node writer created at " + str(self.node_output_path))
-        self.node_writer.writeheader()
+
         self.edge_output_file = open(file=self.edge_output_path, mode="a", newline="")
         self.edge_writer = csv.DictWriter(
             self.edge_output_file, fieldnames=edge_subclass.__annotations__.keys()
         )
+        self.edge_writer.writeheader()
+
         logger.debug("annotation keys: " + str(edge_subclass.__annotations__.keys()))
         logger.info("Edge writer created at " + str(self.edge_output_path))
-        self.edge_writer.writeheader()
+
 
     @staticmethod
     def _get_output_filename(
