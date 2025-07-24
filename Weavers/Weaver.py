@@ -75,6 +75,22 @@ class Weaver(ABC):
             f"Output path set to {self.node_output_path} and {self.edge_output_path}"
         )
 
+    def __set_writers__(self):
+        """
+        Set the writers for the node and edge output files.
+        This method is called after the output paths are set.
+        """
+        self.node_output_file = open(file=self.node_output_path, mode="a", newline="")
+        self.node_writer = csv.DictWriter(
+            self.node_output_file, fieldnames=Node.__annotations__.keys()
+        )
+        self.node_writer.writeheader()
+        self.edge_output_file = open(file=self.edge_output_path, mode="a", newline="")
+        self.edge_writer = csv.DictWriter(
+            self.edge_output_file, fieldnames=Edge.__annotations__.keys()
+        )
+        self.edge_writer.writeheader()
+
     @staticmethod
     def get_output_filename(
         base_name: str, extension: str, output_dir: Path = Path("output")
@@ -100,7 +116,7 @@ class Weaver(ABC):
         if isinstance(data, Node):
             node_output_file = open(self.node_output_path, "a", newline="")
             node_writer = csv.DictWriter(
-                node_output_file, fieldnames=data.__dict__.keys()
+                node_output_file, fieldnames=data.__annotations__.keys()
             )
 
             # Only write header if file is empty
@@ -113,7 +129,7 @@ class Weaver(ABC):
         else:  # isinstance(data, Edge):
             edge_output_file = open(self.edge_output_path, "a", newline="")
             edge_writer = csv.DictWriter(
-                edge_output_file, fieldnames=data.__dict__.keys()
+                edge_output_file, fieldnames=data.__annotations__.keys()
             )
 
             # Only write header if file is empty
