@@ -150,20 +150,17 @@ class Weaver(ABC):
     @abstractmethod
     def weave(self):
         """
-        Weave the components together.
-        This method should be implemented by subclasses.
+        'Weave' (or create) the nodes and edges of the graph.
         """
 
     @abstractmethod
     def generate_nodes(self) -> dict:
         """
         Generate nodes for the weaver.
-        This method should be implemented by subclasses.
         """
 
     @abstractmethod
     def generate_edges(self) -> dict:
         """
         Generate edges for the weaver.
-        This method should be implemented by subclasses.
         """
