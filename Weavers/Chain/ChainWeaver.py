@@ -4,13 +4,12 @@ OVERALL CHAINWEAVER
 
 # Standard
 import re
-from pathlib import Path
 from typing import List, Tuple
 
 # Local
 from Weavers.Chain.data_model import Component, Requires
 from Weavers.Chain.input_utils import resolve_json
-from Weavers.Weaver import Weaver, logger, SUCCESS, FAILURE, INTERRUPTED, FAKER_GEN
+from Weavers.Weaver import Weaver, logger, FAILURE, INTERRUPTED, FAKER_GEN
 
 logger.info("Program Start")
 

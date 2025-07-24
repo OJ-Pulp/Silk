@@ -1,6 +1,5 @@
 # Standard
 import logging
-import json
 import csv
 from abc import ABC, abstractmethod
 from typing import List
