@@ -3,7 +3,7 @@ Graph model for representing nodes and edges in a database.
 """
 
 from abc import ABC
-from typing import List, Optional
+from typing import Optional
 import uuid
 from pathlib import Path
 import pandas as pd
