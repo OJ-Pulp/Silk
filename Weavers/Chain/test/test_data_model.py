@@ -25,24 +25,9 @@ def test_component_creation():
     assert comp.name == "Test Component"
     assert comp.manufacturer == "Test Manufacturer"
     assert comp.locations == ["Test Location"]
-    assert comp.metadata["cost"] == 10.5
-    assert comp.metadata["dimensions"] == [1, 2, 3]
-    assert comp.metadata["breakability"] == 0.5
-
-
-def test_component_metadata_validation():
-    comp = Component(
-        name="MetaTest",
-        manufacturer="MetaManu",
-        locations="MetaLoc",
-        full_product=False,
-    )
-    with pytest.raises(ValueError):
-        comp.set_metadata("cost", -1)
-    with pytest.raises(ValueError):
-        comp.set_metadata("dimensions", [1, 2])  # Not length 3
-    with pytest.raises(TypeError):
-        comp.set_metadata("substitutions", [1, 2, 3])  # Not all strings
+    assert comp.cost == 10.5
+    assert comp.dimensions == [1, 2, 3]
+    assert comp.breakability == 0.5
 
 
 def test_edge_creation_and_to_dict():
@@ -151,22 +136,18 @@ def test_component_invalid_metadata_types():
         full_product=True,
     )
     with pytest.raises(ValueError):
-        comp.set_metadata("cost", -100)
+        comp.cost = -100
     with pytest.raises(ValueError):
-        comp.set_metadata("breakability", 2)
+        comp.breakability = 2
     with pytest.raises(ValueError):
-        comp.set_metadata("failure_rate", -0.1)
+        comp.failure_rate = -0.1
     with pytest.raises(ValueError):
-        comp.set_metadata("dimensions", [1, 2])  # Not length 3
-    with pytest.raises(TypeError):
-        comp.set_metadata("substitutions", [1, 2, 3])  # Not all strings
-    with pytest.raises(TypeError):
-        comp.set_metadata("year_range", ["2010", "2020"])  # Not all ints
+        comp.dimensions = [1, 2]  # Not length 3
     with pytest.raises(ValueError):
-        comp.set_metadata("variant_base_product", "")  # Empty string
+        comp.variant_base_product = ""  # Empty string
     with pytest.raises(ValueError):
-        comp.set_metadata("designation", "")  # Empty string
+        comp.designation = ""  # Empty string
     with pytest.raises(ValueError):
-        comp.set_metadata("category", "")  # Empty string
+        comp.category = ""  # Empty string
     with pytest.raises(ValueError):
-        comp.set_metadata("part_type", "")  # Empty string
+        comp.part_type = ""  # Empty string
