@@ -323,7 +323,7 @@ class ChainWeaver(Weaver):
                     base_product_part_vital = (
                         True
                         if part_type
-                        in self.designations[base_product.metadata["designation"]][
+                        in self.designations[base_product.designation][
                             "Vital Parts"
                         ]
                         else False
@@ -374,8 +374,8 @@ class ChainWeaver(Weaver):
                     logger.debug("")
                     for base_product_sprue in base_product_sprues:
                         if (
-                            base_product_part.metadata["product"]
-                            == base_product_sprue.metadata["product"]
+                            base_product_part.product
+                            == base_product_sprue.product
                             and base_product_part.manufacturer
                             == base_product_sprue.manufacturer
                         ):
@@ -398,7 +398,7 @@ class ChainWeaver(Weaver):
                     generate_subparts(
                         base_product_part,
                         part_category,
-                        base_product.metadata["designation"],
+                        base_product.designation,
                         base_product_part_manufacturer,
                     )
 
@@ -512,10 +512,10 @@ class ChainWeaver(Weaver):
         current_designations = []
         for variant_product in variant_products:
             if (
-                variant_product.metadata.get("variant_base_product")
+                variant_product.variant_base_product
                 == variant_base_product.id
             ):
-                designation = variant_product.metadata.get("designation")
+                designation = variant_product.designation
                 if designation:
                     current_designations.append(designation)
 
@@ -545,7 +545,8 @@ class ChainWeaver(Weaver):
             )
         except NamingError as e:
             logger.warning(f"{type(e).__name__}: {e}")
-            return variant_base_product.metadata["designation"] + "A"
+            assert variant_base_product.designation, str
+            return variant_base_product.designation + "A"
 
         match = re.search(r"([A-Z]+)$", current_designation)
         if not match:
@@ -612,7 +613,7 @@ class ChainWeaver(Weaver):
 
             # Creates 'base_product' Component(Node)
             component_data = {
-                "name": f"{variant_base_product.metadata['popular_name']} {variant_designation}",
+                "name": f"{variant_base_product.popular_name} {variant_designation}",
                 "manufacturer": variant_manufacturer,
                 "locations": FAKER_GEN.random_element(
                     list(self.manufacturers[variant_manufacturer]["Locations"])
@@ -621,8 +622,8 @@ class ChainWeaver(Weaver):
                 "component_type": "Product",
                 "variant": True,
                 "variant_base_product": variant_base_product.id,
-                "designation": variant_base_product.metadata["designation"],
-                "popular_name": variant_base_product.metadata["popular_name"],
+                "designation": variant_base_product.designation,
+                "popular_name": variant_base_product.popular_name,
                 "dimensions": [
                     FAKER_GEN.random_int(10, 100),
                     FAKER_GEN.random_int(10, 100),
@@ -678,7 +679,7 @@ class ChainWeaver(Weaver):
             logger.debug(f"Variant Product {i}:")
 
             individual_needed_parts = set()
-            designation = self.designations.get(variant_product.metadata["designation"])
+            designation = self.designations.get(variant_product.designation)
             if designation:
                 parts = designation.get("Parts")
                 for part_list in parts.values():
@@ -688,8 +689,8 @@ class ChainWeaver(Weaver):
 
             for vital_sprue in vital_base_product_sprues:
                 if (
-                    variant_product.metadata["variant_base_product"]
-                    == vital_sprue.metadata["product"]
+                    variant_product.variant_base_product
+                    == vital_sprue.product
                 ):
                     variant_sprues.append(vital_sprue)
 
@@ -706,7 +707,7 @@ class ChainWeaver(Weaver):
                     for base_product_part_edge in base_product_part_edges:
                         if base_product_part_edge.start_node == vital_sprue:
                             individual_needed_parts.discard(
-                                base_product_part_edge.end_node.metadata["part_type"]
+                                base_product_part_edge.end_node.component_type # type: ignore
                             )
 
             needed_parts[variant_product.id] = individual_needed_parts
@@ -784,7 +785,7 @@ class ChainWeaver(Weaver):
             logger.debug(f"Variant Product {i}:")
 
             parts_categories = self.designations[
-                variant_product.metadata["designation"]
+                variant_product.designation
             ]["Parts"]
             for part_category, _ in parts_categories.items():
                 for part_type in needed_parts[variant_product.id]:
@@ -835,8 +836,8 @@ class ChainWeaver(Weaver):
 
                     for variant_sprue in variant_sprues:
                         if (
-                            variant_part.metadata["product"]
-                            == variant_sprue.metadata["product"]
+                            variant_part.product
+                            == variant_sprue.product
                             and variant_part.manufacturer == variant_sprue.manufacturer
                         ):
                             logger.debug(f"{part_type} Edge:")
