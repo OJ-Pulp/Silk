@@ -86,24 +86,33 @@ class Weaver(ABC):
         :param edge_object: Pass the Edge subclass for this Weaver type for headers.
         """
 
+        def merge_annotations(cls):
+            merged = {}
+            for base in reversed(cls.__mro__):
+                merged.update(getattr(base, '__annotations__', {}))
+            return merged
+
+        # Merge annotations for node and edge subclasses
+        node_fieldnames = list(merge_annotations(node_subclass).keys())
+        edge_fieldnames = list(merge_annotations(edge_subclass).keys())
+
         self.node_output_file = open(file=self.node_output_path, mode="a", newline="")
         self.node_writer = csv.DictWriter(
-            self.node_output_file, fieldnames=node_subclass.__annotations__.keys()
+            self.node_output_file, fieldnames=node_fieldnames
         )
         self.node_writer.writeheader()
 
-        logger.debug("annotation keys: " + str(node_subclass.__annotations__.keys()))
+        logger.debug("annotation keys: " + str(node_fieldnames))
         logger.info("Node writer created at " + str(self.node_output_path))
 
         self.edge_output_file = open(file=self.edge_output_path, mode="a", newline="")
         self.edge_writer = csv.DictWriter(
-            self.edge_output_file, fieldnames=edge_subclass.__annotations__.keys()
+            self.edge_output_file, fieldnames=edge_fieldnames
         )
         self.edge_writer.writeheader()
 
-        logger.debug("annotation keys: " + str(edge_subclass.__annotations__.keys()))
+        logger.debug("annotation keys: " + str(edge_fieldnames))
         logger.info("Edge writer created at " + str(self.edge_output_path))
-
 
     @staticmethod
     def _get_output_filename(
