@@ -239,11 +239,11 @@ class ChainWeaver(Weaver):
         manufacturer_keys = self.manufacturers.keys()
 
         def generate_subparts(
-            parent_part, parent_category, parent_designation, parent_manufacturer
+            parent_part: Component, parent_category, parent_designation, parent_manufacturer
         ):
             # If this part type is also a designation, generate its subparts
-            if parent_part.metadata["part_type"] in self.designations:
-                sub_designation = self.designations[parent_part.metadata["part_type"]]
+            if parent_part.part_type in self.designations:
+                sub_designation = self.designations[parent_part.part_type]
                 sub_parts_categories = sub_designation.get("Parts", {})
                 for sub_category, sub_part_list in sub_parts_categories.items():
                     for sub_part_type in sub_part_list:
@@ -259,7 +259,7 @@ class ChainWeaver(Weaver):
                             "full_product": False,
                             "component_type": "Part",
                             "variant": False,
-                            "product": parent_part.metadata["product"],
+                            "product": parent_part.product,
                             "variant_base_product": None,
                             "vital": False,
                             "category": sub_category,
@@ -305,13 +305,13 @@ class ChainWeaver(Weaver):
                         generate_subparts(
                             sub_part,
                             sub_category,
-                            parent_part.metadata["part_type"],
+                            parent_part.part_type,
                             sub_part_manufacturer,
                         )
 
         for i, base_product in enumerate(base_products, start=1):
             logger.debug(f"Base Product {i}:")
-            parts_categories = self.designations[base_product.metadata["designation"]][
+            parts_categories = self.designations[base_product.designation][
                 "Parts"
             ]
             for part_category, part_list in parts_categories.items():
