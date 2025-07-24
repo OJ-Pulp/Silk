@@ -347,9 +347,6 @@ class Requires(Edge):
     end_node: Node
     """The target node of the edge (must be a Node subclass)."""
 
-    weight: float
-    """The weight of the edge, default is 1.0."""
-
     base_model: bool
     """Indicates if the target component is in the base model of the source component."""
 
