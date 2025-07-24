@@ -18,10 +18,10 @@ logger.info("Program Start")
 class NamingError(Exception):
     pass
 
-class ChainWeaver(Weaver):
 
+class ChainWeaver(Weaver):
     def __init__(self, num_products: int = 40, variant_distribution: float = 0.25):
-        super().__init__([], [])
+        super().__init__()
         self.num_products = num_products
         self.variant_distribution = variant_distribution
 
@@ -33,22 +33,22 @@ class ChainWeaver(Weaver):
             raise SystemExit(FAILURE)
 
         logger.info("Inputs Accepted")
-        
-        self.designations_dict = resolved_inputdata["Designations"]
-        self.manufacturers_dict = resolved_inputdata["Manufacturers"]
+
+        self.designations = resolved_inputdata["Designations"]
+        self.manufacturers = resolved_inputdata["Manufacturers"]
 
         self.base_edges = []
         self.variant_edges = []
         self.base_components = []
         self.variant_components = []
 
-# -------------------------------------------------------------------------------------------
-#                                      BASE_PRODUCTS
-# -------------------------------------------------------------------------------------------
-# region BASE_PRODUCTS
+    # -------------------------------------------------------------------------------------------
+    #                                      BASE_PRODUCTS
+    # -------------------------------------------------------------------------------------------
+    # region BASE_PRODUCTS
     def create_base_products(
         self,
-        num_base_products: int, 
+        num_base_products: int,
     ) -> List[Component]:
         """
         Generates a fake dataset of base products and their data.
@@ -66,9 +66,11 @@ class ChainWeaver(Weaver):
 
         # Sets empty lists to collect products along with other necessary variables
         base_products = []
-        designation_keys = list(self.designations_dict.keys())
-        manufacturer_keys = list(self.manufacturers_dict.keys())
-        designation_counter = {designation_type: 0 for designation_type in designation_keys}
+        designation_keys = list(self.designations.keys())
+        manufacturer_keys = list(self.manufacturers.keys())
+        designation_counter = {
+            designation_type: 0 for designation_type in designation_keys
+        }
 
         # Creates all base products
         for i in range(num_base_products):
@@ -78,14 +80,18 @@ class ChainWeaver(Weaver):
             popular_name = FAKER_GEN.word(part_of_speech="noun").capitalize()
             selected_designation = FAKER_GEN.random_element(designation_keys)
             designation_counter[selected_designation] += 1
-            designation = f"{selected_designation}-{designation_counter[selected_designation]}"
+            designation = (
+                f"{selected_designation}-{designation_counter[selected_designation]}"
+            )
             manufacturer = FAKER_GEN.random_element(manufacturer_keys)
 
             # Creates 'base_product' Component(Node)
             component_data = {
                 "name": f"{popular_name} {designation}",
                 "manufacturer": manufacturer,
-                "locations": FAKER_GEN.random_element(list(self.manufacturers_dict[manufacturer]["Locations"])),
+                "locations": FAKER_GEN.random_element(
+                    list(self.manufacturers[manufacturer]["Locations"])
+                ),
                 "full_product": True,
                 "component_type": "Product",
                 "variant": False,
@@ -94,13 +100,19 @@ class ChainWeaver(Weaver):
                 "dimensions": [
                     FAKER_GEN.random_int(10, 100),
                     FAKER_GEN.random_int(10, 100),
-                    FAKER_GEN.random_int(10, 100)
+                    FAKER_GEN.random_int(10, 100),
                 ],
                 "cost": round(FAKER_GEN.random_number(digits=4), 2),
                 "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
+                "substitutions": [
+                    FAKER_GEN.bothify("???###")
+                    for _ in range(FAKER_GEN.random_int(0, 3))
+                ],
                 "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
-                "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))]
+                "year_range": [
+                    FAKER_GEN.random_int(1990, 2024)
+                    for _ in range(FAKER_GEN.random_int(1, 3))
+                ],
             }
             base_product = Component(**component_data)
 
@@ -111,16 +123,16 @@ class ChainWeaver(Weaver):
 
         return base_products
 
-# endregion
+    # endregion
 
-# -------------------------------------------------------------------------------------------
-#                                   BASE_PRODUCT_SPRUES
-# -------------------------------------------------------------------------------------------
-# region BASE_PRODUCT_SPRUES
+    # -------------------------------------------------------------------------------------------
+    #                                   BASE_PRODUCT_SPRUES
+    # -------------------------------------------------------------------------------------------
+    # region BASE_PRODUCT_SPRUES
 
     def create_base_product_sprues(
         self,
-        base_products: List[Component], 
+        base_products: List[Component],
     ) -> Tuple[List[Component], List[Requires]]:
         """
         Generates a fake dataset of base product sprues and sprue edges and their data.
@@ -139,7 +151,7 @@ class ChainWeaver(Weaver):
         # Sets empty lists to collect sprues and edges along with other necessary variables
         base_product_sprues = []
         base_product_sprue_edges = []
-        manufacturer_keys = list(self.manufacturers_dict.keys())
+        manufacturer_keys = list(self.manufacturers.keys())
 
         # Creates all base product sprues and edges
         for i, base_product in enumerate(base_products, start=1):
@@ -152,7 +164,9 @@ class ChainWeaver(Weaver):
                 component_data = {
                     "name": f"Sprue {FAKER_GEN.bothify(text='???########')}",
                     "manufacturer": manufacturer,
-                    "locations": FAKER_GEN.random_element(self.manufacturers_dict[manufacturer]["Locations"]),
+                    "locations": FAKER_GEN.random_element(
+                        self.manufacturers[manufacturer]["Locations"]
+                    ),
                     "full_product": False,
                     "component_type": "Sprue",
                     "variant": False,
@@ -160,13 +174,19 @@ class ChainWeaver(Weaver):
                     "dimensions": [
                         FAKER_GEN.random_int(10, 100),
                         FAKER_GEN.random_int(10, 100),
-                        FAKER_GEN.random_int(10, 100)
+                        FAKER_GEN.random_int(10, 100),
                     ],
                     "cost": round(FAKER_GEN.random_number(digits=4), 2),
                     "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                    "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
+                    "substitutions": [
+                        FAKER_GEN.bothify("???###")
+                        for _ in range(FAKER_GEN.random_int(0, 3))
+                    ],
                     "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
-                    "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))]
+                    "year_range": [
+                        FAKER_GEN.random_int(1990, 2024)
+                        for _ in range(FAKER_GEN.random_int(1, 3))
+                    ],
                 }
                 base_product_sprue = Component(**component_data)
 
@@ -182,7 +202,7 @@ class ChainWeaver(Weaver):
                     start_node=base_product,
                     end_node=base_product_sprue,
                     base_model=True,
-                    lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                    lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
                 )
 
                 # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
@@ -192,22 +212,22 @@ class ChainWeaver(Weaver):
 
         return base_product_sprues, base_product_sprue_edges
 
-# endregion
+    # endregion
 
-# -------------------------------------------------------------------------------------------
-#                                   BASE_PRODUCT_PARTS
-# -------------------------------------------------------------------------------------------
-# region BASE_PRODUCT_PARTS
+    # -------------------------------------------------------------------------------------------
+    #                                   BASE_PRODUCT_PARTS
+    # -------------------------------------------------------------------------------------------
+    # region BASE_PRODUCT_PARTS
 
     def create_base_product_parts(
         self,
-        base_products: List[Component], 
-        base_product_sprues: List[Component], 
+        base_products: List[Component],
+        base_product_sprues: List[Component],
     ) -> Tuple[List[Component], List[Requires], List[Component]]:
         """
         Generates a fake dataset of base product parts and part edges and their data.
         Supports recursive subcomponent generation for parts that have their own parts.
-        
+
         :param `base_products`: A list of base products and their data.
         :type `base_products`: List[Component]
         :param `base_product_sprues`: A list of base product sprues and their data.
@@ -225,20 +245,26 @@ class ChainWeaver(Weaver):
         base_product_parts = []
         base_product_part_edges = []
         vital_base_product_sprues = []
-        manufacturer_keys = list(self.manufacturers_dict.keys())
+        manufacturer_keys = list(self.manufacturers.keys())
 
-        def generate_subparts(parent_part, parent_category, parent_designation, parent_manufacturer):
+        def generate_subparts(
+            parent_part, parent_category, parent_designation, parent_manufacturer
+        ):
             # If this part type is also a designation, generate its subparts
-            if parent_part.metadata["part_type"] in self.designations_dict:
-                sub_designation = self.designations_dict[parent_part.metadata["part_type"]]
+            if parent_part.metadata["part_type"] in self.designations:
+                sub_designation = self.designations[parent_part.metadata["part_type"]]
                 sub_parts_categories = sub_designation.get("Parts", {})
                 for sub_category, sub_part_list in sub_parts_categories.items():
                     for sub_part_type in sub_part_list:
-                        sub_part_manufacturer = FAKER_GEN.random_element(manufacturer_keys)
+                        sub_part_manufacturer = FAKER_GEN.random_element(
+                            manufacturer_keys
+                        )
                         component_data = {
                             "name": f"{sub_part_type} {FAKER_GEN.bothify('???#####')}",
                             "manufacturer": sub_part_manufacturer,
-                            "locations": FAKER_GEN.random_element(self.manufacturers_dict[sub_part_manufacturer]["Locations"]),
+                            "locations": FAKER_GEN.random_element(
+                                self.manufacturers[sub_part_manufacturer]["Locations"]
+                            ),
                             "full_product": False,
                             "component_type": "Part",
                             "variant": False,
@@ -250,13 +276,23 @@ class ChainWeaver(Weaver):
                             "dimensions": [
                                 FAKER_GEN.random_int(10, 100),
                                 FAKER_GEN.random_int(10, 100),
-                                FAKER_GEN.random_int(10, 100)
+                                FAKER_GEN.random_int(10, 100),
                             ],
                             "cost": round(FAKER_GEN.random_number(digits=4), 2),
-                            "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                            "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
-                            "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
-                            "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))],
+                            "failure_rate": round(
+                                FAKER_GEN.random_number(digits=2) / 100, 4
+                            ),
+                            "substitutions": [
+                                FAKER_GEN.bothify("???###")
+                                for _ in range(FAKER_GEN.random_int(0, 3))
+                            ],
+                            "breakability": round(
+                                FAKER_GEN.random_number(digits=2) / 100, 2
+                            ),
+                            "year_range": [
+                                FAKER_GEN.random_int(1990, 2024)
+                                for _ in range(FAKER_GEN.random_int(1, 3))
+                            ],
                         }
                         sub_part = Component(**component_data)
                         base_product_parts.append(sub_part)
@@ -269,20 +305,40 @@ class ChainWeaver(Weaver):
                         )
                         base_product_part_edges.append(edge)
                         # Recurse further if needed
-                        generate_subparts(sub_part, sub_category, parent_part.metadata["part_type"], sub_part_manufacturer)
+                        generate_subparts(
+                            sub_part,
+                            sub_category,
+                            parent_part.metadata["part_type"],
+                            sub_part_manufacturer,
+                        )
 
         for i, base_product in enumerate(base_products, start=1):
             logger.debug(f"Base Product {i}:")
-            parts_categories = self.designations_dict[base_product.metadata["designation"]]["Parts"]
+            parts_categories = self.designations[base_product.metadata["designation"]][
+                "Parts"
+            ]
             for part_category, part_list in parts_categories.items():
                 for part_type in part_list:
                     logger.debug(f"{part_type}:")
-                    base_product_part_manufacturer = FAKER_GEN.random_element(list(manufacturer_keys))
-                    base_product_part_vital = True if part_type in self.designations_dict[base_product.metadata["designation"]]["Vital Parts"] else False
+                    base_product_part_manufacturer = FAKER_GEN.random_element(
+                        list(manufacturer_keys)
+                    )
+                    base_product_part_vital = (
+                        True
+                        if part_type
+                        in self.designations[base_product.metadata["designation"]][
+                            "Vital Parts"
+                        ]
+                        else False
+                    )
                     component_data = {
                         "name": f"{part_type} {FAKER_GEN.bothify('???#####')}",
                         "manufacturer": base_product_part_manufacturer,
-                        "locations": FAKER_GEN.random_element(self.manufacturers_dict[base_product_part_manufacturer]["Locations"]),
+                        "locations": FAKER_GEN.random_element(
+                            self.manufacturers[base_product_part_manufacturer][
+                                "Locations"
+                            ]
+                        ),
                         "full_product": False,
                         "component_type": "Part",
                         "variant": False,
@@ -294,21 +350,35 @@ class ChainWeaver(Weaver):
                         "dimensions": [
                             FAKER_GEN.random_int(10, 100),
                             FAKER_GEN.random_int(10, 100),
-                            FAKER_GEN.random_int(10, 100)
+                            FAKER_GEN.random_int(10, 100),
                         ],
                         "cost": round(FAKER_GEN.random_number(digits=4), 2),
-                        "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                        "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
-                        "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
-                        "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))],
+                        "failure_rate": round(
+                            FAKER_GEN.random_number(digits=2) / 100, 4
+                        ),
+                        "substitutions": [
+                            FAKER_GEN.bothify("???###")
+                            for _ in range(FAKER_GEN.random_int(0, 3))
+                        ],
+                        "breakability": round(
+                            FAKER_GEN.random_number(digits=2) / 100, 2
+                        ),
+                        "year_range": [
+                            FAKER_GEN.random_int(1990, 2024)
+                            for _ in range(FAKER_GEN.random_int(1, 3))
+                        ],
                     }
                     base_product_part = Component(**component_data)
                     base_product_parts.append(base_product_part)
                     logger.debug(base_product_part)
                     logger.debug("")
                     for base_product_sprue in base_product_sprues:
-                        if base_product_part.metadata["product"] == base_product_sprue.metadata["product"] \
-                            and base_product_part.manufacturer == base_product_sprue.manufacturer:
+                        if (
+                            base_product_part.metadata["product"]
+                            == base_product_sprue.metadata["product"]
+                            and base_product_part.manufacturer
+                            == base_product_sprue.manufacturer
+                        ):
                             logger.debug(f"{part_type} Edge:")
                             base_product_part_edge = Requires(
                                 start_node=base_product_sprue,
@@ -322,16 +392,21 @@ class ChainWeaver(Weaver):
                             if base_product_part_vital:
                                 vital_base_product_sprues.append(base_product_sprue)
                     # Recursively generate subparts if this part is also a designation
-                    generate_subparts(base_product_part, part_category, base_product.metadata["designation"], base_product_part_manufacturer)
+                    generate_subparts(
+                        base_product_part,
+                        part_category,
+                        base_product.metadata["designation"],
+                        base_product_part_manufacturer,
+                    )
 
         return base_product_parts, base_product_part_edges, vital_base_product_sprues
 
-# endregion
+    # endregion
 
-# -------------------------------------------------------------------------------------------
-#                               RESOLVE_BASE_PRODUCT_SPRUES
-# -------------------------------------------------------------------------------------------
-# region RESOLVE_BASE_PRODUCT_SPRUES
+    # -------------------------------------------------------------------------------------------
+    #                               RESOLVE_BASE_PRODUCT_SPRUES
+    # -------------------------------------------------------------------------------------------
+    # region RESOLVE_BASE_PRODUCT_SPRUES
 
     def resolve_base_product_sprues(
         self,
@@ -354,7 +429,7 @@ class ChainWeaver(Weaver):
         :return: A new resolved list of base product sprue edges.
         :rtype: List[Requires]
         """
-            
+
         # Sets empty lists to collect sprues and edges to keep
         resolved_base_sprues = []
         resolved_base_sprue_edges = []
@@ -362,16 +437,23 @@ class ChainWeaver(Weaver):
         # Checks that all sprues are used
         for i, base_product_sprue in enumerate(base_product_sprues, start=1):
             logger.debug(f"Sprue {i}:")
-            
+
             # Checks if a sprue has any edges to parts
-            has_edge = any(edge.start_node == base_product_sprue for edge in base_product_part_edges)
+            has_edge = any(
+                edge.start_node == base_product_sprue
+                for edge in base_product_part_edges
+            )
             if has_edge:
                 # Appends 'base_product_sprue' Component(Node) to the overall new list of 'base_product_sprues'
                 resolved_base_sprues.append(base_product_sprue)
                 logger.debug(f"Kept Sprue {i}")
 
                 # Appends 'base_product_sprue_edge' Requires(Edge) to the overall new list of 'base_product_sprue_edges'
-                resolved_base_sprue_edges.extend(e for e in base_product_sprue_edges if e.end_node == base_product_sprue)
+                resolved_base_sprue_edges.extend(
+                    e
+                    for e in base_product_sprue_edges
+                    if e.end_node == base_product_sprue
+                )
                 logger.debug(f"Kept Edges for Sprue {i}")
                 logger.debug("")
             else:
@@ -381,12 +463,12 @@ class ChainWeaver(Weaver):
 
         return resolved_base_sprues, resolved_base_sprue_edges
 
-# endregion
+    # endregion
 
-# -------------------------------------------------------------------------------------------
-#                                   NAMING_CONVENTIONS
-# -------------------------------------------------------------------------------------------
-# region NAMING_CONVENTIONS
+    # -------------------------------------------------------------------------------------------
+    #                                   NAMING_CONVENTIONS
+    # -------------------------------------------------------------------------------------------
+    # region NAMING_CONVENTIONS
 
     def get_next_letter(self, current_letter):
         """
@@ -396,70 +478,73 @@ class ChainWeaver(Weaver):
         """
         # Get the ASCII value of the current letter and adds 1 to get the ASCII of the next
         next_char_code = ord(current_letter) + 1
-        
+
         # If it goes past "Z", wrap around to "A"
         if next_char_code > ord("Z"):
             next_char_code = ord("A")
-        
+
         # Converts back to chr and outputs as a string of a standard capital letter
         return chr(next_char_code)
 
+    # endregion
 
-# endregion
-
-# -------------------------------------------------------------------------------------------
-#                                   VARIANT_PRODUCTS
-# -------------------------------------------------------------------------------------------
-# region VARIANT_PRODUCTS
+    # -------------------------------------------------------------------------------------------
+    #                                   VARIANT_PRODUCTS
+    # -------------------------------------------------------------------------------------------
+    # region VARIANT_PRODUCTS
 
     def current_designation_value(self, current_designation):
-        match = re.search(r'([A-Z]+)$', current_designation)
+        match = re.search(r"([A-Z]+)$", current_designation)
         if not match:
             return 0
         current_letters = match.group(1)
         value = 0
         for i, char in enumerate(reversed(current_letters)):
-            value += (ord(char) - ord("A") + 1) * (26 ** i)
+            value += (ord(char) - ord("A") + 1) * (26**i)
         return value
 
-
     def find_current_designation(
-        self,
-        variant_base_product: Component,
-        variant_products: List[Component]
+        self, variant_base_product: Component, variant_products: List[Component]
     ) -> str:
         current_designations = []
         for variant_product in variant_products:
-            if variant_product.metadata.get("variant_base_product") == variant_base_product.id:
+            if (
+                variant_product.metadata.get("variant_base_product")
+                == variant_base_product.id
+            ):
                 designation = variant_product.metadata.get("designation")
                 if designation:
                     current_designations.append(designation)
 
         if not current_designations:
-            raise NamingError(f"VariantNameIdentificationError: {variant_base_product.id} has No Preexisting Variants")
-        current_designation = max(current_designations, key=self.current_designation_value)
+            raise NamingError(
+                f"VariantNameIdentificationError: {variant_base_product.id} has No Preexisting Variants"
+            )
+        current_designation = max(
+            current_designations, key=self.current_designation_value
+        )
         return current_designation
 
     def next_variant_designation(
-        self,
-        variant_base_product: Component,
-        variant_products: List[Component]
+        self, variant_base_product: Component, variant_products: List[Component]
     ) -> str:
         """
         Returns the next variant designation letter in a base-26 alphabetical sequence.
         After 'Z', it continues with 'AA', 'AB', etc.
-        
+
         :param current_letter: The current variant designation string (e.g., 'A', ..., 'Z', 'AA', ...)
         :return: The next variant designation string.
         """
 
         try:
-            current_designation = self.find_current_designation(variant_base_product, variant_products)
+            current_designation = self.find_current_designation(
+                variant_base_product, variant_products
+            )
         except NamingError as e:
             logger.warning(f"{type(e).__name__}: {e}")
             return variant_base_product.metadata["designation"] + "A"
 
-        match = re.search(r'([A-Z]+)$', current_designation)
+        match = re.search(r"([A-Z]+)$", current_designation)
         if not match:
             raise SystemExit(FAILURE)
         current_letter = match.group(1)
@@ -473,7 +558,9 @@ class ChainWeaver(Weaver):
                 start_letter = letters[i]
                 letters[i] = chr(ord(letters[i]) + 1)
                 changed_letter = letters[i]
-                logger.info(f"Start Letter of '{start_letter}' Changed to '{changed_letter}'")
+                logger.info(
+                    f"Start Letter of '{start_letter}' Changed to '{changed_letter}'"
+                )
                 logger.debug(f"Letters:         {letters}")
                 logger.debug(f"OUTPUT: New Letters:         {letters}")
                 break
@@ -481,33 +568,32 @@ class ChainWeaver(Weaver):
                 start_letter = letters[i]
                 letters[i] = "A"
                 changed_letter = letters[i]
-                logger.info(f"Start Letter of '{start_letter}' Changed to '{changed_letter}'")
+                logger.info(
+                    f"Start Letter of '{start_letter}' Changed to '{changed_letter}'"
+                )
                 logger.debug(f"Letters:         {letters}")
                 i -= 1
                 logger.debug(f"I:       {i}")
 
         # If all characters were 'Z', we need to add a new 'A' at the beginning
-        if i <0:
+        if i < 0:
             letters.insert(0, "A")
         next_letters = "".join(letters)
-        next_designation = re.sub(r'([A-Z]+)$', next_letters, current_designation)
+        next_designation = re.sub(r"([A-Z]+)$", next_letters, current_designation)
         logger.info(f"OUTPUT: New Letters:         {letters}")
         logger.info(f"Next Designation:         {next_designation}")
         return next_designation
 
-
     def create_variant_products(
-        self,
-        base_products: List[Component],
-        num_variants: int = 10
-    )  -> List[Component]:
+        self, base_products: List[Component], num_variants: int = 10
+    ) -> List[Component]:
         """
         INSERT STUFF
         """
 
         # Sets empty list to collect variant products along with other necessary variables
         variant_products = []
-        manufacturer_keys = list(self.manufacturers_dict.keys())
+        manufacturer_keys = list(self.manufacturers.keys())
 
         # Creates all variant products
         for i in range(num_variants):
@@ -516,14 +602,18 @@ class ChainWeaver(Weaver):
             # Picks a random base product to create a variant of
             variant_base_product = FAKER_GEN.random_element(base_products)
             # Generates variant product data
-            variant_designation = self.next_variant_designation(variant_base_product, variant_products)
+            variant_designation = self.next_variant_designation(
+                variant_base_product, variant_products
+            )
             variant_manufacturer = FAKER_GEN.random_element(manufacturer_keys)
 
             # Creates 'base_product' Component(Node)
             component_data = {
-                "name": f"{variant_base_product.metadata['popular_name']} {variant_designation}", 
+                "name": f"{variant_base_product.metadata['popular_name']} {variant_designation}",
                 "manufacturer": variant_manufacturer,
-                "locations": FAKER_GEN.random_element(list(self.manufacturers_dict[variant_manufacturer]["Locations"])),
+                "locations": FAKER_GEN.random_element(
+                    list(self.manufacturers[variant_manufacturer]["Locations"])
+                ),
                 "full_product": True,
                 "component_type": "Product",
                 "variant": True,
@@ -533,13 +623,19 @@ class ChainWeaver(Weaver):
                 "dimensions": [
                     FAKER_GEN.random_int(10, 100),
                     FAKER_GEN.random_int(10, 100),
-                    FAKER_GEN.random_int(10, 100)
+                    FAKER_GEN.random_int(10, 100),
                 ],
                 "cost": round(FAKER_GEN.random_number(digits=4), 2),
                 "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
+                "substitutions": [
+                    FAKER_GEN.bothify("???###")
+                    for _ in range(FAKER_GEN.random_int(0, 3))
+                ],
                 "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
-                "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))]
+                "year_range": [
+                    FAKER_GEN.random_int(1990, 2024)
+                    for _ in range(FAKER_GEN.random_int(1, 3))
+                ],
             }
             variant_product = Component(**component_data)
 
@@ -547,22 +643,22 @@ class ChainWeaver(Weaver):
             variant_products.append(variant_product)
             logger.debug(variant_product)
             logger.debug("")
-        
+
         return variant_products
 
-# endregion
+    # endregion
 
-# -------------------------------------------------------------------------------------------
-#                                   VARIANT_SPRUES
-# -------------------------------------------------------------------------------------------
-# region VARIANT_SPRUES
+    # -------------------------------------------------------------------------------------------
+    #                                   VARIANT_SPRUES
+    # -------------------------------------------------------------------------------------------
+    # region VARIANT_SPRUES
 
     def create_variant_product_sprues(
         self,
         variant_products: List[Component],
         vital_base_product_sprues: List[Component],
         base_product_part_edges: List[Requires],
-    )  -> Tuple[List[Component], List[Requires], dict, dict]:
+    ) -> Tuple[List[Component], List[Requires], dict, dict]:
         """
         INSERT STUFF
         """
@@ -578,23 +674,26 @@ class ChainWeaver(Weaver):
             logger.debug(f"Variant Product {i}:")
 
             individual_needed_parts = set()
-            designation = self.designations_dict.get(variant_product.metadata["designation"])
+            designation = self.designations.get(variant_product.metadata["designation"])
             if designation:
                 parts = designation.get("Parts")
                 for part_list in parts.values():
                     individual_needed_parts.update(part_list)
-            
-            individual_needed_manufacturers = set(self.manufacturers_dict.keys())
+
+            individual_needed_manufacturers = set(self.manufacturers.keys())
 
             for vital_sprue in vital_base_product_sprues:
-                if variant_product.metadata["variant_base_product"] == vital_sprue.metadata["product"]:
+                if (
+                    variant_product.metadata["variant_base_product"]
+                    == vital_sprue.metadata["product"]
+                ):
                     variant_sprues.append(vital_sprue)
-                    
+
                     variant_sprue_edge = Requires(
                         start_node=variant_product,
                         end_node=vital_sprue,
                         base_model=True,
-                        lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                        lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
                     )
 
                     variant_sprue_edges.append(variant_sprue_edge)
@@ -603,7 +702,9 @@ class ChainWeaver(Weaver):
 
                     for base_product_part_edge in base_product_part_edges:
                         if base_product_part_edge.start_node == vital_sprue:
-                            individual_needed_parts.discard(base_product_part_edge.end_node.metadata["part_type"])
+                            individual_needed_parts.discard(
+                                base_product_part_edge.end_node.metadata["part_type"]
+                            )
 
             needed_parts[variant_product.id] = individual_needed_parts
             needed_manufacturers[variant_product.id] = individual_needed_manufacturers
@@ -615,7 +716,9 @@ class ChainWeaver(Weaver):
                 component_data = {
                     "name": f"Sprue {FAKER_GEN.bothify(text='???########')}",
                     "manufacturer": manufacturer,
-                    "locations": FAKER_GEN.random_element(self.manufacturers_dict[manufacturer]["Locations"]),
+                    "locations": FAKER_GEN.random_element(
+                        self.manufacturers[manufacturer]["Locations"]
+                    ),
                     "full_product": False,
                     "component_type": "Sprue",
                     "variant": True,
@@ -623,13 +726,19 @@ class ChainWeaver(Weaver):
                     "dimensions": [
                         FAKER_GEN.random_int(10, 100),
                         FAKER_GEN.random_int(10, 100),
-                        FAKER_GEN.random_int(10, 100)
+                        FAKER_GEN.random_int(10, 100),
                     ],
                     "cost": round(FAKER_GEN.random_number(digits=4), 2),
                     "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                    "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
+                    "substitutions": [
+                        FAKER_GEN.bothify("???###")
+                        for _ in range(FAKER_GEN.random_int(0, 3))
+                    ],
                     "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
-                    "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))]
+                    "year_range": [
+                        FAKER_GEN.random_int(1990, 2024)
+                        for _ in range(FAKER_GEN.random_int(1, 3))
+                    ],
                 }
                 variant_sprue = Component(**component_data)
 
@@ -642,25 +751,25 @@ class ChainWeaver(Weaver):
                     start_node=variant_product,
                     end_node=variant_sprue,
                     base_model=True,
-                    lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                    lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
                 )
 
                 variant_sprue_edges.append(variant_sprue_edge)
-        
+
         return variant_sprues, variant_sprue_edges, needed_parts, needed_manufacturers
 
-# endregion
+    # endregion
 
-# -------------------------------------------------------------------------------------------
-#                                   VARIANT_PARTS
-# -------------------------------------------------------------------------------------------
-# region VARIANT_PARTS
+    # -------------------------------------------------------------------------------------------
+    #                                   VARIANT_PARTS
+    # -------------------------------------------------------------------------------------------
+    # region VARIANT_PARTS
 
     def create_variant_parts(
         self,
-        variant_products: List[Component], 
-        variant_sprues: List[Component], 
-        needed_parts: dict, 
+        variant_products: List[Component],
+        variant_sprues: List[Component],
+        needed_parts: dict,
         needed_manufacturers: dict,
     ) -> Tuple[List[Component], List[Requires]]:
         """
@@ -674,19 +783,25 @@ class ChainWeaver(Weaver):
         for i, variant_product in enumerate(variant_products, start=1):
             logger.debug(f"Variant Product {i}:")
 
-            parts_categories = self.designations_dict[variant_product.metadata["designation"]]["Parts"]
+            parts_categories = self.designations[
+                variant_product.metadata["designation"]
+            ]["Parts"]
             for part_category, _ in parts_categories.items():
                 for part_type in needed_parts[variant_product.id]:
                     logger.debug(f"{part_type}:")
 
                     # Generates variant product part data
-                    variant_part_manufacturer = FAKER_GEN.random_element(needed_manufacturers[variant_product.id])
+                    variant_part_manufacturer = FAKER_GEN.random_element(
+                        needed_manufacturers[variant_product.id]
+                    )
 
                     # Creates 'variant_product_part' Component(Node)
                     component_data = {
                         "name": f"{part_type}{FAKER_GEN.bothify('???#####')}",
                         "manufacturer": variant_part_manufacturer,
-                        "locations": FAKER_GEN.random_element(self.manufacturers_dict[variant_part_manufacturer]["Locations"]),
+                        "locations": FAKER_GEN.random_element(
+                            self.manufacturers[variant_part_manufacturer]["Locations"]
+                        ),
                         "full_product": False,
                         "component_type": "Part",
                         "product": variant_product.id,
@@ -696,21 +811,34 @@ class ChainWeaver(Weaver):
                         "dimensions": [
                             FAKER_GEN.random_int(10, 100),
                             FAKER_GEN.random_int(10, 100),
-                            FAKER_GEN.random_int(10, 100)
+                            FAKER_GEN.random_int(10, 100),
                         ],
                         "cost": round(FAKER_GEN.random_number(digits=4), 2),
-                        "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                        "substitutions": [FAKER_GEN.bothify("???###") for _ in range(FAKER_GEN.random_int(0, 3))],
-                        "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
-                        "year_range": [FAKER_GEN.random_int(1990, 2024) for _ in range(FAKER_GEN.random_int(1, 3))],
+                        "failure_rate": round(
+                            FAKER_GEN.random_number(digits=2) / 100, 4
+                        ),
+                        "substitutions": [
+                            FAKER_GEN.bothify("???###")
+                            for _ in range(FAKER_GEN.random_int(0, 3))
+                        ],
+                        "breakability": round(
+                            FAKER_GEN.random_number(digits=2) / 100, 2
+                        ),
+                        "year_range": [
+                            FAKER_GEN.random_int(1990, 2024)
+                            for _ in range(FAKER_GEN.random_int(1, 3))
+                        ],
                     }
                     variant_part = Component(**component_data)
 
                     variant_parts.append(variant_part)
 
                     for variant_sprue in variant_sprues:
-                        if variant_part.metadata["product"] == variant_sprue.metadata["product"] \
-                            and variant_part.manufacturer == variant_sprue.manufacturer:
+                        if (
+                            variant_part.metadata["product"]
+                            == variant_sprue.metadata["product"]
+                            and variant_part.manufacturer == variant_sprue.manufacturer
+                        ):
                             logger.debug(f"{part_type} Edge:")
 
                             # Creates 'base_product_sprue' to 'base_product_part' Requires(Edge)
@@ -718,7 +846,9 @@ class ChainWeaver(Weaver):
                                 start_node=variant_sprue,
                                 end_node=variant_part,
                                 base_model=True,
-                                lead_time=FAKER_GEN.random_int(1, 1000),    # In Business Days
+                                lead_time=FAKER_GEN.random_int(
+                                    1, 1000
+                                ),  # In Business Days
                             )
 
                             # Appends 'base_product_sprue_edge' Requires(Edge) to the overall list of 'base_product_sprue_edges'
@@ -738,7 +868,6 @@ class ChainWeaver(Weaver):
         """
         logger.info("Main Start")
 
-
         # Sets overall variables
         logger.debug("Local Main Variables: ")
         logger.debug(f"Num_Products:        {self.num_products}")
@@ -751,21 +880,37 @@ class ChainWeaver(Weaver):
 
         base_products = self.create_base_products(num_base_products)
         logger.info("Base Products Created")
-        base_product_sprues, base_product_sprue_edges = self.create_base_product_sprues(base_products)
+        base_product_sprues, base_product_sprue_edges = self.create_base_product_sprues(
+            base_products
+        )
         logger.info("Base Product Sprues Created")
-        base_product_parts, base_product_part_edges, vital_base_product_sprues =  self.create_base_product_parts(base_products, base_product_sprues)
+        base_product_parts, base_product_part_edges, vital_base_product_sprues = (
+            self.create_base_product_parts(base_products, base_product_sprues)
+        )
         logger.info("Base Product Parts Created")
-        resolved_base_product_sprues, resolved_base_product_sprue_edges = self.resolve_base_product_sprues(base_product_sprues, base_product_sprue_edges, base_product_part_edges)
+        resolved_base_product_sprues, resolved_base_product_sprue_edges = (
+            self.resolve_base_product_sprues(
+                base_product_sprues, base_product_sprue_edges, base_product_part_edges
+            )
+        )
         logger.info("Base Product Sprues Resolved")
         variant_products = self.create_variant_products(base_products, num_variants)
         logger.info("Variant Products Created")
-        variant_sprues, variant_sprue_edges, needed_parts, needed_manufacturers = self.create_variant_product_sprues(variant_products, vital_base_product_sprues, base_product_part_edges)
+        variant_sprues, variant_sprue_edges, needed_parts, needed_manufacturers = (
+            self.create_variant_product_sprues(
+                variant_products, vital_base_product_sprues, base_product_part_edges
+            )
+        )
         logger.info("Variant Sprues Created")
-        variant_parts, variant_part_edges = self.create_variant_parts(variant_products, variant_sprues, needed_parts, needed_manufacturers)
+        variant_parts, variant_part_edges = self.create_variant_parts(
+            variant_products, variant_sprues, needed_parts, needed_manufacturers
+        )
         logger.info("Variant Parts Created")
 
         # Collect all components and edges
-        self.base_components = base_products + resolved_base_product_sprues + base_product_parts
+        self.base_components = (
+            base_products + resolved_base_product_sprues + base_product_parts
+        )
         self.variant_components = variant_products + variant_sprues + variant_parts
         self.components = self.base_components + self.variant_components
         self.base_edges = resolved_base_product_sprue_edges + base_product_part_edges
@@ -793,13 +938,16 @@ def main(num_products: int = 40, variant_distribution: float = 0.25):
     weaver.weave()
     # weaver.write_to_csv()
 
+
 # endregion
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt as e:
-        logger.warning(f"{type(e).__name__}: Input Processing Interrupted by User -- Exiting")
+        logger.warning(
+            f"{type(e).__name__}: Input Processing Interrupted by User -- Exiting"
+        )
         raise SystemExit(INTERRUPTED)
 
 logger.info("Program End")
