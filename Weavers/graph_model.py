@@ -19,8 +19,11 @@ class Node(ABC):
     - Manufacturer nodes might use the name of the company (ex. "Ford Motor Company").
     """
 
-    # Must be overridden in subclasses to specify which fields to export
-    __csv_fields__: List[str]
+    id: str 
+    """Unique identifier for the node, generated if not provided."""
+
+    name: str 
+    """Name of the node to be displayed in GUI tools."""
 
     def __init__(self, name: str, id: Optional[str] = None):
         """
@@ -65,9 +68,9 @@ class Node(ABC):
             for k, v in self.metadata.items():
                 row[k] = v
 
-        # Optionally prune to __csv_fields__
-        if self.__csv_fields__:
-            row = {k: row.get(k, "") for k in self.__csv_fields__}
+        # # Optionally prune to __csv_fields__
+        # if self.__csv_fields__:
+        #     row = {k: row.get(k, "") for k in self.__csv_fields__}
 
         return row
 
