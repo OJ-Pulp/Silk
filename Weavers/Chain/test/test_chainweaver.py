@@ -1,6 +1,7 @@
 import pytest
 from Weavers.Chain.ChainWeaver import ChainWeaver
 from Weavers.Chain.data_model import Component, Requires
+import csv
 
 weaver = ChainWeaver()
 
@@ -49,3 +50,24 @@ def test_resolve_base_product_sprues():
 def test_get_next_letter_wrap():
     assert weaver.get_next_letter("A") == "B"
     assert weaver.get_next_letter("Z") == "A"
+
+
+def test_components_csv_has_unique_ids(tmp_path, monkeypatch):
+    # Patch the output directory used by ChainWeaver
+    output_dir = tmp_path / "output"
+    monkeypatch.setattr(
+        "Weavers.Chain.ChainWeaver.get_next_test_output_filename",
+        lambda base_name, extension, output_dir=output_dir: output_dir
+        / f"test1_{base_name}.{extension.lstrip('.')}",
+    )
+    # Run main to generate CSVs
+    from Weavers.Chain import ChainWeaver
+
+    ChainWeaver.main(num_products=5, variant_distribution=0.2)
+    # Find the components CSV
+    components_csv = output_dir / "test1_nodes.csv"
+    assert components_csv.exists(), "Components CSV was not created"
+    with components_csv.open(newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+        ids = [row["ID"] for row in reader if "ID" in row]
+    assert len(ids) != len(set(ids)), "Duplicate IDs found in components CSV"
