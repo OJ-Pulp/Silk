@@ -46,7 +46,10 @@ class ChainWeaver(Weaver):
     #                                      BASE_PRODUCTS
     # -------------------------------------------------------------------------------------------
     # region BASE_PRODUCTS
-    def create_base_products(self, num_base_products: int):
+    def create_base_products(
+        self,
+        num_base_products: int,
+    ) -> List[Component]:
         """
         Generates a fake dataset of base products and their data.
 
@@ -58,8 +61,9 @@ class ChainWeaver(Weaver):
         """
 
         # Sets empty lists to collect products along with other necessary variables
-        designation_keys = list(self.designations.keys())
-        manufacturer_keys = list(self.manufacturers.keys())
+        base_products = []
+        designation_keys = self.designations.keys()
+        manufacturer_keys = self.manufacturers.keys()
         designation_counter = {
             designation_type: 0 for designation_type in designation_keys
         }
@@ -109,6 +113,13 @@ class ChainWeaver(Weaver):
             base_product = Component(**component_data)
 
             self.write_node(base_product)
+
+            # Appends 'base_product' Component(Node) to the overall list of 'base_products'
+            base_products.append(base_product)
+            logger.debug(base_product)
+            logger.debug("")
+
+        return base_products
 
     # endregion
 
@@ -882,6 +893,9 @@ class ChainWeaver(Weaver):
         )
         logger.info("Base Product Sprues Resolved")
         variant_products = self.create_variant_products(base_products, num_variants)
+        
+        del base_products # Free up memory by removing base products from the list
+
         logger.info("Variant Products Created")
         variant_sprues, variant_sprue_edges, needed_parts, needed_manufacturers = (
             self.create_variant_product_sprues(
@@ -895,15 +909,15 @@ class ChainWeaver(Weaver):
         logger.info("Variant Parts Created")
 
         # Collect all components and edges
-        self.base_components = (
-            base_products + resolved_base_product_sprues + base_product_parts
-        )
-        self.variant_components = variant_products + variant_sprues + variant_parts
-        self.components = self.base_components + self.variant_components
-        self.base_edges = resolved_base_product_sprue_edges + base_product_part_edges
-        self.variant_edges = variant_sprue_edges + variant_part_edges
+        # self.base_components = (
+        #     base_products + resolved_base_product_sprues + base_product_parts
+        # )
+        # self.variant_components = variant_products + variant_sprues + variant_parts
+        # self.components = self.base_components + self.variant_components
+        # self.base_edges = resolved_base_product_sprue_edges + base_product_part_edges
+        # self.variant_edges = variant_sprue_edges + variant_part_edges
         # self.edges = self.base_edges + self.variant_edges
-        logger.info("Lists Consolidated")
+        # logger.info("Lists Consolidated")
 
     def generate_nodes(self) -> dict:
         return {"base": self.base_components, "variant": self.variant_components}
