@@ -65,34 +65,44 @@ class Weaver(ABC):
         Set the output path for the Weaver's output files.
         """
 
-        self.node_output_path = Weaver.get_output_filename(
+        self.node_output_path = Weaver._get_output_filename(
             base_name="nodes", extension="csv"
         )
-        self.edge_output_path = Weaver.get_output_filename(
+        self.edge_output_path = Weaver._get_output_filename(
             base_name="edges", extension="csv"
         )
         logger.info(
             f"Output path set to {self.node_output_path} and {self.edge_output_path}"
         )
 
-    def __set_writers__(self):
+    def set_writers(self, node_subclass: type[Node], edge_subclass: type[Edge]):
         """
         Set the writers for the node and edge output files.
-        This method is called after the output paths are set.
+        This method is called after the output paths are set, typically after
+        object instantation.
+
+        Also writes the headers to reduce boilerplate.
+
+        :param node_object: Pass the Node subclass for this Weaver type for headers.
+        :param edge_object: Pass the Edge subclass for this Weaver type for headers.
         """
         self.node_output_file = open(file=self.node_output_path, mode="a", newline="")
         self.node_writer = csv.DictWriter(
-            self.node_output_file, fieldnames=Node.__annotations__.keys()
+            self.node_output_file, fieldnames=node_subclass.__annotations__.keys()
         )
+        logger.debug("annotation keys: " + str(node_subclass.__annotations__.keys()))
+        logger.info("Node writer created at " + str(self.node_output_path))
         self.node_writer.writeheader()
         self.edge_output_file = open(file=self.edge_output_path, mode="a", newline="")
         self.edge_writer = csv.DictWriter(
-            self.edge_output_file, fieldnames=Edge.__annotations__.keys()
+            self.edge_output_file, fieldnames=edge_subclass.__annotations__.keys()
         )
+        logger.debug("annotation keys: " + str(edge_subclass.__annotations__.keys()))
+        logger.info("Edge writer created at " + str(self.edge_output_path))
         self.edge_writer.writeheader()
 
     @staticmethod
-    def get_output_filename(
+    def _get_output_filename(
         base_name: str, extension: str, output_dir: Path = Path("output")
     ) -> Path:
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -113,31 +123,24 @@ class Weaver(ABC):
         :param data: The Node or Edge object to write to the CSV file.
         """
 
+        if self.node_writer is None or self.edge_writer is None:
+            raise ValueError("Writers not set. Call set_writers() first.")
+
         if isinstance(data, Node):
-            node_output_file = open(self.node_output_path, "a", newline="")
-            node_writer = csv.DictWriter(
-                node_output_file, fieldnames=data.__annotations__.keys()
-            )
-
             # Only write header if file is empty
-            if node_output_file.tell() == 0:
-                node_writer.writeheader()
+            if self.node_output_file.tell() == 0:
+                self.node_writer.writeheader()
 
-            node_writer.writerow(data.to_dict())
-            node_output_file.close()  # Don’t forget to close the file!
+            self.node_writer.writerow(data.to_dict())
+            self.node_output_file.close()  # Don’t forget to close the file!
 
         else:  # isinstance(data, Edge):
-            edge_output_file = open(self.edge_output_path, "a", newline="")
-            edge_writer = csv.DictWriter(
-                edge_output_file, fieldnames=data.__annotations__.keys()
-            )
-
             # Only write header if file is empty
-            if edge_output_file.tell() == 0:
-                edge_writer.writeheader()
+            if self.edge_output_file.tell() == 0:
+                self.edge_writer.writeheader()
 
-            edge_writer.writerow(data.to_dict())
-            edge_output_file.close()  # Don’t forget to close the file!
+            self.edge_writer.writerow(data.to_dict())
+            self.edge_output_file.close()  # Don’t forget to close the file!
 
     @abstractmethod
     def weave(self):
