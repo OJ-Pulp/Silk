@@ -80,6 +80,8 @@ class Edge(ABC):
     Used to define directional links in the graph.
     """
 
+    
+
     def __init__(self, start_node: Node, end_node: Node, weight: float = 1.0):
         """
         Create a directed edge from one node to another.
@@ -88,7 +90,6 @@ class Edge(ABC):
         :param end_node: The target node (must be a Node subclass).
         :param weight: The weight of the edge, default is 1.0.
         """
-        self.id = str(uuid.uuid4())
         self.start_node = start_node
         self.end_node = end_node
         self.weight = weight
@@ -101,18 +102,21 @@ class Edge(ABC):
             other (object): The object to compare with.
 
         Returns:
-            bool: True if 'other' is an Edge and has the same id, False otherwise.
+            bool: True if 'other' is an Edge and has the same start and end nodes, as well as weight, False otherwise.
         """
-        return isinstance(other, Edge) and self.id == other.id
+        return isinstance(other, Edge) and \
+        self.start_node.id == other.start_node.id and \
+        self.end_node.id == other.end_node.id and \
+        self.weight == other.weight
 
     def __hash__(self):
         """
         Compute the hash value for the Edge instance.
 
         Returns:
-            int: The hash of the Edge's id.
+            int: The hash of the start_node ID, end_node ID, and weight.
         """
-        return hash(self.id)
+        return hash(self.start_node.id + self.end_node.id + str(self.weight))
 
     def to_dict(self) -> dict:
         """
