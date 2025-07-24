@@ -32,7 +32,7 @@ class Node(ABC):
     weight: float = 1.0
     """Weight of the node, default is 1.0."""
 
-    def __init__(self, name: str, id: Optional[str] = None):
+    def __init__(self, name: str, id: Optional[str] = None, weight: Optional[float] = 1.0):
         """
         Initialize a Node with a name.
 
@@ -40,6 +40,8 @@ class Node(ABC):
         """
         self.id = id if id is not None else str(uuid.uuid4())
         self.name = name
+        # if weight is not None:
+            # self.weight = weight
         self.metadata: dict
 
     def __eq__(self, other):
@@ -96,10 +98,10 @@ class Edge(ABC):
     end_node: Node
     """The target node of the edge (must be a Node subclass)."""
 
-    weight: float
-    """The weight of the edge, default is 1.0."""
+    # weight: Optional[float] = 1.0
+    # """The weight of the edge, default is 1.0."""
 
-    def __init__(self, start_node: Node, end_node: Node, weight: float = 1.0):
+    def __init__(self, start_node: Node, end_node: Node):
         """
         Create a directed edge from one node to another.
 
@@ -109,7 +111,7 @@ class Edge(ABC):
         """
         self.start_node = start_node
         self.end_node = end_node
-        self.weight = weight
+        # self.weight = weight if not None else 1.0
 
     def __eq__(self, other):
         """
@@ -150,8 +152,8 @@ class Edge(ABC):
 
         # Start with start_id, end_id (omit 'id')
         row = {
-            "start_id": getattr(self.start_node, "id", None),
-            "end_id": getattr(self.end_node, "id", None),
+            "start_node": getattr(self.start_node, "id", None),
+            "end_node": getattr(self.end_node, "id", None),
         }
 
         for k, v in base_attrs.items():
