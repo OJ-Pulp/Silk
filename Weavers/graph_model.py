@@ -68,10 +68,6 @@ class Node(ABC):
             for k, v in self.metadata.items():
                 row[k] = v
 
-        # # Optionally prune to __csv_fields__
-        # if self.__csv_fields__:
-        #     row = {k: row.get(k, "") for k in self.__csv_fields__}
-
         return row
 
 
@@ -83,7 +79,14 @@ class Edge(ABC):
     Used to define directional links in the graph.
     """
 
-    
+    start_node: Node
+    """The source node of the edge (must be a Node subclass)."""
+
+    end_node: Node
+    """The target node of the edge (must be a Node subclass)."""
+
+    weight: float
+    """The weight of the edge, default is 1.0."""
 
     def __init__(self, start_node: Node, end_node: Node, weight: float = 1.0):
         """
@@ -142,10 +145,6 @@ class Edge(ABC):
 
         for k, v in base_attrs.items():
             row[k] = v
-
-        # Optionally prune to __csv_fields__
-        if hasattr(self, "__csv_fields__") and getattr(self, "__csv_fields__"):
-            row = {k: row.get(k, "") for k in getattr(self, "__csv_fields__")}
 
         return row
 
