@@ -96,6 +96,9 @@ class Component(Node):
 
     component_type: Optional[str] = None 
     """Level of the component in relation to other components (e.g., sprue, part, assembly)"""
+    
+    product: Optional[str] = None
+    """The product that the non full_product component is a component of. If full_product is True, this is None."""
 
     variant: Optional[bool] = None 
     """Whether or not this component is a variant of another component. False if it is the base model."""
