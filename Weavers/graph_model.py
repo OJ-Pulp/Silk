@@ -17,6 +17,10 @@ class Node(ABC):
     Examples:
     - Component nodes might have the component name as the name.
     - Manufacturer nodes might use the name of the company (ex. "Ford Motor Company").
+    
+    Class attributes listed here are used to define the fields that will be exported to CSV.
+    These fields are NOT inherited by subclasses, so each subclass must define its own attributes.
+    This allows for flexibility in defining edges with different properties, say if you want an unweighted graph, you can exclude the weight attribute.
     """
 
     id: str 
@@ -24,6 +28,9 @@ class Node(ABC):
 
     name: str 
     """Name of the node to be displayed in GUI tools."""
+
+    weight: float = 1.0
+    """Weight of the node, default is 1.0."""
 
     def __init__(self, name: str, id: Optional[str] = None):
         """
@@ -77,6 +84,10 @@ class Edge(ABC):
 
     Each edge has a unique ID.
     Used to define directional links in the graph.
+
+    Class attributes listed here are used to define the fields that will be exported to CSV.
+    These fields are NOT inherited by subclasses, so each subclass must define its own attributes.
+    This allows for flexibility in defining edges with different properties, say if you want an unweighted graph, you can exclude the weight attribute.
     """
 
     start_node: Node
