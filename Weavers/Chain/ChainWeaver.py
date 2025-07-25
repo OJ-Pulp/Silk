@@ -36,11 +36,6 @@ class ChainWeaver(Weaver):
         self.designations = resolved_inputdata["Designations"]
         self.manufacturers = resolved_inputdata["Manufacturers"]
 
-        self.base_edges = []
-        self.variant_edges = []
-        self.base_components = []
-        self.variant_components = []
-
     # -------------------------------------------------------------------------------------------
     #                                      BASE_PRODUCTS
     # -------------------------------------------------------------------------------------------
