@@ -5,7 +5,7 @@ Graph model for representing nodes and edges in a database.
 from abc import ABC
 from typing import Optional
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 
 
 @dataclass
@@ -35,28 +35,8 @@ class Node(ABC):
     def to_dict(self) -> dict:
         """
         Convert any Node subclass to a flat dictionary.
-        If __csv_fields__ is defined, it controls which fields are exported.
-        Otherwise, export all simple attributes + metadata.
         """
-        row = {"id": self.id, "name": self.name}
-
-        # Get instance dict without private/internal
-        base_attrs = {
-            k: v
-            for k, v in self.__dict__.items()
-            if not k.startswith("_") and k not in {"id", "name", "metadata"}
-        }
-
-        # Flatten flat lists and basic types
-        for k, v in base_attrs.items():
-            if isinstance(v, list):
-                row[k] = ";".join(map(str, v))
-            else:
-                row[k] = v
-
-
-        return row
-
+        return asdict(self)
 
 @dataclass
 class Edge(ABC):
@@ -83,23 +63,5 @@ class Edge(ABC):
     def to_dict(self) -> dict:
         """
         Convert any Edge subclass to a flat dictionary.
-        If __csv_fields__ is defined, it controls which fields are exported.
-        Otherwise, export all simple attributes.
         """
-        # Get instance dict without private/internal
-        base_attrs = {
-            k: v
-            for k, v in self.__dict__.items()
-            if not k.startswith("_") and k not in {"start_node", "end_node"}
-        }
-
-        # Start with start_id, end_id (omit 'id')
-        row = {
-            "start_node": getattr(self.start_node, "id", None),
-            "end_node": getattr(self.end_node, "id", None),
-        }
-
-        for k, v in base_attrs.items():
-            row[k] = v
-
-        return row
+        return asdict(self)
