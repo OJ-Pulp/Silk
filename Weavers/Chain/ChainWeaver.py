@@ -886,7 +886,8 @@ class ChainWeaver(Weaver):
             self.create_base_product_parts(base_products, base_product_sprues)
         )
         logger.info("Base Product Parts Created")
-        
+ 
+        # TODO: Find a way to resolve base product sprues and edges inside of their creation function
         # resolved_base_product_sprues, resolved_base_product_sprue_edges = (
         #     self.resolve_base_product_sprues(
         #         base_product_sprues, base_product_sprue_edges, base_product_part_edges
