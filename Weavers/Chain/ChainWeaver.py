@@ -914,13 +914,6 @@ class ChainWeaver(Weaver):
         logger.info("Variant Parts Created")
 
 
-    def generate_nodes(self) -> dict:
-        return {"base": self.base_components, "variant": self.variant_components}
-
-    def generate_edges(self) -> dict:
-        return {"base": self.base_edges, "variant": self.variant_edges}
-
-
 def main(num_products: int = 40, variant_distribution: float = 0.25):
     weaver = ChainWeaver(num_products, variant_distribution)
     weaver.set_writers(Component, Requires)

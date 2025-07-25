@@ -111,6 +111,8 @@ class Weaver(ABC):
         )
         self.edge_writer.writeheader()
 
+        self.writers_set = True
+
         logger.debug("annotation keys: " + str(edge_fieldnames))
         logger.info("Edge writer created at " + str(self.edge_output_path))
 
@@ -153,22 +155,9 @@ class Weaver(ABC):
 
         self.edge_writer.writerow(edge.to_dict())
 
-    
 
     @abstractmethod
     def weave(self):
         """
         'Weave' (or create) the nodes and edges of the graph.
-        """
-
-    @abstractmethod
-    def generate_nodes(self) -> dict:
-        """
-        Generate nodes for the weaver.
-        """
-
-    @abstractmethod
-    def generate_edges(self) -> dict:
-        """
-        Generate edges for the weaver.
         """
