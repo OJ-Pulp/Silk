@@ -2,7 +2,6 @@
 import logging
 import csv
 from abc import ABC, abstractmethod
-from typing import List
 from pathlib import Path
 
 # Third-Party
@@ -44,18 +43,21 @@ class Weaver(ABC):
     Examples include ChainWeaver, DocWeaver, MapWeaver, etc.
     """
 
+    node_class: type[Node] = Node
+    """The Node subclass used by this Weaver type from its data model. Must be overridden in subclasses."""
+
+    edge_class: type[Edge] = Edge
+    """The Edge subclass used by this Weaver type from its data model. Must be overridden in subclasses."""
+
     def __init__(self):
         """
-        Initialize the Weaver with a name.
-        :param name: The name of the weaver.
+        Initializes the Weaver with output paths for nodes and edges.
         """
 
         self.node_output_path: Path
         self.edge_output_path: Path
         self.__set_output_path__()
-
-        self.nodes: List[Node]
-        self.edges: List[Edge]
+        self.__set_writers__()
 
         logger.info("Weaver Initialized")
 
@@ -74,7 +76,7 @@ class Weaver(ABC):
             f"Output path set to {self.node_output_path} and {self.edge_output_path}"
         )
 
-    def set_writers(self, node_subclass: type[Node], edge_subclass: type[Edge]):
+    def __set_writers__(self):
         """
         Set the writers for the node and edge output files.
         This method is called after the output paths are set, typically after
@@ -93,8 +95,8 @@ class Weaver(ABC):
             return merged
 
         # Merge annotations for node and edge subclasses
-        node_fieldnames = list(merge_annotations(node_subclass).keys())
-        edge_fieldnames = list(merge_annotations(edge_subclass).keys())
+        node_fieldnames = list(merge_annotations(self.node_class).keys())
+        edge_fieldnames = list(merge_annotations(self.edge_class).keys())
 
         self.node_output_file = open(file=self.node_output_path, mode="a", newline="")
         self.node_writer = csv.DictWriter(
@@ -155,6 +157,17 @@ class Weaver(ABC):
 
         self.edge_writer.writerow(edge.to_dict())
 
+    def close(self):
+        """
+        Close the output files for nodes and edges.
+        This should be called after all nodes and edges have been written. (After weave() is called)
+        """
+        if self.node_output_file:
+            self.node_output_file.close()
+            logger.info(f"Node output file closed: {self.node_output_path}")
+        if self.edge_output_file:
+            self.edge_output_file.close()
+            logger.info(f"Edge output file closed: {self.edge_output_path}")
 
     @abstractmethod
     def weave(self):

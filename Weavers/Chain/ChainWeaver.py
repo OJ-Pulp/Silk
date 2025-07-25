@@ -19,6 +19,9 @@ class NamingError(Exception):
 
 
 class ChainWeaver(Weaver):
+    node_class = Component
+    edge_class = Requires
+
     def __init__(self, num_products: int = 40, variant_distribution: float = 0.25):
         super().__init__()
         self.num_products = num_products
@@ -914,13 +917,10 @@ class ChainWeaver(Weaver):
         logger.info("Variant Parts Created")
 
 
-def main(num_products: int = 40, variant_distribution: float = 0.25):
-    weaver = ChainWeaver(num_products, variant_distribution)
-    weaver.set_writers(Component, Requires)
+def main():
+    weaver = ChainWeaver(num_products=100, variant_distribution=0.25)
     weaver.weave()
-    weaver.node_output_file.close()
-    weaver.edge_output_file.close()
-
+    weaver.close()
 
 # endregion
 
