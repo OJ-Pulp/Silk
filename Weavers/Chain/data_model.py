@@ -147,10 +147,10 @@ class Requires(Edge):
     Additionally includes lead time variable, specific use case determined by the user.
     """
     
-    start_node: Node
+    start_node: str
     """The source node of the edge (must be a Node subclass)."""
 
-    end_node: Node
+    end_node: str
     """The target node of the edge (must be a Node subclass)."""
 
     base_model: bool

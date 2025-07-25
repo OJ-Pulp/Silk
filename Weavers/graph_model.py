@@ -3,7 +3,6 @@ Graph model for representing nodes and edges in a database.
 """
 
 from abc import ABC
-from typing import Optional
 import uuid
 from dataclasses import dataclass, field, asdict
 
@@ -29,9 +28,6 @@ class Node(ABC):
     id: str = field(default_factory=lambda:str(uuid.uuid4()), init=False)
     """Unique identifier for the node, generated with UUID4 if not provided."""
 
-    weight: Optional[float] = field(default_factory=lambda:1.0, init=False)
-    """Weight of the node, default is 1.0."""
-
     def to_dict(self) -> dict:
         """
         Convert any Node subclass to a flat dictionary.
@@ -51,14 +47,11 @@ class Edge(ABC):
     This allows for flexibility in defining edges with different properties, say if you want an unweighted graph, you can exclude the weight attribute.
     """
 
-    start_node: Node
+    start_node: str
     """The source node of the edge (must be a Node subclass)."""
 
-    end_node: Node
+    end_node: str
     """The target node of the edge (must be a Node subclass)."""
-
-    weight: Optional[float] = field(default_factory=lambda:1.0, init=False)
-    """The weight of the edge, default is 1.0."""
 
     def to_dict(self) -> dict:
         """
