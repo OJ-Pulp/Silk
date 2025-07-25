@@ -34,7 +34,7 @@ class ChainWeaver(Weaver):
             logger.critical(f"{type(e).__name__}: {e}")
             raise SystemExit(FAILURE)
 
-        logger.info("Inputs Accepted")
+        # logger.info("Inputs Accepted")
 
         self.designations = resolved_inputdata["Designations"]
         self.manufacturers = resolved_inputdata["Manufacturers"]
@@ -67,7 +67,7 @@ class ChainWeaver(Weaver):
 
         # Creates all base products
         for i in range(num_base_products):
-            logger.debug(f"Base Product {i}:")
+            # logger.debug(f"Base Product {i}:")
 
             # Generates base product data
             popular_name = FAKER_GEN.word(part_of_speech="noun").capitalize()
@@ -113,8 +113,8 @@ class ChainWeaver(Weaver):
 
             # Appends 'base_product' Component(Node) to the overall list of 'base_products'
             base_products.append(base_product)
-            logger.debug(base_product)
-            logger.debug("")
+            # logger.debug(base_product)
+            # logger.debug("")
 
         return base_products
 
@@ -147,10 +147,10 @@ class ChainWeaver(Weaver):
 
         # Creates all base product sprues and edges
         for i, base_product in enumerate(base_products, start=1):
-            logger.debug(f"Base Product {i}:")
+            # logger.debug(f"Base Product {i}:")
 
             for manufacturer in manufacturer_keys:
-                logger.debug(f"{manufacturer} Base Product Sprue:")
+                # logger.debug(f"{manufacturer} Base Product Sprue:")
 
                 # Creates 'base_product_sprue' Component(Node)
                 component_data = {
@@ -186,15 +186,15 @@ class ChainWeaver(Weaver):
 
                 # Appends 'base_product_sprue' Component(Node) to the overall list of 'base_product_sprues'
                 base_product_sprues.append(base_product_sprue)
-                logger.debug(base_product_sprue)
-                logger.debug("")
+                # logger.debug(base_product_sprue)
+                # logger.debug("")
 
-                logger.debug(f"{manufacturer} Base Product Sprue Edge:")
+                # logger.debug(f"{manufacturer} Base Product Sprue Edge:")
 
                 # Creates 'base_product' to 'base_product_sprue' Requires(Edge)
                 base_product_sprue_edge = Requires(
-                    start_node=base_product,
-                    end_node=base_product_sprue,
+                    start_node=base_product.name,
+                    end_node=base_product_sprue.name,
                     base_model=True,
                     lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
                 )
@@ -290,8 +290,8 @@ class ChainWeaver(Weaver):
 
                         # Edge from parent_part to sub_part
                         edge = Requires(
-                            start_node=parent_part,
-                            end_node=sub_part,
+                            start_node=parent_part.name,
+                            end_node=sub_part.name,
                             base_model=True,
                             lead_time=FAKER_GEN.random_int(1, 1000),
                         )
@@ -308,13 +308,13 @@ class ChainWeaver(Weaver):
                         )
 
         for i, base_product in enumerate(base_products, start=1):
-            logger.debug(f"Base Product {i}:")
+            # logger.debug(f"Base Product {i}:")
             parts_categories = self.designations[base_product.designation][
                 "Parts"
             ]
             for part_category, part_list in parts_categories.items():
                 for part_type in part_list:
-                    logger.debug(f"{part_type}:")
+                    # logger.debug(f"{part_type}:")
                     base_product_part_manufacturer = FAKER_GEN.random_element(
                         list(manufacturer_keys)
                     )
@@ -368,8 +368,8 @@ class ChainWeaver(Weaver):
                     self.write_node(base_product_part)
                     base_product_parts.append(base_product_part)
 
-                    logger.debug(base_product_part)
-                    logger.debug("")
+                    # logger.debug(base_product_part)
+                    # logger.debug("")
                     for base_product_sprue in base_product_sprues:
                         if (
                             base_product_part.product
@@ -377,10 +377,10 @@ class ChainWeaver(Weaver):
                             and base_product_part.manufacturer
                             == base_product_sprue.manufacturer
                         ):
-                            logger.debug(f"{part_type} Edge:")
+                            # logger.debug(f"{part_type} Edge:")
                             base_product_part_edge = Requires(
-                                start_node=base_product_sprue,
-                                end_node=base_product_part,
+                                start_node=base_product_sprue.name,
+                                end_node=base_product_part.name,
                                 base_model=True,
                                 lead_time=FAKER_GEN.random_int(1, 1000),
                             )
@@ -388,8 +388,8 @@ class ChainWeaver(Weaver):
                             self.write_edge(base_product_part_edge)
                             base_product_part_edges.append(base_product_part_edge)
 
-                            logger.debug(base_product_part_edge)
-                            logger.debug("")
+                            # logger.debug(base_product_part_edge)
+                            # logger.debug("")
                             if base_product_part_vital:
                                 vital_base_product_sprues.append(base_product_sprue)
                     # Recursively generate subparts if this part is also a designation
@@ -437,7 +437,7 @@ class ChainWeaver(Weaver):
 
         # Checks that all sprues are used
         for i, base_product_sprue in enumerate(base_product_sprues, start=1):
-            logger.debug(f"Sprue {i}:")
+            # logger.debug(f"Sprue {i}:")
 
             # Checks if a sprue has any edges to parts
             has_edge = any(
@@ -455,12 +455,12 @@ class ChainWeaver(Weaver):
                     for e in base_product_sprue_edges
                     if e.end_node == base_product_sprue
                 )
-                logger.debug(f"Kept Edges for Sprue {i}")
-                logger.debug("")
-            else:
-                logger.debug(f"Removed Base Product Sprue {i}:")
-                logger.debug(base_product_sprue)
-                logger.debug("")
+            #     logger.debug(f"Kept Edges for Sprue {i}")
+            #     logger.debug("")
+            # else:
+            #     logger.debug(f"Removed Base Product Sprue {i}:")
+            #     logger.debug(base_product_sprue)
+            #     logger.debug("")
 
         return resolved_base_sprues, resolved_base_sprue_edges
 
@@ -551,9 +551,9 @@ class ChainWeaver(Weaver):
             raise SystemExit(FAILURE)
         current_letter = match.group(1)
         letters = list(current_letter)
-        logger.info(f"INPUT: Letters:         {letters}")
+        # logger.info(f"INPUT: Letters:         {letters}")
         i = len(letters) - 1
-        logger.debug(f"I:       {i}")
+        # logger.debug(f"I:       {i}")
 
         while i >= 0:
             if letters[i] != "Z":
@@ -563,8 +563,8 @@ class ChainWeaver(Weaver):
                 logger.info(
                     f"Start Letter of '{start_letter}' Changed to '{changed_letter}'"
                 )
-                logger.debug(f"Letters:         {letters}")
-                logger.debug(f"OUTPUT: New Letters:         {letters}")
+                # logger.debug(f"Letters:         {letters}")
+                # logger.debug(f"OUTPUT: New Letters:         {letters}")
                 break
             else:
                 start_letter = letters[i]
@@ -573,17 +573,17 @@ class ChainWeaver(Weaver):
                 logger.info(
                     f"Start Letter of '{start_letter}' Changed to '{changed_letter}'"
                 )
-                logger.debug(f"Letters:         {letters}")
+                # logger.debug(f"Letters:         {letters}")
                 i -= 1
-                logger.debug(f"I:       {i}")
+                # logger.debug(f"I:       {i}")
 
         # If all characters were 'Z', we need to add a new 'A' at the beginning
         if i < 0:
             letters.insert(0, "A")
         next_letters = "".join(letters)
         next_designation = re.sub(r"([A-Z]+)$", next_letters, current_designation)
-        logger.info(f"OUTPUT: New Letters:         {letters}")
-        logger.info(f"Next Designation:         {next_designation}")
+        # logger.info(f"OUTPUT: New Letters:         {letters}")
+        # logger.info(f"Next Designation:         {next_designation}")
         return next_designation
 
     def create_variant_products(
@@ -599,7 +599,7 @@ class ChainWeaver(Weaver):
 
         # Creates all variant products
         for i in range(num_variants):
-            logger.debug(f"Variant Product {i}:")
+            # logger.debug(f"Variant Product {i}:")
 
             # Picks a random base product to create a variant of
             variant_base_product = FAKER_GEN.random_element(base_products)
@@ -645,8 +645,8 @@ class ChainWeaver(Weaver):
 
             # Appends 'variant_product' Component(Node) to the overall list of 'variant_products'
             variant_products.append(variant_product)
-            logger.debug(variant_product)
-            logger.debug("")
+            # logger.debug(variant_product)
+            # logger.debug("")
 
         return variant_products
 
@@ -674,7 +674,7 @@ class ChainWeaver(Weaver):
 
         # Creates all base product sprues and edges
         for i, variant_product in enumerate(variant_products, start=1):
-            logger.debug(f"Variant Product {i}:")
+            # logger.debug(f"Variant Product {i}:")
 
             individual_needed_parts = set()
             designation = self.designations.get(variant_product.designation)
@@ -693,8 +693,8 @@ class ChainWeaver(Weaver):
                     variant_sprues.append(vital_sprue)
 
                     variant_sprue_edge = Requires(
-                        start_node=variant_product,
-                        end_node=vital_sprue,
+                        start_node=variant_product.name,
+                        end_node=vital_sprue.name,
                         base_model=True,
                         lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
                     )
@@ -712,7 +712,7 @@ class ChainWeaver(Weaver):
             needed_manufacturers[variant_product.id] = individual_needed_manufacturers
 
             for manufacturer in individual_needed_manufacturers:
-                logger.debug(f"{manufacturer} Variant Sprue:")
+                # logger.debug(f"{manufacturer} Variant Sprue:")
 
                 # Creates 'base_product_sprue' Component(Node)
                 component_data = {
@@ -747,12 +747,12 @@ class ChainWeaver(Weaver):
                 self.write_node(variant_sprue)
                 variant_sprues.append(variant_sprue)
 
-                logger.debug(f"{manufacturer} Variant Sprue Edge:")
+                # logger.debug(f"{manufacturer} Variant Sprue Edge:")
 
                 # Creates 'base_product' to 'base_product_sprue' Requires(Edge)
                 variant_sprue_edge = Requires(
-                    start_node=variant_product,
-                    end_node=variant_sprue,
+                    start_node=variant_product.name,
+                    end_node=variant_sprue.name,
                     base_model=True,
                     lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
                 )
@@ -780,14 +780,14 @@ class ChainWeaver(Weaver):
 
         # Creates all variant product parts and edges
         for i, variant_product in enumerate(variant_products, start=1):
-            logger.debug(f"Variant Product {i}:")
+            # logger.debug(f"Variant Product {i}:")
 
             parts_categories = self.designations[
                 variant_product.designation
             ]["Parts"]
             for part_category, _ in parts_categories.items():
                 for part_type in needed_parts[variant_product.id]:
-                    logger.debug(f"{part_type}:")
+                    # logger.debug(f"{part_type}:")
 
                     # Generates variant product part data
                     variant_part_manufacturer = FAKER_GEN.random_element(
@@ -838,12 +838,12 @@ class ChainWeaver(Weaver):
                             == variant_sprue.product
                             and variant_part.manufacturer == variant_sprue.manufacturer
                         ):
-                            logger.debug(f"{part_type} Edge:")
+                            # logger.debug(f"{part_type} Edge:")
 
                             # Creates 'base_product_sprue' to 'base_product_part' Requires(Edge)
                             variant_part_edge = Requires(
-                                start_node=variant_sprue,
-                                end_node=variant_part,
+                                start_node=variant_sprue.name,
+                                end_node=variant_part.name,
                                 base_model=True,
                                 lead_time=FAKER_GEN.random_int(
                                     1, 1000
@@ -918,7 +918,7 @@ class ChainWeaver(Weaver):
 
 
 def main():
-    weaver = ChainWeaver(num_products=100, variant_distribution=0.25)
+    weaver = ChainWeaver(num_products=1, variant_distribution=0)
     weaver.weave()
     weaver.close()
 
