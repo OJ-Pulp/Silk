@@ -189,3 +189,38 @@ def markov_chain(
             break
         v = v_next
     return v
+
+
+def list_algorithms() -> List[str]:
+    """
+    Returns a list of available algorithms for graph analysis.
+    This can be extended to include more algorithms as needed.
+    :return: List of algorithm names.
+    """
+    return {
+        "weight_nodes": [
+            "example 1",
+            "example 2",
+            "example 3",
+        ],
+        "weight_edges": [
+            "example 1",
+            "example 2",
+            "example 3",
+        ],
+        "traverse_graph": [
+            "example 1",
+            "example 2",
+            "example 3",
+        ],
+        "cluster_graph": [
+            "example 1",
+            "example 2",
+            "example 3",
+        ],
+        "compare_graphs": [
+            "example 1",
+            "example 2",
+            "example 3",
+        ],
+    }

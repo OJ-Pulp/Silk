@@ -11,6 +11,12 @@ export const graphState = {
   showIDs: false,
 };
 
+// data.js or your graph module
+export let uuids = [];
+export let adjacencyMatrix = [];
+export let nodeWeights = [];
+
+
 export const selectedNodes = new Set();
 export const selectedEdges = new Set();
 
@@ -19,29 +25,30 @@ export function clearSelection() {
   selectedEdges.clear();
 }
 
+export async function refreshGrab() {
+  try {
+    const response = await fetch("http://localhost:8001/get_network");
+    if (!response.ok) throw new Error("Failed to fetch network data");
+
+    const data = await response.json();
+
+    // Update exported globals
+    uuids = data.node_idxs;
+    adjacencyMatrix = data.edge_matrix;
+    nodeWeights = data.node_weights;
+
+    console.log("Network data refreshed");
+  } catch (error) {
+    console.error("Error in refreshGrab:", error);
+  }
+}
+
 
 export function renderGraph() {
-  // Call Get network backend function
-  const uuids = [];
-  const adjacencyMatrix = [];
-  const nodeWeights = [];
-
-  fetch("http://localhost:8001/get_network")
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Failed to fetch network data");
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log("Network data received:", data);
-      uuids.push(...data.node_idxs);
-
-      adjacencyMatrix.push(...data.edge_matrix);
-
-      nodeWeights.push(...data.node_weights);
-      console.log("Network data loaded");
-
+    if (uuids.length === 0) {
+      console.warn("Graph data is empty! Call refreshGrab() first.");
+      return;
+    }
     // Prepare nodes and links from adjacencyMatrix
     const nodes = uuids.map((id, i) => ({ id, index: i, weight: nodeWeights[i] }));
     const links = [];
@@ -83,13 +90,20 @@ export function renderGraph() {
     for (let i = 0; i < 300; i++) simulation.tick();
 
     function getNodeRadius(weight) {
-      if (graphState.invertNodes) {
-        const maxWeight = Math.max(...nodes.map(n => n.weight));
-        return 10 + (maxWeight - weight);
-      } else {
-        return weight;
-      }
+      const minRadius = 1;   // ← Change this value to increase/decrease min size
+      const maxRadius = 11;  // ← Change this value to increase/decrease max size
+
+      const minWeight = Math.min(...nodes.map(n => n.weight));
+      const maxWeight = Math.max(...nodes.map(n => n.weight));
+
+      if (maxWeight === minWeight) return (minRadius + maxRadius) / 2;
+
+      let normalized = (weight - minWeight) / (maxWeight - minWeight);
+      if (graphState.invertNodes) normalized = 1 - normalized;
+
+      return minRadius + normalized * (maxRadius - minRadius);
     }
+
 
     // Link hitboxes (for easier mouse events)
     const linkHitboxes = container.append("g")
@@ -105,9 +119,9 @@ export function renderGraph() {
       .attr("stroke", "transparent")
       .style("pointer-events", "stroke")
       .on("mouseover", (event, d) => {
-        let tipText = `Edge ${nodes[d.source.index].id}→${nodes[d.target.index].id}: ${d.weight_ij}`;
+        let tipText = `Edge (${nodes[d.source.index].id}, ${nodes[d.target.index].id}): ${d.weight_ij}`;
         if (d.weight_ij !== d.weight_ji) {
-          tipText += `<br>Edge ${nodes[d.target.index].id}→${nodes[d.source.index].id}: ${d.weight_ji}`;
+          tipText += `<br>Edge (${nodes[d.target.index].id}, ${nodes[d.source.index].id}): ${d.weight_ji}`;
         }
         showTooltip(event, tipText);
       })
@@ -127,11 +141,11 @@ export function renderGraph() {
       .attr("y1", d => d.source.y)
       .attr("x2", d => d.target.x)
       .attr("y2", d => d.target.y)
-      .attr("stroke-width", d => Math.sqrt(d.weight))
+      .attr("stroke-width", d => 2)
       .on("mouseover", (event, d) => {
-        let tipText = `Edge ${nodes[d.source.index].id}→${nodes[d.target.index].id}: ${d.weight_ij}`;
+        let tipText = `Edge (${nodes[d.source.index].id}, ${nodes[d.target.index].id}): ${d.weight_ij}`;
         if (d.weight_ij !== d.weight_ji) {
-          tipText += `<br>Edge ${nodes[d.target.index].id}→${nodes[d.source.index].id}: ${d.weight_ji}`;
+          tipText += `<br>Edge (${nodes[d.target.index].id}, ${nodes[d.source.index].id}): ${d.weight_ji}`;
         }
         showTooltip(event, tipText);
       })
@@ -184,8 +198,8 @@ export function renderGraph() {
     function toggleEdgeSelection(d) {
       const uuidA = nodes[d.source.index].id;
       const uuidB = nodes[d.target.index].id;
-      const forwardKey = `${uuidA}>${uuidB}`;
-      const backwardKey = `${uuidB}>${uuidA}`;
+      const forwardKey = `(${uuidA}, ${uuidB})`;
+      const backwardKey = `(${uuidB}, ${uuidA})`;
 
       const forwardSelected = selectedEdges.has(forwardKey);
       const backwardSelected = selectedEdges.has(backwardKey);
@@ -220,8 +234,8 @@ export function renderGraph() {
         .classed("selected-edge", d => {
           const uuidA = nodes[d.source.index].id;
           const uuidB = nodes[d.target.index].id;
-          const forwardKey = `${uuidA}>${uuidB}`;
-          const backwardKey = `${uuidB}>${uuidA}`;
+          const forwardKey = `(${uuidA}, ${uuidB})`;
+          const backwardKey = `(${uuidB}, ${uuidA})`;
           return selectedEdges.has(forwardKey) || selectedEdges.has(backwardKey);
         })
         .classed("highlighted", d => {
@@ -231,8 +245,8 @@ export function renderGraph() {
             (edge.source === sourceId && edge.target === targetId) ||
             (edge.source === targetId && edge.target === sourceId)
           );
-          const forwardKey = `${sourceId}>${targetId}`;
-          const backwardKey = `${targetId}>${sourceId}`;
+          const forwardKey = `(${sourceId}, ${targetId})`;
+          const backwardKey = `(${targetId}, ${sourceId})`;
           const isSelected = selectedEdges.has(forwardKey) || selectedEdges.has(backwardKey);
           return isHighlighted && !isSelected;
         });
@@ -250,13 +264,13 @@ export function renderGraph() {
             Type: 'Node',
             ID: node.id,
             Weight: node.weight,
-            Data: { "test": "test" }
+            ...(node.data || {}) // Call backend
           });
         }
       });
 
       selectedEdges.forEach(key => {
-        const [uuidA, uuidB] = key.split('>');
+        const [uuidA, uuidB] = key.slice(1, -1).split(', ').map(s => s.trim());
         const i = uuids.indexOf(uuidA);
         const j = uuids.indexOf(uuidB);
         const weight = adjacencyMatrix[i]?.[j];
@@ -358,8 +372,8 @@ export function renderGraph() {
           ) {
             const uuidA = nodes[link.source.index].id;
             const uuidB = nodes[link.target.index].id;
-            const forwardKey = `${uuidA}>${uuidB}`;
-            const backwardKey = `${uuidB}>${uuidA}`;
+            const forwardKey = `(${uuidA}, ${uuidB})`;
+            const backwardKey = `(${uuidB}, ${uuidA})`;
 
             if (link.weight_ij !== link.weight_ji) {
               selectedEdges.add(forwardKey);
@@ -435,8 +449,13 @@ export function renderGraph() {
 
     // Initial update of visuals
     updateSelectionVisuals();
-  });
 }
 
-// Render the graph initially
-renderGraph(highlightedNodes, highlightedEdges);
+async function init() {
+  await refreshGrab();
+  renderGraph();
+}
+
+init().catch(error => {
+  console.error("Error initializing graph:", error);
+});

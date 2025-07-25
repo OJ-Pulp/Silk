@@ -413,6 +413,22 @@ svg#graph:active {
   padding: 5px 10px;
 }
 
+#graph-suggestions {
+  max-height: 150px;
+  overflow-y: auto;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.suggestion-item {
+  padding: 6px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #eee;
+}
+
+
 .popup-divider {
   border: none;
   border-top: 1px solid #ccc;
@@ -426,6 +442,10 @@ svg#graph:active {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 400px; /* Limit width */
+  max-height: 500px; /* Limit height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 10px;
 }
 
 .form-row {
@@ -441,8 +461,50 @@ svg#graph:active {
 }
 
 .form-actions {
-  margin-top: 20px;
+  margin-top: 10px;
   text-align: center; /* Center horizontally */
+}
+
+.entity-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: flex-end;
+}
+
+.entity-column {
+  flex: 1;
+}
+
+.entity-label {
+  color: gray;
+  font-size: 0.75em;
+  margin-bottom: 2px;
+}
+
+.entity-key,
+.entity-value {
+  width: 100%;
+}
+
+.remove-btn {
+  border: none;
+  background: none;
+  color: grey;
+  cursor: pointer;
+  font-size: 1.2em;
+  padding: 0;
+  margin-left: 8px;
+  align-self: center;
+  line-height: 0;
+  user-select: none;
+  position: relative;
+  top: 0px; /* Adjust if needed */
+  bottom: 5px;
+}
+
+.remove-btn:hover {
+  color: #ff0000;
 }
 
 #save-survey {
@@ -465,4 +527,27 @@ svg#graph:active {
   background-color: #e0e0e0;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   outline: none;
+}
+.circle-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #333;
+  background-color: white;
+  color: #333;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.circle-button:hover {
+  background-color: #333;
+  color: white;
 }

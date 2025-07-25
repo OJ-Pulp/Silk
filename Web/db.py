@@ -1,7 +1,7 @@
 import sqlite3
 import uuid
 import numpy as np
-import os
+import os, re
 from typing import Dict, Any, List, Tuple
 
 
@@ -286,12 +286,12 @@ class GraphDB:
     ) -> np.ndarray:
         """
         Calculate weights for nodes based on specified conditions. If no conditions are provided,
-        equal weights are assigned to all nodes. Additionally, if no graph IDs are provided,
-        all graphs are considered.
+        equal weights are assigned to all nodes. If no graph IDs are provided, all graphs are considered.
 
         Parameters:
             node_conditions (dict[str, list[str]]): Dictionary of conditions for filtering nodes.
             graph_ids (list[str], optional): List of graph IDs to filter nodes. If None, all graphs are considered.
+
         Returns:
             Tuple[np.ndarray, List[str]]: A tuple containing an array of node weights and a list of node IDs.
         """
@@ -300,60 +300,87 @@ class GraphDB:
             graph_ids = [row[0] for row in self.cursor.fetchall()]
 
         if not node_conditions:
-            # If no conditions are provided, return equal weights for all nodes
+            # Return equal weights if no conditions
             self.cursor.execute(
-                "SELECT Node_ID FROM Graph_Nodes WHERE Graph_ID IN ({})".format(
-                    ",".join(["?"] * len(graph_ids))
-                ),
-                graph_ids,
+                f"SELECT DISTINCT Node_ID FROM Graph_Nodes WHERE Graph_ID IN ({','.join(repr(g) for g in graph_ids)})"
             )
-            node_ids = [row[0] for row in self.cursor.fetchall()]
-            return np.ones(len(node_ids)), node_ids
-        else:
-            node_weights = {}
-            for entity, conditions in node_conditions.items():
-                # Get the entity ID and type
-                self.cursor.execute(
-                    "SELECT ID, Type FROM Entities WHERE Name = ?", (entity,)
+            node_ids = [row[0] for row in self.cursor.fetchall() if row[0] is not None]
+            node_ids = list(set(node_ids))
+            return (
+                (np.ones(len(node_ids)), node_ids) if node_ids else (np.array([]), [])
+            )
+
+        node_weights = {}
+        for entity, conditions in node_conditions.items():
+            # Get entity ID and type
+            self.cursor.execute(
+                f"SELECT ID, Type FROM Entities WHERE Name = {repr(entity)}"
+            )
+            result = self.cursor.fetchone()
+            if not result:
+                continue
+
+            entity_id, entity_type = result
+            value_table = f"{entity_type}_Entity_Values"
+
+            for condition in conditions:
+                condition = condition.strip()
+                match = re.match(
+                    r"^(=|!=|>=|<=|>|<|LIKE|NOT LIKE|IN|NOT IN|BETWEEN)\s+(.*)$",
+                    condition,
+                    re.IGNORECASE,
                 )
-                entity_id, entity_type = self.cursor.fetchone()
+                if not match:
+                    print(f"Skipping invalid condition: {condition}")
+                    continue
 
-                value_table = f"{entity_type}_Entity_Values"
+                operator, value = match.groups()
+                operator = operator.upper()
+                value = value.strip()
 
-                for condition in conditions:
-                    # parse the operator and value from the condition
-                    # e.g., condition = "> 5"
-                    operator, condition_value = condition.strip().split(" ", 1)
+                if operator in ("IN", "NOT IN"):
+                    items = [
+                        f"'{item.strip().strip('\"\'')}'"
+                        for item in re.split(r"[,\s]+", value.strip("()[]"))
+                        if item
+                    ]
+                    value_clause = f"{operator} ({', '.join(items)})"
+                elif operator == "BETWEEN":
+                    parts = re.split(r"\s+AND\s+", value, flags=re.IGNORECASE)
+                    if len(parts) != 2:
+                        print(f"Skipping malformed BETWEEN: {value}")
+                        continue
+                    value_clause = f"BETWEEN {parts[0]} AND {parts[1]}"
+                else:
+                    # Sanitize string value
+                    if not value.replace(".", "", 1).isdigit():
+                        value = f"'{value.strip('\"\'')}'"
+                    value_clause = f"{operator} {value}"
 
-                    # Build SQL with normalization via window function
-                    placeholders = ",".join(["?"] * len(graph_ids))
-                    query = f"""
-                        SELECT ev.Target_ID, 
-                            CASE 
-                                WHEN ? = 'Text' THEN 1.0 / COUNT(*) OVER ()
-                                ELSE CAST(ev.Value AS FLOAT) / SUM(CAST(ev.Value AS FLOAT)) OVER ()
-                            END AS weight
-                        FROM {value_table} ev
-                        JOIN Graph_Nodes gn ON ev.Target_ID = gn.Node_ID
-                        WHERE ev.Entity_ID = ?
-                        AND ev.Target_Type = 'node'
-                        AND ev.Value {operator} ?
-                        AND gn.Graph_ID IN ({placeholders})
-                    """
+                # Build query with inline values
+                query = f"""
+                    SELECT ev.Target_ID,
+                        CASE
+                            WHEN '{entity_type}' = 'Text' THEN 1.0 / COUNT(*) OVER ()
+                            ELSE CAST(ev.Value AS FLOAT) / SUM(CAST(ev.Value AS FLOAT)) OVER ()
+                        END AS weight
+                    FROM {value_table} ev
+                    JOIN Graph_Nodes gn ON ev.Target_ID = gn.Node_ID
+                    WHERE ev.Entity_ID = '{entity_id}'
+                    AND ev.Target_Type = 'node'
+                    AND ev.Value {value_clause}
+                    AND gn.Graph_ID IN ({', '.join(repr(gid) for gid in graph_ids)})
+                """
 
-                    self.cursor.execute(
-                        query,
-                        (entity_type, entity_id, condition_value, *graph_ids),
-                    )
+                self.cursor.execute(query)
+                for node_id, weight in self.cursor.fetchall():
+                    node_weights.setdefault(node_id, []).append(weight)
 
-                    for node_id, weight in self.cursor.fetchall():
-                        node_weights.setdefault(node_id, []).append(weight)
+        # Average weights
+        for node_id, weights in node_weights.items():
+            node_weights[node_id] = sum(weights) / len(weights)
 
-            # Average across all conditions for each node
-            for node_id, weights in node_weights.items():
-                node_weights[node_id] = sum(weights) / len(weights)
-
-            return np.array(list(node_weights.values())), list(node_weights.keys())
+        return np.array(list(node_weights.values())), list(node_weights.keys())
 
     def _weight_edges(
         self, edge_conditions: Dict[str, List[str]], node_ids: List[str] = None
@@ -368,6 +395,9 @@ class GraphDB:
         Returns:
             Tuple[np.ndarray, List[str]]: A tuple containing an array of edge weights and a list of node IDs.
         """
+        if not node_ids:
+            return np.array([]), []
+
         if not node_ids:
             self.cursor.execute("SELECT DISTINCT Node_ID FROM Graph_Nodes")
             node_ids = [row[0] for row in self.cursor.fetchall()]
@@ -405,7 +435,7 @@ class GraphDB:
                     placeholders = ",".join(["?"] * len(node_ids))
 
                     query = f"""
-                        SELECT ev.Target_ID, ge.Source_ID, ge.Target_ID,
+                        SELECT ge.SourceID, ge.TargetID,
                             CASE 
                                 WHEN ? = 'Text' THEN 1.0 / COUNT(*) OVER ()
                                 ELSE CAST(ev.Value AS FLOAT) / SUM(CAST(ev.Value AS FLOAT)) OVER ()
@@ -415,8 +445,8 @@ class GraphDB:
                         WHERE ev.Entity_ID = ?
                         AND ev.Target_Type = 'edge'
                         AND ev.Value {operator} ?
-                        AND ge.Source_ID IN ({placeholders})
-                        AND ge.Target_ID IN ({placeholders})
+                        AND ge.SourceID IN ({placeholders})
+                        AND ge.TargetID IN ({placeholders})
                     """
 
                     self.cursor.execute(
@@ -424,7 +454,7 @@ class GraphDB:
                         (entity_type, entity_id, condition_value, *node_ids, *node_ids),
                     )
 
-                    for edge_id, source_id, target_id, weight in self.cursor.fetchall():
+                    for source_id, target_id, weight in self.cursor.fetchall():
                         edge_weights.setdefault((source_id, target_id), []).append(
                             weight
                         )
@@ -439,36 +469,53 @@ class GraphDB:
             return matrix, node_ids
 
     def _add_entities(self, target_id: str, target_type: str, **kwargs) -> None:
-        for key in kwargs.keys():
+        for key, value in kwargs.items():
             self.cursor.execute(
                 "SELECT ID, Name, Type FROM Entities WHERE Name = ?", (key,)
             )
-            if not self.cursor.fetchone():
-                entity_name = key.lower()
+            row = self.cursor.fetchone()
+
+            if row:
+                entity_id, entity_name, entity_type = row
+            else:
+                py_type = type(value).__name__
+
+                if py_type == "str":
+                    entity_type = "Text"
+                elif py_type == "int":
+                    entity_type = "Int"
+                elif py_type == "float":
+                    entity_type = "Real"
+                else:
+                    raise ValueError(
+                        f"Unsupported value type: {py_type} for key '{key}'"
+                    )
+
                 entity_id = str(uuid.uuid4())
-                entity_type = type(kwargs[key]).__name__
+                entity_name = key.lower()
+
                 self.cursor.execute(
                     "INSERT INTO Entities (ID, Name, Type) VALUES (?, ?, ?)",
                     (entity_id, entity_name, entity_type),
                 )
 
-            else:
-                entity_id, entity_name, entity_type = self.cursor.fetchone()
+            # Build table name dynamically using entity_type
+            value_table = f"{entity_type}_Entity_Values"
 
-            # Insert into the Node_Entity table based on the entity type
-            type_map = {
-                "str": "Text_Entity_Values",
-                "int": "Int_Entity_Values",
-                "float": "Real_Entity_Values",
-            }
-            if entity_type in type_map:
-                self.cursor.execute(
-                    f"INSERT INTO {type_map[entity_type]} (Entity_ID, Target_Type, Target_ID, Value) VALUES (?, ?, ?, ?)",
-                    (entity_id, target_type, target_id, kwargs[key]),
-                )
+            if entity_type == "Text":
+                value = str(value)
+            elif entity_type == "Int":
+                value = int(value)
+            elif entity_type == "Real":
+                value = float(value)
             else:
                 raise ValueError(f"Unsupported entity type: {entity_type}")
-        # Commit the changes to the database
+
+            self.cursor.execute(
+                f"INSERT INTO {value_table} (Entity_ID, Target_Type, Target_ID, Value) VALUES (?, ?, ?, ?)",
+                (entity_id, target_type, target_id, value),
+            )
+
         self.connection.commit()
 
     def _delete_entities(self, target_id: str, target_type: str) -> None:
@@ -564,6 +611,39 @@ class GraphDB:
             (id, id),
         )
         return self.cursor.fetchone() is not None
+
+    def get_all_entities(self, target_type: str) -> List[Dict[str, Any]]:
+        """
+        Retrieve all entities of a specific type (graph, node, or edge).
+
+        Parameters:
+            target_type (str): The type of the target (e.g., 'graph', 'node', 'edge').
+
+        Returns:
+            List[Dict[str, Any]]: A list of entity metadata dictionaries (ID, Name, Type).
+        """
+        if target_type not in ("graph", "node", "edge"):
+            raise ValueError("target_type must be 'graph', 'node', or 'edge'.")
+
+        query = f"""
+            SELECT DISTINCT E.ID, E.Name, E.Type
+            FROM Entities E
+            WHERE E.ID IN (
+                SELECT Entity_ID FROM Real_Entity_Values WHERE Target_Type = ?
+                UNION
+                SELECT Entity_ID FROM Int_Entity_Values WHERE Target_Type = ?
+                UNION
+                SELECT Entity_ID FROM Text_Entity_Values WHERE Target_Type = ?
+            )
+            ORDER BY E.Name
+            """
+
+        cursor = self.connection.execute(query, (target_type, target_type, target_type))
+        return [
+            {"ID": row[0], "Name": row[1], "Type": row[2]}
+            for row in cursor.fetchall()
+            if row[0] is not None and row[1] is not None and row[2] is not None
+        ]
 
     def delete_db(self):
         """Delete the database file."""

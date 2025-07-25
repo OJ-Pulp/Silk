@@ -77,14 +77,29 @@ async def get_network():
     return backend.get_current_graph()
 
 
+@app.get("/get_node_entities")
+async def get_node_entities():
+    data = backend.get_node_entities()
+    print(f"Node entities: {data}")
+    return data
+
+
+@app.get("/get_edge_entities")
+async def get_edge_entities():
+    data = backend.get_edge_entities()
+    print(f"Edge entities: {data}")
+    return data
+
+
 @app.post("/create_node")
 async def create_node(request: Request):
     print("Creating a new node...")
     data = await request.json()
+    print(f"Creating node with data: {data}")
     node_id = data["node_id"]
-    graph_id = data["graph_id"]
-    kwargs = {k: v for k, v in data.items() if k not in ["node_id", "graph_id"]}
-    return backend.create_node(graph_id, node_id, **kwargs)
+    graph_ids = data["graph_ids"]
+    kwargs = {k: v for k, v in data.items() if k not in ["node_id", "graph_ids"]}
+    return backend.create_node(graph_ids, node_id, **kwargs)
 
 
 @app.post("/get_node")
@@ -117,6 +132,7 @@ async def delete_node(request: Request):
 async def create_edge(request: Request):
     print("Creating a new edge...")
     data = await request.json()
+    print(data)
     source = data["source"]
     target = data["target"]
     kwargs = {k: v for k, v in data.items() if k not in ["source", "target"]}
@@ -229,7 +245,7 @@ async def filter_graphs(request: Request):
     print("Filtering graphs...")
     data = await request.json()
     return backend.filter_graphs(
-        data["graph_filter"], data["node_filter"], data["edge_filter"]
+        data["graph_filters"], data["node_filters"], data["edge_filters"]
     )
 
 

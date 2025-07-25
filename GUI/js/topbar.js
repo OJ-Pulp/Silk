@@ -175,7 +175,7 @@ const surveyMap = {
   "new graph": "new-graph",
   "save graph": "save-graph",
   "delete graph": "delete-graph",
-  "show graph": "show-graph",
+  "display graph": "display-graph",
 };
 
 

@@ -140,19 +140,19 @@ class Connector:
             return None
 
     def get_current_graph(self):
-        edge_matrix, node_weights, node_idxs = self.spider.get_current_graph()
+        node_weights, edge_matrix, node_idxs = self.spider.get_current_graph()
 
-        # return {
-        #     "edge_matrix": edge_matrix.tolist(),
-        #     "node_weights": node_weights.tolist(),
-        #     "node_idxs": node_idxs,
-        # }
-        # Return a fake large testing data of 20 nodes and 30 edges
         return {
-            "edge_matrix": [[1] * 20 for _ in range(20)],
-            "node_weights": [4.0] * 20,
-            "node_idxs": [f"node_{i}" for i in range(20)],
+            "edge_matrix": edge_matrix.tolist(),
+            "node_weights": node_weights.tolist(),
+            "node_idxs": node_idxs,
         }
+        # Return a fake large testing data of 20 nodes and 30 edges
+        # return {
+        #     "edge_matrix": [[1] * 20 for _ in range(20)],
+        #     "node_weights": [4.0] * 20,
+        #     "node_idxs": [f"node_{i}" for i in range(20)],
+        # }
 
     def check_id(self, id):
         return self.spider.check_id(id)
@@ -160,11 +160,17 @@ class Connector:
     def get_graphs(self):
         return self.spider.get_graphs()
 
-    def create_node(self, graph_id, node_id, **kwargs):
-        self.spider.create_node(graph_id, node_id, **kwargs)
+    def get_node_entities(self):
+        return self.spider.get_node_entities()
+
+    def get_edge_entities(self):
+        return self.spider.get_edge_entities()
+
+    def create_node(self, graph_ids, node_id, **kwargs):
+        self.spider.create_node(graph_ids, node_id, **kwargs)
         return {
             "status": "success",
-            "message": f"Node '{node_id}' created in graph '{graph_id}'.",
+            "message": f"Node '{node_id}' created in graphs.",
         }
 
     def create_edge(self, source, target, **kwargs):

@@ -8,7 +8,7 @@ tool functions for answering network questions.
 
 from config import DEFAULT_PATH, SCHEMA_FILE, join_paths
 from Web.db import GraphDB
-from Web.webmath.math import markov_chain, max_profit_route, mcl, mcc
+from Web.webmath.math import markov_chain, max_profit_route, mcl, mcc, list_algorithms
 import numpy as np
 from typing import List
 
@@ -108,6 +108,18 @@ class Spider:
     def get_edge(self, source: str, target: str):
         return self.graph.get_edge(source, target)
 
+    def get_node_entities(self):
+        """
+        Get all node entities in the current graph.
+        """
+        return [ent["Name"] for ent in self.graph.get_all_entities("node")]
+
+    def get_edge_entities(self):
+        """
+        Get all edge entities in the current graph.
+        """
+        return [ent["Name"] for ent in self.graph.get_all_entities("edge")]
+
     # ----------------------------
     # Graph Management
     # ----------------------------
@@ -186,6 +198,9 @@ class Spider:
     def compare_graphs(self, graph1_id, graph2_id):
         return self.graph.compare_graphs(graph1_id, graph2_id)
 
-    def get_tools(self):
+    def get_all_tools(self):
         # Placeholder; implement dynamic tool discovery if needed
-        return ["Tool1", "Tool2", "Tool3"]
+        return list_algorithms()
+
+    def get_current_tools(self):
+        return self.current_state["Tools"]

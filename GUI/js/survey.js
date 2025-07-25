@@ -1,4 +1,4 @@
-import { graphState, renderGraph, clearSelection } from './graph.js';
+import { clearSelection, uuids, refreshGrab } from './graph.js';
 import {rerenderGraph} from './topbar.js';
 import { clearPopup } from './popup.js';
 
@@ -34,10 +34,203 @@ export function renderSurvey(mode, data = null) {
     case "edit-entities":
       renderEditEntitiesForm(data);
       break;
+    case "display-graph":
+      renderDisplayGraphForm();
+      break;
     default:
       formContainer.innerHTML = "<p>Unknown mode.</p>";
   }
 }
+
+async function renderDisplayGraphForm() {
+  formContainer.innerHTML = `
+    <label style="margin-top: 6px;">Graph ID:</label>
+    <div style="position: relative;">
+      <input type="text" id="graph-ids-input" placeholder="Graph ID #1, Graph ID #2..." autocomplete="off" style="width: 100%;">
+      <div id="graph-suggestions"
+           style="border: 1px solid #ccc; background: white; position: absolute; z-index: 10; top: 100%; left: 0; right: 0;"></div>
+    </div>
+
+    <div id="filters-container" style="display: flex; gap: 20px; margin-top: 12px;">
+
+      <!-- Node Filters column -->
+      <div id="node-filter-section" style="flex: 1;">
+        <label style="margin-bottom: 4px; display: block;">Node Filters:</label>
+        <div id="node-filter-list" style="margin-top: 0px;"></div>
+        <div style="text-align: center; margin-top: 6px;">
+          <button id="add-node-filter-btn" type="button" class="circle-button" title="Add Node Filter">+</button>
+        </div>
+      </div>
+
+      <!-- Edge Filters column -->
+      <div id="edge-filter-section" style="flex: 1;">
+        <label style="margin-bottom: 4px; display: block;">Edge Filters:</label>
+        <div id="edge-filter-list" style="margin-top: 0px;"></div>
+        <div style="text-align: center; margin-top: 6px;">
+          <button id="add-edge-filter-btn" type="button" class="circle-button" title="Add Edge Filter">+</button>
+        </div>
+      </div>
+
+    </div>
+  `;
+  // Fetch node and edge keys once
+  let nodeKeys = [];
+  let edgeKeys = [];
+  try {
+    const [nodeRes, edgeRes] = await Promise.all([
+      fetch("http://localhost:8001/get_node_entities"),
+      fetch("http://localhost:8001/get_edge_entities")
+    ]);
+    if (nodeRes.ok) nodeKeys = await nodeRes.json();
+    if (edgeRes.ok) edgeKeys = await edgeRes.json();
+  } catch (err) {
+    console.error("Failed to fetch node/edge keys", err);
+  }
+
+  // Set up buttons
+  document.getElementById("add-node-filter-btn").onclick = () => addFilterField("node-filter-list", nodeKeys);
+  document.getElementById("add-edge-filter-btn").onclick = () => addFilterField("edge-filter-list", edgeKeys);
+
+  // Add initial rows
+  addFilterField("node-filter-list", nodeKeys);
+  addFilterField("edge-filter-list", edgeKeys);
+
+  setupGraphAutocomplete();
+}
+
+
+// Levenshtein Distance
+function levenshtein(a, b) {
+    const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+    for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+    for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            if (a[i - 1] === b[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+            }
+        }
+    }
+    return dp[a.length][b.length];
+}
+
+// Find Closest Key
+function findClosestKey(varName, validKeys) {
+    let minDist = Infinity;
+    let closest = varName;
+    for (const key of validKeys) {
+        const dist = levenshtein(varName.toLowerCase(), key.toLowerCase());
+        if (dist < minDist) {
+            minDist = dist;
+            closest = key;
+        }
+    }
+    return closest;
+}
+function equToSQL(expression, validKeys) {
+    expression = expression.trim().replace(/\s+/g, ' ');
+    expression = expression.replace(/==/g, '=')
+                           .replace(/\bnot like\b/gi, 'NOT LIKE')
+                           .replace(/\blike\b/gi, 'LIKE')
+                           .replace(/\bnot in\b/gi, 'NOT IN')
+                           .replace(/\bin\b/gi, 'IN');
+
+    // Handle BETWEEN-style range queries (e.g. 10 < age < 20)
+    let betweenMatch = expression.match(/^(\d+(?:\.\d+)?)\s*<\s*(\w+)\s*<\s*(\d+(?:\.\d+)?)$/);
+    if (betweenMatch) {
+        let [_, low, variable, high] = betweenMatch;
+        variable = findClosestKey(variable, validKeys);
+        return `${variable} BETWEEN ${low} AND ${high}`;
+    }
+
+    // Handle IN / NOT IN clauses
+    let inMatch = expression.match(/^(\w+)\s+(IN|NOT IN)\s+(\[.*\]|\(.*\))$/i);
+    if (inMatch) {
+        let [_, variable, op, val] = inMatch;
+        variable = findClosestKey(variable, validKeys);
+        val = val.slice(1, -1).trim();
+
+        // Match quoted strings or individual tokens
+        let items = Array.from(val.matchAll(/(['"])(.*?)\1|(\S+)/g), m => {
+            const quoted = m[2];
+            const unquoted = m[3];
+            let item = quoted !== undefined ? quoted : unquoted;
+            return `'${item.replace(/'/g, "''")}'`;
+        });
+
+        return `${variable} ${op.toUpperCase()} (${items.join(', ')})`;
+    }
+
+    // Handle single-value expressions like name = 'John'
+    let singleMatch = expression.match(/^(\w+)\s*(=|!=|>=|<=|>|<|LIKE|NOT LIKE)\s*(.+)$/i);
+    if (singleMatch) {
+        let [_, variable, operator, val] = singleMatch;
+        variable = findClosestKey(variable, validKeys);
+        val = val.trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+            val = `'${val.slice(1, -1).replace(/'/g, "''")}'`;
+        }
+        return `${variable} ${operator.toUpperCase()} ${val}`;
+    }
+
+    throw new Error(`Invalid or unsupported expression: ${expression}`);
+}
+
+// Add Filter Field
+function addFilterField(containerId, validKeys) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const rows = container.querySelectorAll("div.entity-row");
+  if (rows.length > 0) {
+    const lastInput = rows[rows.length - 1].querySelector("input.entity-value");
+    if (!lastInput.value.trim()) return;
+  }
+
+  createFilterRow(container, validKeys);
+}
+// Create Filter Row
+function createFilterRow(container, validKeys) {
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("entity-row");
+
+  const inputCol = document.createElement("div");
+  inputCol.classList.add("entity-column");
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.classList.add("entity-value");
+  input.placeholder = "Filter text...";
+
+  input.addEventListener("blur", () => {
+    const raw = input.value.trim();
+    if (!raw) return;
+
+    try {
+      const corrected = equToSQL(raw, validKeys); // directly get corrected string
+      input.value = corrected;                      // set corrected expression
+    } catch (err) {
+      console.warn("Invalid expression:", err.message);
+      // optionally leave the input as is or clear it
+    }
+  });
+
+  inputCol.appendChild(input);
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "✕";
+  removeBtn.type = "button";
+  removeBtn.classList.add("remove-btn");
+  removeBtn.onclick = () => wrapper.remove();
+
+  wrapper.appendChild(inputCol);
+  wrapper.appendChild(removeBtn);
+  container.appendChild(wrapper);
+}
+
+
 
 function renderEditEntitiesForm(data) {
   const formContainer = document.getElementById("survey-form-container");
@@ -113,96 +306,229 @@ function renderEditToolbarForm() {
   });
 }
 
-// Create Node form
-function renderCreateNodeForm() {
-  formContainer.innerHTML = `
-    <label>Node ID:</label>
-    <input type="text" id="node-id">
-    <div id="node-id-error" style="color: red; font-size: 0.85em; margin-top: 4px;"></div>
-    <div style="text-align: center; margin-top: 12px;">
-      <button id="add-entity-btn" type="button">Add Entity</button>
-    </div>
-  `;
+
   // TODO: Make it so I can put in graph ids and it is a text input seperated by commas
   // And it auto-completes with existing graph ids. If the id does not exist then show read lines under the text
   // and dont allow for the form to be submitted until it is corrected
   // Make entities similar for the key-value pairs but allow for submition even if they keys are 
   // not found within the database
+// Create Node form
+function renderCreateNodeForm() {
+  formContainer.innerHTML = `
+
+    <label style="margin-top: 6px;">Graph ID:</label>
+    <div style="position: relative;">
+      <input type="text" id="graph-ids-input" placeholder="Graph ID #1, Graph ID #2..." autocomplete="off" style="width: 100%;">
+      <div id="graph-suggestions"
+           style="border: 1px solid #ccc; background: white; position: absolute; z-index: 10; top: 100%; left: 0; right: 0;"></div>
+    </div>
+    
+    <label>Node ID:</label>
+    <input type="text" id="node-id" placeholder="Node ID...">
+    <div id="node-id-error" style="color: red; font-size: 0.85em; margin-top: 4px;"></div>
+
+
+
+    <div id="entity-list-container" style="margin-top: 0px;">
+        <label style="margin-top: 0px;">Entities:</label>
+    </div>
+
+    <div id="entity-list-container"  style="text-align: center; margin-top: 0px;">
+    
+      <button id="add-entity-btn" type="button" class="circle-button" title="Add Entity">+</button>
+    </div>
+  `;
+
+  document.getElementById("add-entity-btn").onclick = () => {
+    addKeyValueEntityField("entity-list-container");
+  };
+
+  addKeyValueEntityField("entity-list-container");
+
+  setupGraphAutocomplete();
+}
+
+
+
+// Create Edge form
+function renderCreateEdgeForm() {
+  formContainer.innerHTML = `
+    <label>Source:</label>
+    <select id="source">
+      <option value="" disabled selected>--</option>
+      ${uuids.map(n => `<option value="${n}">${n}</option>`).join('')}
+    </select>
+
+    <label>Target:</label>
+    <select id="target">
+      <option value="" disabled selected>--</option>
+      ${uuids.map(n => `<option value="${n}">${n}</option>`).join('')}
+    </select>
+
+    <!-- Directed checkbox -->
+    <div style="margin-top: 10px;">
+      <input type="checkbox" id="directed" name="directed">
+      <label for="directed">Directed</label>
+    </div>
+
+    <div id="edge-id-error" style="color: red; font-size: 0.85em; margin-top: 4px;"></div>
+    <div id="entity-list-container" style="margin-top: 0px;">
+      <label style="margin-top: 0px;">Entities:</label>
+    </div>
+
+    <div id="entity-list-container" style="text-align: center; margin-top: 0px;">
+      <button id="add-entity-btn" type="button" class="circle-button" title="Add Entity">+</button>
+    </div>
+  `;
+
+  function syncDropdownOptions() {
+    const sourceSelect = document.getElementById("source");
+    const targetSelect = document.getElementById("target");
+
+    const sourceVal = sourceSelect.value;
+    const targetVal = targetSelect.value;
+
+    Array.from(sourceSelect.options).forEach(opt => opt.disabled = false);
+    Array.from(targetSelect.options).forEach(opt => opt.disabled = false);
+
+    if (sourceVal) {
+      Array.from(targetSelect.options).forEach(opt => {
+        if (opt.value === sourceVal) opt.disabled = true;
+      });
+    }
+    if (targetVal) {
+      Array.from(sourceSelect.options).forEach(opt => {
+        if (opt.value === targetVal) opt.disabled = true;
+      });
+    }
+  }
+
+  document.getElementById("source").addEventListener("change", syncDropdownOptions);
+  document.getElementById("target").addEventListener("change", syncDropdownOptions);
+
+  syncDropdownOptions();
+
+  addKeyValueEntityField("entity-list-container");
+
   document.getElementById("add-entity-btn").onclick = () => {
     addKeyValueEntityField("entity-list-container");
   };
 }
 
 
-// Create Edge form
-function renderCreateEdgeForm() {
-  const nodes = getNodesFromFrontend();
 
-  formContainer.innerHTML = `
-    <label>Node #1:</label>
-    <select id="node1">${nodes.map(n => `<option>${n}</option>`).join('')}</select>
-    <label>Node #2:</label>
-    <select id="node2">${nodes.map(n => `<option>${n}</option>`).join('')}</select>
-    <div id="edge-id-error" style="color: red; font-size: 0.85em; margin-top: 4px;"></div>
-    <div style="text-align: center; margin-top: 12px;">
-      <button id="add-edge-entity-btn" type="button">Add Entity</button>
-    </div>
-  `;
+async function setupGraphAutocomplete() {
+  const input = document.getElementById("graph-ids-input");
+  const suggestionsBox = document.getElementById("graph-suggestions");
 
-  document.getElementById("add-edge-entity-btn").onclick = () => {
-    addKeyValueEntityField("edge-entity-list-container");
-  };
+  let allGraphs = [];
+
+  // Fetch graph IDs once
+  try {
+    const res = await fetch("http://localhost:8001/get_graphs");
+    const data = await res.json();
+    allGraphs = data.graphs || [];
+  } catch (err) {
+    console.error("Error fetching graphs:", err);
+  }
+
+  input.addEventListener("input", () => {
+    const value = input.value;
+    const parts = value.split(",").map(s => s.trim());
+    const current = parts[parts.length - 1].toLowerCase();
+
+    suggestionsBox.innerHTML = "";
+    if (!current) return;
+
+    const matches = allGraphs.filter(g => g.toLowerCase().startsWith(current));
+    matches.slice(0, 10).forEach(graph => {
+      const div = document.createElement("div");
+      div.textContent = graph;
+      div.className = "suggestion-item";
+      div.style.padding = "6px";
+      div.style.cursor = "pointer";
+
+      div.addEventListener("click", () => {
+        parts[parts.length - 1] = graph;
+        input.value = parts.join(", ") + ", ";
+        suggestionsBox.innerHTML = "";
+      });
+
+      suggestionsBox.appendChild(div);
+    });
+  });
+
+  // Hide suggestions and clean input on blur
+  input.addEventListener("blur", () => {
+    setTimeout(() => {  // Delay so click events on suggestions can still register
+      suggestionsBox.innerHTML = "";
+
+      const validSet = new Set(allGraphs.map(g => g.toLowerCase()));
+      const seen = new Set();
+      const parts = input.value
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean)
+        .filter(s => {
+          const lower = s.toLowerCase();
+          return validSet.has(lower) && !seen.has(lower) && seen.add(lower);
+        });
+
+      input.value = parts.join(", ");
+    }, 150); // slight delay to allow suggestion click
+  });
+
+  // Optional: hide if clicked outside input or suggestion box
+  document.addEventListener("click", (e) => {
+    if (e.target !== input && !suggestionsBox.contains(e.target)) {
+      suggestionsBox.innerHTML = "";
+    }
+  });
 }
 
+
+
 function addKeyValueEntityField(containerId) {
-  let container = document.getElementById(containerId);
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
-  // If the container doesn't exist yet, create and append it
-  if (!container) {
-    container = document.createElement("div");
-    container.id = containerId;
-    container.style.marginTop = "12px";
-    container.style.minHeight = "40px"; // to avoid layout jump
-    document.querySelector("form").appendChild(container); // or another specific parent
+  const rows = container.querySelectorAll("div.entity-row");
+  if (rows.length > 0) {
+    // Get the last row
+    const lastRow = rows[rows.length - 1];
+    const lastKeyInput = lastRow.querySelector(".entity-key");
+    const lastValInput = lastRow.querySelector(".entity-value");
+
+    // If either key or value is empty, do NOT add a new row
+    if (!lastKeyInput.value.trim() || !lastValInput.value.trim()) {
+      return;
+    }
   }
 
-  // Prevent adding if last key or value is empty
-  const lastKey = container.querySelector(".entity-key:last-of-type");
-  const lastVal = container.querySelector(".entity-value:last-of-type");
+  // Add new row since last row is filled or no rows yet
+  createEntityRow(container);
+}
 
-  if (lastKey && lastVal && (!lastKey.value.trim() || !lastVal.value.trim())) {
-    return;
-  }
-
+function createEntityRow(container) {
   const wrapper = document.createElement("div");
-  wrapper.style.display = "flex";
-  wrapper.style.gap = "8px";
-  wrapper.style.marginBottom = "8px";
-  wrapper.style.alignItems = "flex-end";
+  wrapper.classList.add("entity-row");
 
   const keyCol = document.createElement("div");
-  keyCol.style.flex = "1";
+  keyCol.classList.add("entity-column");
   keyCol.innerHTML = `
-    <div style="color: gray; font-size: 0.75em;">Key</div>
-    <input type="text" class="entity-key" style="width: 100%;">
+    <input type="text" class="entity-key" placeholder="Entity Name...">
   `;
 
   const valCol = document.createElement("div");
-  valCol.style.flex = "1";
+  valCol.classList.add("entity-column");
   valCol.innerHTML = `
-    <div style="color: gray; font-size: 0.75em;">Value</div>
-    <input type="text" class="entity-value" style="width: 100%;">
+    <input type="text" class="entity-value" placeholder="Entity Value...">
   `;
 
   const removeBtn = document.createElement("button");
   removeBtn.textContent = "✕";
   removeBtn.type = "button";
-  removeBtn.style.border = "none";
-  removeBtn.style.background = "none";
-  removeBtn.style.color = "red";
-  removeBtn.style.cursor = "pointer";
-  removeBtn.style.fontSize = "1.1em";
-  removeBtn.style.paddingBottom = "6px";
+  removeBtn.classList.add("remove-btn");
   removeBtn.onclick = () => wrapper.remove();
 
   wrapper.appendChild(keyCol);
@@ -214,7 +540,6 @@ function addKeyValueEntityField(containerId) {
 
 
 
-
 // Create Graph form
 function renderCreateGraphForm() {
   formContainer.innerHTML = `
@@ -222,7 +547,6 @@ function renderCreateGraphForm() {
     <input type="text" id="graph-id">
   `;
 }
-
 
 // Delete Graph form
 async function renderDeleteGraphForm() {
@@ -252,11 +576,6 @@ async function renderSaveGraphForm() {
     <label>Graph ID:</label>
     <input type="text" id="graph-id">
   `;
-}
-
-// Stub for node list, replace with real data
-function getNodesFromFrontend() {
-  return window.graphNodes || ["NodeA", "NodeB", "NodeC"];
 }
 
 // Close modal button
@@ -310,6 +629,7 @@ document.getElementById("save-survey").addEventListener("click", async () => {
         errorDiv.remove(); // Clean up
         clearSelection();
         clearPopup();
+        await refreshGrab();
         rerenderGraph();
         modal.classList.add("hidden");
       } else {
@@ -320,7 +640,67 @@ document.getElementById("save-survey").addEventListener("click", async () => {
       console.error("Error deleting graph:", err);
       errorDiv.textContent = "An unexpected error occurred.";
     }
-  } else if (currentSurveyMode == "save-graph") {
+  } else if (currentSurveyMode == "display-graph") {
+  const input = document.getElementById("graph-ids-input");
+  const graphFilters = input.value.split(",").map(s => s.trim()).filter(Boolean);
+
+  // Helper to extract key from SQL string (first token before space)
+  function extractKey(sqlExpr) {
+    const match = sqlExpr.match(/^(\w+)\s+/);
+    return match ? match[1] : null;
+  }
+
+  function collectFilters(containerId) {
+    const inputs = document.querySelectorAll(`#${containerId} input.entity-value`);
+    const grouped = {};
+
+    for (const input of inputs) {
+      const val = input.value.trim();
+      if (!val) continue;
+
+      const keyMatch = val.match(/^(\w+)\s+(.*)$/);  // matches key + rest
+      if (!keyMatch) continue;
+
+      const [, key, condition] = keyMatch;
+
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(condition.trim());
+    }
+
+    return grouped;
+  }
+
+
+  const nodeFilters = collectFilters("node-filter-list");
+  const edgeFilters = collectFilters("edge-filter-list");
+
+  try {
+    const res = await fetch("http://localhost:8001/filter_graphs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        graph_filters: graphFilters,
+        node_filters: nodeFilters,
+        edge_filters: edgeFilters,
+      }),
+    });
+
+    if (res.ok) {
+      clearSelection();
+      clearPopup();
+      modal.classList.add("hidden");
+      await refreshGrab();
+      rerenderGraph();
+    } else {
+      console.error(await res.text());
+      alert("Failed to display graph.");
+    }
+  } catch (err) {
+    console.error("Error displaying graph:", err);
+    alert("An unexpected error occurred.");
+  }
+}
+else if (currentSurveyMode == "save-graph") {
     const input = document.getElementById("graph-id");
     const id = input?.value?.trim();
 
@@ -366,7 +746,6 @@ document.getElementById("save-survey").addEventListener("click", async () => {
         if (errorDiv) errorDiv.remove();
         clearSelection();
         clearPopup();
-        rerenderGraph();
         modal.classList.add("hidden");
       } else {
         errorDiv.textContent = "Failed to create graph.";
@@ -376,7 +755,8 @@ document.getElementById("save-survey").addEventListener("click", async () => {
       console.error("Error during graph creation:", err);
       errorDiv.textContent = "An unexpected error occurred.";
     }
-  } else if (currentSurveyMode === "create-node") {
+  } else if (currentSurveyMode === "add-node") {
+{
   const id = document.getElementById("node-id")?.value?.trim();
   const errorDiv = document.getElementById("node-id-error");
   errorDiv.textContent = "";
@@ -387,17 +767,20 @@ document.getElementById("save-survey").addEventListener("click", async () => {
   }
 
   try {
+    // Check if Node ID already exists
     const checkRes = await fetch("http://localhost:8001/check_id", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
+
     const checkJson = await checkRes.json();
     if (checkJson.exists) {
       errorDiv.textContent = "This Node ID already exists.";
       return;
     }
 
+    // Collect entity key-value pairs
     const keyEls = document.querySelectorAll("#entity-list-container .entity-key");
     const valEls = document.querySelectorAll("#entity-list-container .entity-value");
 
@@ -408,16 +791,26 @@ document.getElementById("save-survey").addEventListener("click", async () => {
       if (key) entities[key] = value;
     }
 
+    // Get graph IDs (already validated and cleaned)
+    const graphInput = document.getElementById("graph-ids-input");
+    const graph_ids = graphInput.value.split(",").map(s => s.trim()).filter(Boolean);
+
+    // Final payload
     const res = await fetch("http://localhost:8001/create_node", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, entities }),
+      body: JSON.stringify({
+        node_id: id,
+        graph_ids,
+        ...entities,
+      }),
     });
 
     if (res.ok) {
       errorDiv.textContent = "";
       clearSelection();
       clearPopup();
+      await refreshGrab();
       rerenderGraph();
       modal.classList.add("hidden");
     } else {
@@ -426,49 +819,79 @@ document.getElementById("save-survey").addEventListener("click", async () => {
   } catch (err) {
     console.error("Node creation error:", err);
     errorDiv.textContent = "Unexpected error.";
+  }
+}
+} else if (currentSurveyMode === "add-edge") {
+  const source = document.getElementById("source")?.value?.trim();
+  const target = document.getElementById("target")?.value?.trim();
+  const directed = document.getElementById("directed")?.checked;
+  const errorDiv = document.getElementById("edge-id-error");
+  errorDiv.textContent = "";
+
+  if (!source || !target) {
+    errorDiv.textContent = "Both source and target nodes must be selected.";
+    return;
+  }
+
+  if (source === target) {
+    errorDiv.textContent = "Source and target nodes cannot be the same.";
+    return;
+  }
+
+  try {
+    const keyEls = document.querySelectorAll("#entity-list-container .entity-key");
+    const valEls = document.querySelectorAll("#entity-list-container .entity-value");
+
+    const entities = {};
+    for (let i = 0; i < keyEls.length; i++) {
+      const key = keyEls[i].value.trim();
+      const value = valEls[i].value.trim();
+      if (key) entities[key] = value;
     }
-  } else if (currentSurveyMode === "create-edge") {
-    const node1 = document.getElementById("node1")?.value;
-    const node2 = document.getElementById("node2")?.value;
-    const errorDiv = document.getElementById("edge-id-error");
-    errorDiv.textContent = "";
 
-    if (!node1 || !node2) {
-      errorDiv.textContent = "Both nodes must be selected.";
-      return;
-    }
-
-    try {
-      const keyEls = document.querySelectorAll("#edge-entity-list-container .entity-key");
-      const valEls = document.querySelectorAll("#edge-entity-list-container .entity-value");
-
-      const entities = {};
-      for (let i = 0; i < keyEls.length; i++) {
-        const key = keyEls[i].value.trim();
-        const value = valEls[i].value.trim();
-        if (key) entities[key] = value;
-      }
-
+    if (directed) {
+      // Send single directed edge
       const res = await fetch("http://localhost:8001/create_edge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ node1, node2, entities }),
+        body: JSON.stringify({ source, target, ...entities }),
       });
 
-      if (res.ok) {
-        errorDiv.textContent = "";
-        clearSelection();
-        clearPopup();
-        rerenderGraph();
-        modal.classList.add("hidden");
-      } else {
-        errorDiv.textContent = "Failed to create edge.";
-      }
-    } catch (err) {
-      console.error("Edge creation error:", err);
-      errorDiv.textContent = "Unexpected error.";
+      if (!res.ok) throw new Error("Failed to create edge.");
+
+    } else {
+      // Send both directions for undirected edge
+      const res1 = await fetch("http://localhost:8001/create_edge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ source, target, ...entities }),
+      });
+
+      if (!res1.ok) throw new Error("Failed to create edge.");
+
+      const res2 = await fetch("http://localhost:8001/create_edge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ source: target, target: source, ...entities }),
+      });
+
+      if (!res2.ok) throw new Error("Failed to create edge.");
     }
-  } else if (currentSurveyMode === "new-graph") {
+
+    // If both requests succeeded:
+    errorDiv.textContent = "";
+    clearSelection();
+    clearPopup();
+    await refreshGrab();
+    rerenderGraph();
+    modal.classList.add("hidden");
+
+  } catch (err) {
+    console.error("Edge creation error:", err);
+    errorDiv.textContent = "Unexpected error.";
+  }
+}
+ else if (currentSurveyMode === "new-graph") {
     const input = document.getElementById("graph-id");
     const id = input?.value?.trim();
 
@@ -514,6 +937,7 @@ document.getElementById("save-survey").addEventListener("click", async () => {
         if (errorDiv) errorDiv.remove();
         clearSelection();
         clearPopup();
+        await refreshGrab();
         rerenderGraph();
         modal.classList.add("hidden");
       } else {
