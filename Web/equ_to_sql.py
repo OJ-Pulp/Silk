@@ -98,8 +98,20 @@ keywords = [
     "cast",
     "convert",
     "coalesce",
-    "nullif"
+    "nullif",
 ]
+
+operators = {
+    "equals": "=",
+    "is equal to": "=", 
+    "==": "=",
+    "does not equal": "!=",
+    "doesn't equal": "!=",
+    "is greater than or equal to": ">=",
+    "is less than or equal to": "<=",
+    "is greater than": ">",
+    "is less than": "<"
+}
 
 def equ_to_sql(expr_list):
     result = {}
@@ -109,13 +121,15 @@ def equ_to_sql(expr_list):
         expr = expr.strip()
         expr = re.sub(r'\s+', ' ', expr)
 
-        # Normalizes equals signs
-        expr = expr.replace("==", "=")
-
-        # Normalize operators
+        # Normalize keywords
         for keyword in keywords:
             if keyword in expr:
                 expr = re.sub(fr'\b{keyword}\b', keyword.upper(), expr, flags=re.IGNORECASE)
+
+        # Normalize operators
+        for operator in operators:
+            if operator in expr:
+                expr = re.sub(fr'\b{operator}\b', operator.value(), expr, flags=re.IGNORECASE)
 
         # Patterns and processing
         patterns = [
