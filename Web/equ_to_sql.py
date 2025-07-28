@@ -1,18 +1,121 @@
 import re
+import logging
+
+# -------------------------------------------------------------------------------------------
+#                                   LOGGING_SETTINGS
+# -------------------------------------------------------------------------------------------
+# region LOGGING_SETTINGS
+
+# SystemExit codes
+SUCCESS = 0
+FAILURE = 1
+INTERRUPTED = 130
+
+SUCCESS_LEVEL_NUM = 15
+
+logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
+
+def success(self, message, *args, **kwargs):
+    if self.isEnabledFor(SUCCESS_LEVEL_NUM):
+        self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)
+
+logging.Logger.success = success
+
+# Configures for logging showing messages level INFO and above
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger(__name__)
+
+# endregion
+
+keywords = [
+    "not like",
+    "like",
+    "not in",
+    "in",
+    "is null",
+    "is not null",
+    "between",
+    "and",
+    "or",
+    "not",
+    "select",
+    "insert",
+    "update",
+    "delete",
+    "from",
+    "where",
+    "group by",
+    "having",
+    "order by",
+    "limit",
+    "offset",
+    "join",
+    "inner join",
+    "left join",
+    "right join",
+    "full outer join",
+    "cross join",
+    "on",
+    "as",
+    "distinct",
+    "all",
+    "union",
+    "union all",
+    "exists",
+    "create",
+    "alter",
+    "drop",
+    "table",
+    "database",
+    "view",
+    "index",
+    "constraint",
+    "primary key",
+    "foreign key",
+    "unique",
+    "default",
+    "check",
+    "null",
+    "not null",
+    "add",
+    "modify",
+    "rename",
+    "truncate",
+    "case",
+    "when",
+    "then",
+    "else",
+    "end",
+    "count",
+    "sum",
+    "avg",
+    "min",
+    "max",
+    "cast",
+    "convert",
+    "coalesce",
+    "nullif"
+]
 
 def equ_to_sql(expr_list):
     result = {}
 
     for expr in expr_list:
+        # Normalizes spaces
         expr = expr.strip()
         expr = re.sub(r'\s+', ' ', expr)
 
-        # Normalize operators
+        # Normalizes equals signs
         expr = expr.replace("==", "=")
-        expr = re.sub(r'\bnot like\b', 'NOT LIKE', expr, flags=re.IGNORECASE)
-        expr = re.sub(r'\blike\b', 'LIKE', expr, flags=re.IGNORECASE)
-        expr = re.sub(r'\bnot in\b', 'NOT IN', expr, flags=re.IGNORECASE)
-        expr = re.sub(r'\bin\b', 'IN', expr, flags=re.IGNORECASE)
+
+        # Normalize operators
+        for keyword in keywords:
+            if keyword in expr:
+                expr = re.sub(fr'\b{keyword}\b', keyword.upper(), expr, flags=re.IGNORECASE)
 
         # Patterns and processing
         patterns = [
