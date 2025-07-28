@@ -144,9 +144,9 @@ class Spider:
 
     def filter_graphs(
         self,
-        graph_filter: List[str] = None,
-        node_filter: str = None,
-        edge_filter: str = None,
+        graph_filter: List[str] | None = None,
+        node_filter: str | None = None,
+        edge_filter: str | None = None,
     ):
 
         self.current_state["graph"]["graph_filter"] = graph_filter or []
@@ -187,7 +187,7 @@ class Spider:
             return None
         return [index_keys[i] for i in route]
 
-    def cluster_graph(self, edge_matrix, node_vector, index_keys):
+    def cluster_graph(self, edge_matrix, index_keys):
         clusters = mcl(edge_matrix)
         if clusters is None or len(clusters) == 0:
             return None

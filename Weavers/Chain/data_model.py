@@ -1,7 +1,7 @@
 """Data model for components and their requirement relationships in the supply chain."""
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 from Weavers.graph_model import Node, Edge
 
@@ -71,69 +71,70 @@ DATA_SCHEMA = {
     "additionalProperties": False,
 }
 
+
 @dataclass
 class Component(Node):
     """
     Represents a physical component in the system.
 
-    Includes attributes like dimensions, cost, failure rate, and more. 
+    Includes attributes like dimensions, cost, failure rate, and more.
     """
 
-    name: str 
+    name: str
     """Name of the node to be displayed in GUI tools."""
 
-    manufacturer: str 
+    manufacturer: str
     """The manufacturer that produces this component."""
 
-    locations: str | List[str] 
+    locations: str | List[str]
     """The location(s) that this component is produced in."""
 
-    full_product: bool 
+    full_product: bool
     """Whether or not this component is a full product to be sold to customers."""
 
-    component_type: Optional[str] = None 
+    component_type: str | None = None
     """Level of the component in relation to other components (e.g., sprue, part, assembly)"""
-    
-    product: Optional[str] = None
+
+    product: str | None = None
     """The product that the non full_product component is a component of. If full_product is True, this is None."""
 
-    variant: Optional[bool] = None 
+    variant: bool | None = None
     """Whether or not this component is a variant of another component. False if it is the base model."""
 
-    variant_base_product: Optional[str] = None 
+    variant_base_product: str | None = None
     """The base product that the variant is a subset of"""
 
-    vital: Optional[bool] = None 
+    vital: bool | None = None
     """Indicates whether the component is vital for a variant"""
 
-    designation: Optional[str] = None 
+    designation: str | None = None
     """Specific designation of the component used for any external purposes"""
 
-    popular_name: Optional[str] = None 
+    popular_name: str | None = None
     """More commonly used name for the component"""
 
-    category: Optional[str] = None 
+    category: str | None = None
     """Category of the component (e.g., electronics, mechanical). Definition of category determined by user."""
 
-    part_type: Optional[str] = None 
+    part_type: str | None = None
     """The general type of the component. Specific definition of part type is determined by user."""
 
-    dimensions: Optional[List[int]] = None  
+    dimensions: List[int] | None = None
     """List of [length, width, height]"""
 
-    cost: Optional[float] = None  
+    cost: float | None = None
     """Monetary cost of the component. Currency used determined by user."""
 
-    failure_rate: Optional[float] = None  
+    failure_rate: float | None = None
     """Expected failure rate (e.g., failures/hour). Rate determined by user."""
 
-    substitutions: Optional[List[str]] = None  
+    substitutions: List[str] | None = None
     """List of substitute component IDs"""
 
-    breakability: Optional[float] = None  
+    breakability: float | None = None
     """Likelihood of breakage (0–1)"""
 
-    year_range: Optional[List[int]] = None  
+    year_range: List[int] | None = None
     """The range of years this component was produced. Each year must be in the list."""
 
 
@@ -146,7 +147,7 @@ class Requires(Edge):
     Includes if a component is a part of the base model of another component.
     Additionally includes lead time variable, specific use case determined by the user.
     """
-    
+
     start_node: str
     """The source node of the edge (must be a Node subclass)."""
 
