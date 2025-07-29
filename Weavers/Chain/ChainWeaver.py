@@ -237,7 +237,10 @@ class ChainWeaver(Weaver):
         manufacturer_keys = self.manufacturers.keys()
 
         def generate_subparts(
-            parent_part: Component, parent_category, parent_designation, parent_manufacturer
+            parent_part: Component,
+            parent_category,
+            parent_designation,
+            parent_manufacturer,
         ):
             # If this part type is also a designation, generate its subparts
             if parent_part.part_type in self.designations:
@@ -309,9 +312,7 @@ class ChainWeaver(Weaver):
 
         for i, base_product in enumerate(base_products, start=1):
             # logger.debug(f"Base Product {i}:")
-            parts_categories = self.designations[base_product.designation][
-                "Parts"
-            ]
+            parts_categories = self.designations[base_product.designation]["Parts"]
             for part_category, part_list in parts_categories.items():
                 for part_type in part_list:
                     # logger.debug(f"{part_type}:")
@@ -321,9 +322,7 @@ class ChainWeaver(Weaver):
                     base_product_part_vital = (
                         True
                         if part_type
-                        in self.designations[base_product.designation][
-                            "Vital Parts"
-                        ]
+                        in self.designations[base_product.designation]["Vital Parts"]
                         else False
                     )
                     component_data = {
@@ -372,8 +371,7 @@ class ChainWeaver(Weaver):
                     # logger.debug("")
                     for base_product_sprue in base_product_sprues:
                         if (
-                            base_product_part.product
-                            == base_product_sprue.product
+                            base_product_part.product == base_product_sprue.product
                             and base_product_part.manufacturer
                             == base_product_sprue.manufacturer
                         ):
@@ -509,10 +507,7 @@ class ChainWeaver(Weaver):
     ) -> str:
         current_designations = []
         for variant_product in variant_products:
-            if (
-                variant_product.variant_base_product
-                == variant_base_product.id
-            ):
+            if variant_product.variant_base_product == variant_base_product.id:
                 designation = variant_product.designation
                 if designation:
                     current_designations.append(designation)
@@ -686,10 +681,7 @@ class ChainWeaver(Weaver):
             individual_needed_manufacturers = set(self.manufacturers.keys())
 
             for vital_sprue in vital_base_product_sprues:
-                if (
-                    variant_product.variant_base_product
-                    == vital_sprue.product
-                ):
+                if variant_product.variant_base_product == vital_sprue.product:
                     variant_sprues.append(vital_sprue)
 
                     variant_sprue_edge = Requires(
@@ -705,7 +697,7 @@ class ChainWeaver(Weaver):
                     for base_product_part_edge in base_product_part_edges:
                         if base_product_part_edge.start_node == vital_sprue:
                             individual_needed_parts.discard(
-                                base_product_part_edge.end_node.component_type # type: ignore
+                                base_product_part_edge.end_node.component_type  # type: ignore
                             )
 
             needed_parts[variant_product.id] = individual_needed_parts
@@ -743,7 +735,7 @@ class ChainWeaver(Weaver):
                     ],
                 }
                 variant_sprue = Component(**component_data)
-                
+
                 self.write_node(variant_sprue)
                 variant_sprues.append(variant_sprue)
 
@@ -782,9 +774,7 @@ class ChainWeaver(Weaver):
         for i, variant_product in enumerate(variant_products, start=1):
             # logger.debug(f"Variant Product {i}:")
 
-            parts_categories = self.designations[
-                variant_product.designation
-            ]["Parts"]
+            parts_categories = self.designations[variant_product.designation]["Parts"]
             for part_category, _ in parts_categories.items():
                 for part_type in needed_parts[variant_product.id]:
                     # logger.debug(f"{part_type}:")
@@ -829,13 +819,12 @@ class ChainWeaver(Weaver):
                         ],
                     }
                     variant_part = Component(**component_data)
-                    
+
                     self.write_node(variant_part)
 
                     for variant_sprue in variant_sprues:
                         if (
-                            variant_part.product
-                            == variant_sprue.product
+                            variant_part.product == variant_sprue.product
                             and variant_part.manufacturer == variant_sprue.manufacturer
                         ):
                             # logger.debug(f"{part_type} Edge:")
@@ -876,17 +865,15 @@ class ChainWeaver(Weaver):
 
         base_products = self.create_base_products(num_base_products)
         logger.info("Base Products Created")
-        
-        base_product_sprues = self.create_base_product_sprues(
-            base_products
-        )
+
+        base_product_sprues = self.create_base_product_sprues(base_products)
         logger.info("Base Product Sprues Created")
-        
+
         base_product_part_edges, vital_base_product_sprues = (
             self.create_base_product_parts(base_products, base_product_sprues)
         )
         logger.info("Base Product Parts Created")
- 
+
         # TODO: Find a way to resolve base product sprues and edges inside of their creation function
         # resolved_base_product_sprues, resolved_base_product_sprue_edges = (
         #     self.resolve_base_product_sprues(
@@ -898,8 +885,8 @@ class ChainWeaver(Weaver):
         del base_product_sprues
 
         variant_products = self.create_variant_products(base_products, num_variants)
-        
-        del base_products # Free up memory by removing base products from the list
+
+        del base_products  # Free up memory by removing base products from the list
 
         logger.info("Variant Products Created")
         variant_sprues, needed_parts, needed_manufacturers = (
@@ -907,7 +894,7 @@ class ChainWeaver(Weaver):
                 variant_products, vital_base_product_sprues, base_product_part_edges
             )
         )
-        
+
         del vital_base_product_sprues
         del base_product_part_edges
 
@@ -919,9 +906,10 @@ class ChainWeaver(Weaver):
 
 
 def main():
-    weaver = ChainWeaver(num_products=1, variant_distribution=0)
+    weaver = ChainWeaver(num_products=10, variant_distribution=0.25)
     weaver.weave()
     weaver.close()
+
 
 # endregion
 
