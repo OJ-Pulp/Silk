@@ -4,7 +4,7 @@ OVERALL CHAINWEAVER
 
 # Standard
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Generator
 
 # Local
 from Weavers.Chain.data_model import Component, Requires
@@ -43,22 +43,21 @@ class ChainWeaver(Weaver):
     #                                      BASE_PRODUCTS
     # -------------------------------------------------------------------------------------------
     # region BASE_PRODUCTS
-    def create_base_products(
+    def generate_base_products(
         self,
         num_base_products: int,
-    ) -> List[Component]:
+    ) -> Generator[Component, None, None]:
         """
         Generates a fake dataset of base products and their data.
 
         :param `num_base_products`: The total number of unique base products to include in the supply chain.
         :type `num_base_products`: int
 
-        :return: A list of base products.
-        :rtype: List[Component]
+        :return: A generator yielding base products.
+        :rtype: Generator[Component, None, None]
         """
 
         # Sets empty lists to collect products along with other necessary variables
-        base_products = []
         designation_keys = self.designations.keys()
         manufacturer_keys = self.manufacturers.keys()
         designation_counter = {
@@ -66,7 +65,7 @@ class ChainWeaver(Weaver):
         }
 
         # Creates all base products
-        for i in range(num_base_products):
+        for _ in range(num_base_products):
             # logger.debug(f"Base Product {i}:")
 
             # Generates base product data
@@ -110,13 +109,7 @@ class ChainWeaver(Weaver):
             base_product = Component(**component_data)
 
             self.write_node(base_product)
-
-            # Appends 'base_product' Component(Node) to the overall list of 'base_products'
-            base_products.append(base_product)
-            # logger.debug(base_product)
-            # logger.debug("")
-
-        return base_products
+            yield base_product
 
     # endregion
 
@@ -125,34 +118,16 @@ class ChainWeaver(Weaver):
     # -------------------------------------------------------------------------------------------
     # region BASE_PRODUCT_SPRUES
 
-    def create_base_product_sprues(
+    def generate_base_product_sprues(
         self,
-        base_products: List[Component],
-    ) -> List[Component]:
+        base_products: Generator[Component, None, None],
+    ) -> Generator[Component, None, None]:
         """
-        Generates a fake dataset of base product sprues and sprue edges and their data.
-
-        :param `base_products`: A list of base products and their data.
-        :type `base_products`: List[Component]
-
-        :return: A list of base product sprues.
-        :rtype: List[Component]
-        :return: A list of edges between base products and base product sprues.
-        :rtype: List[Requires]
+        Yields base product sprue components.
         """
-
-        # Sets empty lists to collect sprues and edges along with other necessary variables
-        base_product_sprues = []
         manufacturer_keys = self.manufacturers.keys()
-
-        # Creates all base product sprues and edges
-        for i, base_product in enumerate(base_products, start=1):
-            # logger.debug(f"Base Product {i}:")
-
+        for base_product in base_products:
             for manufacturer in manufacturer_keys:
-                # logger.debug(f"{manufacturer} Base Product Sprue:")
-
-                # Creates 'base_product_sprue' Component(Node)
                 component_data = {
                     "name": f"Sprue {FAKER_GEN.bothify(text='???########')}",
                     "manufacturer": manufacturer,
@@ -181,149 +156,80 @@ class ChainWeaver(Weaver):
                     ],
                 }
                 base_product_sprue = Component(**component_data)
-
                 self.write_node(base_product_sprue)
+                yield base_product_sprue
 
-                # Appends 'base_product_sprue' Component(Node) to the overall list of 'base_product_sprues'
-                base_product_sprues.append(base_product_sprue)
-                # logger.debug(base_product_sprue)
-                # logger.debug("")
+    def generate_base_product_sprue_edges(
+        self,
+        base_products: Generator[Component, None, None],
+        base_product_sprues: Generator[Component, None, None],
+    ) -> Generator[Requires, None, None]:
+        """
+        Yields edges between base products and base product sprues.
+        """
+        # Convert sprues to a list for multiple passes (if needed)
+        sprues_list = list(base_product_sprues)
+        for base_product in base_products:
+            for sprue in sprues_list:
+                if sprue.product == base_product.id:
+                    base_product_sprue_edge = Requires(
+                        start_node=base_product.name,
+                        end_node=sprue.name,
+                        base_model=True,
+                        lead_time=FAKER_GEN.random_int(1, 1000),
+                    )
+                    self.write_edge(base_product_sprue_edge)
+                    yield base_product_sprue_edge
 
-                # logger.debug(f"{manufacturer} Base Product Sprue Edge:")
-
-                # Creates 'base_product' to 'base_product_sprue' Requires(Edge)
-                base_product_sprue_edge = Requires(
-                    start_node=base_product.name,
-                    end_node=base_product_sprue.name,
-                    base_model=True,
-                    lead_time=FAKER_GEN.random_int(1, 1000),  # In Business Days
-                )
-
-                self.write_edge(base_product_sprue_edge)
-
-        return base_product_sprues
-
-    # endregion
+    def generate_vital_base_product_sprues(
+        self,
+        base_products: Generator[Component, None, None],
+        base_product_sprues: Generator[Component, None, None],
+    ) -> Generator[Component, None, None]:
+        """
+        Yields vital base product sprues.
+        """
+        manufacturer_keys = self.manufacturers.keys()
+        sprues_list = list(base_product_sprues)
+        for base_product in base_products:
+            parts_categories = self.designations[base_product.designation]["Parts"]
+            for part_list in parts_categories.items():
+                for part_type in part_list:
+                    base_product_part_manufacturer = FAKER_GEN.random_element(
+                        list(manufacturer_keys)
+                    )
+                    is_vital = (
+                        part_type
+                        in self.designations[base_product.designation]["Vital Parts"]
+                    )
+                    if is_vital:
+                        for base_product_sprue in sprues_list:
+                            if (
+                                base_product.id == base_product_sprue.product
+                                and base_product_part_manufacturer
+                                == base_product_sprue.manufacturer
+                            ):
+                                yield base_product_sprue
 
     # -------------------------------------------------------------------------------------------
     #                                   BASE_PRODUCT_PARTS
     # -------------------------------------------------------------------------------------------
     # region BASE_PRODUCT_PARTS
 
-    def create_base_product_parts(
+    def generate_base_product_parts(
         self,
-        base_products: List[Component],
-        base_product_sprues: List[Component],
-    ) -> Tuple[List[Requires], List[Component]]:
+        base_products: Generator[Component, None, None],
+    ) -> Generator[Component, None, None]:
         """
-        Generates a fake dataset of base product parts and part edges and their data.
-        Supports recursive subcomponent generation for parts that have their own parts.
-
-        :param `base_products`: A list of base products and their data.
-        :type `base_products`: List[Component]
-        :param `base_product_sprues`: A list of base product sprues and their data.
-        :type `base_product_sprues`: List[Component]
-
-        :return: A list of edges between base product sprues and base product parts.
-        :rtype: List[Requires]
-        :return: A list of sprues that contain vital base product parts.
-        :rtype: List[Component]
+        Yields base product part components.
         """
-
-        # Sets empty lists to collect parts, edges, and vital sprues along with other necessary variables
-        base_product_parts = []
-        base_product_part_edges = []
-        vital_base_product_sprues = []
         manufacturer_keys = self.manufacturers.keys()
-
-        def generate_subparts(
-            parent_part: Component,
-            parent_category,
-            parent_designation,
-            parent_manufacturer,
-        ):
-            # If this part type is also a designation, generate its subparts
-            if parent_part.part_type in self.designations:
-                sub_designation = self.designations[parent_part.part_type]
-                sub_parts_categories = sub_designation.get("Parts", {})
-                for sub_category, sub_part_list in sub_parts_categories.items():
-                    for sub_part_type in sub_part_list:
-                        sub_part_manufacturer = FAKER_GEN.random_element(
-                            manufacturer_keys
-                        )
-                        component_data = {
-                            "name": f"{sub_part_type} {FAKER_GEN.bothify('???#####')}",
-                            "manufacturer": sub_part_manufacturer,
-                            "locations": FAKER_GEN.random_element(
-                                self.manufacturers[sub_part_manufacturer]["Locations"]
-                            ),
-                            "full_product": False,
-                            "component_type": "Part",
-                            "variant": False,
-                            "product": parent_part.product,
-                            "variant_base_product": None,
-                            "vital": False,
-                            "category": sub_category,
-                            "part_type": sub_part_type,
-                            "dimensions": [
-                                FAKER_GEN.random_int(10, 100),
-                                FAKER_GEN.random_int(10, 100),
-                                FAKER_GEN.random_int(10, 100),
-                            ],
-                            "cost": round(FAKER_GEN.random_number(digits=4), 2),
-                            "failure_rate": round(
-                                FAKER_GEN.random_number(digits=2) / 100, 4
-                            ),
-                            "substitutions": [
-                                FAKER_GEN.bothify("???###")
-                                for _ in range(FAKER_GEN.random_int(0, 3))
-                            ],
-                            "breakability": round(
-                                FAKER_GEN.random_number(digits=2) / 100, 2
-                            ),
-                            "year_range": [
-                                FAKER_GEN.random_int(1990, 2024)
-                                for _ in range(FAKER_GEN.random_int(1, 3))
-                            ],
-                        }
-                        sub_part = Component(**component_data)
-
-                        self.write_node(sub_part)
-                        base_product_parts.append(sub_part)
-
-                        # Edge from parent_part to sub_part
-                        edge = Requires(
-                            start_node=parent_part.name,
-                            end_node=sub_part.name,
-                            base_model=True,
-                            lead_time=FAKER_GEN.random_int(1, 1000),
-                        )
-
-                        self.write_edge(edge)
-                        base_product_part_edges.append(edge)
-
-                        # Recurse further if needed
-                        generate_subparts(
-                            sub_part,
-                            sub_category,
-                            parent_part.part_type,
-                            sub_part_manufacturer,
-                        )
-
-        for i, base_product in enumerate(base_products, start=1):
-            # logger.debug(f"Base Product {i}:")
+        for base_product in base_products:
             parts_categories = self.designations[base_product.designation]["Parts"]
             for part_category, part_list in parts_categories.items():
                 for part_type in part_list:
-                    # logger.debug(f"{part_type}:")
                     base_product_part_manufacturer = FAKER_GEN.random_element(
                         list(manufacturer_keys)
-                    )
-                    base_product_part_vital = (
-                        True
-                        if part_type
-                        in self.designations[base_product.designation]["Vital Parts"]
-                        else False
                     )
                     component_data = {
                         "name": f"{part_type} {FAKER_GEN.bothify('???#####')}",
@@ -338,7 +244,8 @@ class ChainWeaver(Weaver):
                         "variant": False,
                         "product": base_product.id,
                         "variant_base_product": None,
-                        "vital": base_product_part_vital,
+                        "vital": part_type
+                        in self.designations[base_product.designation]["Vital Parts"],
                         "category": part_category,
                         "part_type": part_type,
                         "dimensions": [
@@ -363,42 +270,33 @@ class ChainWeaver(Weaver):
                         ],
                     }
                     base_product_part = Component(**component_data)
-
                     self.write_node(base_product_part)
-                    base_product_parts.append(base_product_part)
+                    yield base_product_part
 
-                    # logger.debug(base_product_part)
-                    # logger.debug("")
-                    for base_product_sprue in base_product_sprues:
-                        if (
-                            base_product_part.product == base_product_sprue.product
-                            and base_product_part.manufacturer
-                            == base_product_sprue.manufacturer
-                        ):
-                            # logger.debug(f"{part_type} Edge:")
-                            base_product_part_edge = Requires(
-                                start_node=base_product_sprue.name,
-                                end_node=base_product_part.name,
-                                base_model=True,
-                                lead_time=FAKER_GEN.random_int(1, 1000),
-                            )
-
-                            self.write_edge(base_product_part_edge)
-                            base_product_part_edges.append(base_product_part_edge)
-
-                            # logger.debug(base_product_part_edge)
-                            # logger.debug("")
-                            if base_product_part_vital:
-                                vital_base_product_sprues.append(base_product_sprue)
-                    # Recursively generate subparts if this part is also a designation
-                    generate_subparts(
-                        base_product_part,
-                        part_category,
-                        base_product.designation,
-                        base_product_part_manufacturer,
+    def generate_base_product_part_edges(
+        self,
+        base_product_parts: Generator[Component, None, None],
+        base_product_sprues: Generator[Component, None, None],
+    ) -> Generator[Requires, None, None]:
+        """
+        Yields edges between base product sprues and base product parts.
+        """
+        sprues_list = list(base_product_sprues)
+        for base_product_part in base_product_parts:
+            for base_product_sprue in sprues_list:
+                if (
+                    base_product_part.product == base_product_sprue.product
+                    and base_product_part.manufacturer
+                    == base_product_sprue.manufacturer
+                ):
+                    base_product_part_edge = Requires(
+                        start_node=base_product_sprue.name,
+                        end_node=base_product_part.name,
+                        base_model=True,
+                        lead_time=FAKER_GEN.random_int(1, 1000),
                     )
-
-        return base_product_part_edges, vital_base_product_sprues
+                    self.write_edge(base_product_part_edge)
+                    yield base_product_part_edge
 
     # endregion
 
@@ -863,16 +761,23 @@ class ChainWeaver(Weaver):
         logger.debug(f"Num_Base_Products:        {num_base_products}")
         logger.info("Local Main Variables Set")
 
-        base_products = self.create_base_products(num_base_products)
-        logger.info("Base Products Created")
+        # Base products
+        base_products = self.generate_base_products(num_base_products)
 
-        base_product_sprues = self.create_base_product_sprues(base_products)
-        logger.info("Base Product Sprues Created")
-
-        base_product_part_edges, vital_base_product_sprues = (
-            self.create_base_product_parts(base_products, base_product_sprues)
+        # Base products sprues and edges
+        base_product_sprues = self.generate_base_product_sprues(base_products)
+        base_product_sprue_edges = self.generate_base_product_sprue_edges(
+            base_products, base_product_sprues
         )
-        logger.info("Base Product Parts Created")
+        vital_base_product_sprues = self.generate_vital_base_product_sprues(
+            base_products, base_product_sprues
+        )
+
+        # Base product parts and edges
+        base_product_parts = self.generate_base_product_parts(base_products)
+        base_product_part_edges = self.generate_base_product_part_edges(
+            base_product_parts, base_product_sprues
+        )
 
         # TODO: Find a way to resolve base product sprues and edges inside of their creation function
         # resolved_base_product_sprues, resolved_base_product_sprue_edges = (
