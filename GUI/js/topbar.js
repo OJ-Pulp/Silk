@@ -28,8 +28,7 @@ document.addEventListener('click', (e) => {
 });
 
 // --- Toolbar Button Handlers ---
-const newDatabaseBtn = document.getElementById("newDatabaseBtn");
-const openDatabaseBtn = document.getElementById("openDatabaseBtn");
+const newDatabaseBtn = document.getElementById("newDatabaseBtn"); const openDatabaseBtn = document.getElementById("openDatabaseBtn");
 const importDataBtn = document.getElementById("importDataBtn");
 const exportDataBtn = document.getElementById("exportDataBtn");
 
@@ -38,7 +37,6 @@ const invertNodesBtn = document.getElementById("invertNodesBtn");
 const invertEdgesBtn = document.getElementById("invertEdgesBtn");
 const showIDsBtn = document.getElementById("showIDsBtn");
 const rectSelectBtn = document.getElementById("rectSelectBtn");
-
 newDatabaseBtn.addEventListener("click", () => {
   fetch("http://localhost:8001/new_database", {
     method: "POST",
@@ -176,8 +174,8 @@ const surveyMap = {
   "save graph": "save-graph",
   "delete graph": "delete-graph",
   "display graph": "display-graph",
+  "generate graph": "generate-graph",
 };
-
 
 document.querySelectorAll('.dropdown-item').forEach(item => {
   const text = item.textContent.trim().toLowerCase();

@@ -37,6 +37,9 @@ export function renderSurvey(mode, data = null) {
     case "display-graph":
       renderDisplayGraphForm();
       break;
+    case "generate-graph":
+      renderGenerateGraphForm();
+      break;
     default:
       formContainer.innerHTML = "<p>Unknown mode.</p>";
   }
@@ -578,6 +581,31 @@ async function renderSaveGraphForm() {
   `;
 }
 
+// Edit Toolbar form
+function renderGenerateGraphForm() {
+  formContainer.innerHTML = `
+    <label for="weaver-select">Weaver:</label>
+    <select id="weaver-select" style="margin-bottom: 12px;">
+      <option value="ChainWeaver">ChainWeaver</option>
+      <!-- Add more weavers here as needed -->
+    </select>
+    <div id="chainweaver-options">
+      <label for="num-products">Number of Products:</label>
+      <input type="number" id="num-products" min="1" value="10" style="margin-bottom: 8px;">
+      <label for="variant-distribution">Variant Distribution (%):</label>
+      <input type="number" id="variant-distribution" min="0" max="100" value="50" style="margin-bottom: 8px;">
+    </div>
+  `;
+
+  // If you add more weavers, show/hide options here
+  document.getElementById("weaver-select").addEventListener("change", (e) => {
+    const val = e.target.value;
+    document.getElementById("chainweaver-options").style.display =
+      val === "ChainWeaver" ? "block" : "none";
+  });
+}
+
+
 // Close modal button
 document.getElementById("close-survey").addEventListener("click", () => {
   modal.classList.add("hidden");
@@ -948,8 +976,38 @@ else if (currentSurveyMode == "save-graph") {
       console.error("Error during graph creation:", err);
       errorDiv.textContent = "An unexpected error occurred.";
     }
-  } else {
-      modal.classList.add("hidden");
+  } else if (currentSurveyMode === "generate-graph") {
+    // Gather form values
+    const weaver = document.getElementById("weaver-select")?.value;
+    if (weaver === "ChainWeaver") {
+      const numProducts = parseInt(document.getElementById("num-products")?.value, 10);
+      const variantDist = parseFloat(document.getElementById("variant-distribution")?.value);
+      // TODO: Call backend endpoint for ChainWeaver graph generation
+      try {
+        const res = await fetch("http://localhost:8001/generate_chainweaver_graph", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            num_products: numProducts,
+            variant_distribution: variantDist,
+          }),
+        });
+        if (res.ok) {
+          clearSelection();
+          clearPopup();
+          await refreshGrab();
+          rerenderGraph();
+          modal.classList.add("hidden");
+        } else {
+          alert("Failed to generate graph.");
+        }
+      } catch (err) {
+        console.error("Error generating graph:", err);
+        alert("Unexpected error.");
+      }
     }
+  } else {
+    modal.classList.add("hidden");
+  }
 });
 
