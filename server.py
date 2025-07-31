@@ -91,6 +91,16 @@ async def get_edge_entities():
     return data
 
 
+@app.post("/generate_chainweaver_graph")
+async def generate_chainweaver_graph(request: Request):
+    print("Generating ChainWeaver graph...")
+    data = await request.json()
+    num_products = data.get("num_products")
+    variant_distribution = data.get("variant_distribution")
+    # Call your backend logic (Connector) to generate the graph
+    result = backend.generate_chainweaver_graph(num_products, variant_distribution)
+    return {"status": "success", "message": "ChainWeaver graph generated.", "result": result}
+
 @app.post("/create_node")
 async def create_node(request: Request):
     print("Creating a new node...")

@@ -11,7 +11,7 @@ import os
 class Connector:
     def __init__(self):
         self.current_state = {}
-        self.spider = None
+        self.spider: spider.Spider
         self.load_state()
 
     def save_state(self):
@@ -226,6 +226,115 @@ class Connector:
     def get_tools(self):
         self.spider.get_tools()
         return {"status": "success", "tools": ["Tool1", "Tool2", "Tool3"]}
+
+    def generate_chainweaver_graph(self, num_products, variant_distribution):
+        from Weavers.Chain.ChainWeaver import ChainWeaver
+
+        # Create ChainWeaver instance and run weave to generate all data
+        weaver = ChainWeaver(
+            num_products=int(num_products),
+            variant_distribution=float(variant_distribution),
+        )
+
+        # --- Generate base products and collect as list ---
+        base_products = list(
+            weaver.generate_base_products(
+                weaver.num_products
+                - int(weaver.num_products * weaver.variant_distribution)
+            )
+        )
+        for node in base_products:
+            self.spider.create_node(["default"], node.id, **node.__dict__)
+
+        # --- Generate base product sprues and collect as list ---
+        base_product_sprues = list(weaver.generate_base_product_sprues(base_products))
+        for node in base_product_sprues:
+            self.spider.create_node(["default"], node.id, **node.__dict__)
+
+        # --- Generate base product sprue edges ---
+        base_product_sprue_edges = list(
+            weaver.generate_base_product_sprue_edges(base_products, base_product_sprues)
+        )
+        for edge in base_product_sprue_edges:
+            self.spider.create_edge(edge.start_node, edge.end_node, **edge.__dict__)
+
+        # --- Generate vital base product sprues ---
+        vital_base_product_sprues = list(
+            weaver.generate_vital_base_product_sprues(
+                base_products, base_product_sprues
+            )
+        )
+        for node in vital_base_product_sprues:
+            self.spider.create_node(["default"], node.id, **node.__dict__)
+
+        # --- Generate base product parts ---
+        base_product_parts = list(weaver.generate_base_product_parts(base_products))
+        for node in base_product_parts:
+            self.spider.create_node(["default"], node.id, **node.__dict__)
+
+        # --- Generate base product part edges ---
+        base_product_part_edges = list(
+            weaver.generate_base_product_part_edges(
+                base_product_parts, base_product_sprues
+            )
+        )
+        for edge in base_product_part_edges:
+            self.spider.create_edge(edge.start_node, edge.end_node, **edge.__dict__)
+
+        # --- Generate variant products ---
+        num_variants = int(weaver.num_products * weaver.variant_distribution)
+        variant_products = list(
+            weaver.generate_variant_products(base_products, num_variants)
+        )
+        for node in variant_products:
+            self.spider.create_node(["default"], node.id, **node.__dict__)
+
+        # --- Generate variant sprues ---
+        variant_sprues = list(
+            weaver.generate_variant_product_sprues(
+                variant_products, vital_base_product_sprues
+            )
+        )
+        for node in variant_sprues:
+            self.spider.create_node(["default"], node.id, **node.__dict__)
+
+        # --- Generate variant sprue edges ---
+        variant_sprue_edges = list(
+            weaver.generate_variant_product_sprue_edges(
+                variant_products,
+                variant_sprues,
+                vital_base_product_sprues,
+            )
+        )
+        for edge in variant_sprue_edges:
+            self.spider.create_edge(edge.start_node, edge.end_node, **edge.__dict__)
+
+        # --- Generate variant parts ---
+        variant_parts = list(weaver.generate_variant_parts(variant_products))
+        for node in variant_parts:
+            self.spider.create_node(["default"], node.id, **node.__dict__)
+
+        # --- Generate variant part edges ---
+        variant_part_edges = list(
+            weaver.generate_variant_part_edges(variant_parts, variant_sprues)
+        )
+        for edge in variant_part_edges:
+            self.spider.create_edge(edge.start_node, edge.end_node, **edge.__dict__)
+
+        weaver.close()
+        return {
+            "base_products": len(base_products),
+            "base_product_sprues": len(base_product_sprues),
+            "base_product_sprue_edges": len(base_product_sprue_edges),
+            "vital_base_product_sprues": len(vital_base_product_sprues),
+            "base_product_parts": len(base_product_parts),
+            "base_product_part_edges": len(base_product_part_edges),
+            "variant_products": len(variant_products),
+            "variant_sprues": len(variant_sprues),
+            "variant_sprue_edges": len(variant_sprue_edges),
+            "variant_parts": len(variant_parts),
+            "variant_part_edges": len(variant_part_edges),
+        }
 
     def weight_nodes(self, edge_matrix, node_vector, index_keys):
         self.spider.weight_nodes(edge_matrix, node_vector, index_keys)
