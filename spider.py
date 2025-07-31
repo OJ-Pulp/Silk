@@ -7,7 +7,6 @@ tool functions for answering network questions.
 """
 
 from typing import List
-import os
 
 import numpy as np
 
@@ -146,8 +145,8 @@ class Spider:
     def filter_graphs(
         self,
         graph_filter: List[str] | None = None,
-        node_filter: str | None = None,
-        edge_filter: str | None = None,
+        node_filter: dict | None = None,
+        edge_filter: dict | None = None,
     ):
         self.current_state["graph"]["graph_filter"] = graph_filter or []
         self.current_state["graph"]["node_filter"] = node_filter or {}
@@ -161,16 +160,16 @@ class Spider:
     # Tool Methods (Graph Algorithms)
     # ----------------------------
 
-    def weight_nodes(self, edge_matrix, node_vector, index_keys):
+    def weight_nodes(self, edge_matrix, index_keys):
         if edge_matrix is None or edge_matrix.size == 0:
             return None
         weights = markov_chain(edge_matrix)
         return list(zip(index_keys, weights))
 
-    def weight_edges(self, edge_matrix, node_vector, index_keys):
+    def weight_edges(self, edge_matrix, index_keys):
         if edge_matrix is None or edge_matrix.size == 0:
             return None
-        edge_weights = mcc(edge_matrix, node_vector)
+        edge_weights = mcc(edge_matrix)
         return [
             ((index_keys[i], index_keys[j]), edge_weights[i, j])
             for i in range(edge_weights.shape[0])
@@ -182,6 +181,8 @@ class Spider:
         start = kwargs.get("start")
         end = kwargs.get("end")
         K = kwargs.get("num_hops")
+        if start is None or end is None or K is None:
+            return None
         route = max_profit_route(edge_matrix, node_vector, start, end, K)
         if route is None:
             return None
@@ -195,8 +196,9 @@ class Spider:
             [index_keys[i] for i in cluster] for cluster in clusters if len(cluster) > 0
         ]
 
-    def compare_graphs(self, graph1_id, graph2_id):
-        return self.graph.compare_graphs(graph1_id, graph2_id)
+    # def compare_graphs(self, graph1_id, graph2_id):
+    #     pass
+    # return self.graph.compare_graphs(graph1_id, graph2_id)
 
     def get_all_tools(self):
         # Placeholder; implement dynamic tool discovery if needed
