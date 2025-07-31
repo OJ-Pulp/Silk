@@ -32,16 +32,12 @@ class Spider:
                 "Compare Graphs": None,
             },
         }
-        if db_path is None:
-            self.current_db_path = None
-            self.graph = None
+        if db_name is not None and db_path is not None:
+            self.current_db_path = join_paths(db_path, db_name)
+            self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
         else:
-            if db_name is not None and db_path is not None:
-                self.current_db_path = join_paths(db_path, db_name)
-                self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
-            else:
-                self.current_db_path = None
-                self.graph = None
+            self.current_db_path = ":memory:"
+            self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
     # ----------------------------
     # Persistence Methods
@@ -55,17 +51,15 @@ class Spider:
         self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
     def disconnect(self):
+        # Instead of setting to None, reset to in-memory DB
         if self.graph is not None:
             self.graph.close()
-            self.graph = None
-        else:
-            print("No active database connection to close.")
+        self.current_db_path = ":memory:"
+        self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
     def reconnect(self):
-        if self.current_db_path is not None and os.path.exists(self.current_db_path):
-            self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
-        else:
-            print("No active database file to reconnect.")
+        # always reconnect to the current_db_path (which is never none)
+        self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
     def is_database(self):
         return self.graph is not None and self.current_db_path is not None
