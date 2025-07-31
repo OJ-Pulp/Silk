@@ -174,3 +174,11 @@ class Weaver(ABC):
         """
         'Weave' (or create) the nodes and edges of the graph.
         """
+
+    # @abstractmethod
+    # def generate_node(self):
+    #     pass
+    #
+    # @abstractmethod
+    # def generate_edge(self):
+    #     pass
