@@ -6,15 +6,18 @@ It includes wrapper function for the Hybrid SQL Graph Database (WebDB) and provi
 tool functions for answering network questions.
 """
 
-from config import DEFAULT_PATH, SCHEMA_FILE, join_paths
-from Web.db import GraphDB
-from Web.webmath.math import markov_chain, max_profit_route, mcl, mcc, list_algorithms
-import numpy as np
 from typing import List
+import os
+
+import numpy as np
+
+from config import SCHEMA_FILE, join_paths
+from Web.db import GraphDB
+from Web.webmath.math import list_algorithms, markov_chain, max_profit_route, mcc, mcl
 
 
 class Spider:
-    def __init__(self, db_name: str = None, db_path: str = None):
+    def __init__(self, db_name: str | None = None, db_path: str | None = None):
         self.current_state = {
             "graph": {
                 "graph_filter": [],
@@ -33,8 +36,12 @@ class Spider:
             self.current_db_path = None
             self.graph = None
         else:
-            self.current_db_path = join_paths(db_path, db_name)
-            self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
+            if db_name is not None and db_path is not None:
+                self.current_db_path = join_paths(db_path, db_name)
+                self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
+            else:
+                self.current_db_path = None
+                self.graph = None
 
     # ----------------------------
     # Persistence Methods
@@ -55,10 +62,10 @@ class Spider:
             print("No active database connection to close.")
 
     def reconnect(self):
-        if self.current_db_path is not None:
+        if self.current_db_path is not None and os.path.exists(self.current_db_path):
             self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
         else:
-            print("No active database connection to reconnect.")
+            print("No active database file to reconnect.")
 
     def is_database(self):
         return self.graph is not None and self.current_db_path is not None
@@ -148,7 +155,6 @@ class Spider:
         node_filter: str | None = None,
         edge_filter: str | None = None,
     ):
-
         self.current_state["graph"]["graph_filter"] = graph_filter or []
         self.current_state["graph"]["node_filter"] = node_filter or {}
         self.current_state["graph"]["edge_filter"] = edge_filter or {}
