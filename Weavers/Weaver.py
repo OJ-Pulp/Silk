@@ -91,7 +91,7 @@ class Weaver(ABC):
         def merge_annotations(cls):
             merged = {}
             for base in reversed(cls.__mro__):
-                merged.update(getattr(base, '__annotations__', {}))
+                merged.update(getattr(base, "__annotations__", {}))
             return merged
 
         # Merge annotations for node and edge subclasses

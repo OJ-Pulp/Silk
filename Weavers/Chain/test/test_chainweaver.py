@@ -7,7 +7,7 @@ weaver = ChainWeaver()
 
 
 def test_create_base_products():
-    products = weaver.create_base_products(3)
+    products = weaver.generate_base_products(3)
     assert len(products) == 3
     for p in products:
         assert isinstance(p, Component)
@@ -16,9 +16,9 @@ def test_create_base_products():
 
 
 def test_create_base_product_sprues():
-    base_products = weaver.create_base_products(2)
+    base_products = weaver.generate_base_products(2)
     # Patch MANUFACTURERS global for test
-    sprues, edges = weaver.create_base_product_sprues(base_products)
+    sprues, edges = weaver.generate_base_product_sprues(base_products)
     assert all(isinstance(s, Component) for s in sprues)
     assert all(isinstance(e, Requires) for e in edges)
     assert len(sprues) > 0
@@ -26,8 +26,8 @@ def test_create_base_product_sprues():
 
 
 def test_create_base_product_parts():
-    base_products = weaver.create_base_products(1)
-    sprues, _ = weaver.create_base_product_sprues(base_products)
+    base_products = weaver.generate_base_products(1)
+    sprues, _ = weaver.generate_base_product_sprues(base_products)
     parts, part_edges, vital_sprues = weaver.create_base_product_parts(
         base_products, sprues
     )
@@ -37,8 +37,8 @@ def test_create_base_product_parts():
 
 
 def test_resolve_base_product_sprues():
-    base_products = weaver.create_base_products(1)
-    sprues, sprue_edges = weaver.create_base_product_sprues(base_products)
+    base_products = weaver.generate_base_products(1)
+    sprues, sprue_edges = weaver.generate_base_product_sprues(base_products)
     _, part_edges, _ = weaver.create_base_product_parts(base_products, sprues)
     kept_sprues, kept_edges = weaver.resolve_base_product_sprues(
         sprues, sprue_edges, part_edges
