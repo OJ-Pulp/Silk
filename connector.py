@@ -23,12 +23,20 @@ class Connector:
             self.spider.reconnect()
 
     def load_state(self):
-        if os.path.exists(os.path.join(get_dir_path(), "state.pkl")):
+        state_path = os.path.join(get_dir_path(), "state.pkl")
+        if os.path.exists(state_path):
             print(f"Loading state from: {get_dir_path()}")
-            with open(os.path.join(get_dir_path(), "state.pkl"), "rb") as f:
-                self.spider = pickle.load(f)
-            self.spider.reconnect()
-            print("State loaded successfully.")
+            try:
+                with open(state_path, "rb") as f:
+                    self.spider = pickle.load(f)
+                self.spider.reconnect()
+                print("State loaded successfully.")
+            except (EOFError, pickle.UnpicklingError) as e:
+                print(f"Failed to load state ({e}). Creating a new Spider instance.")
+                self.spider = spider.Spider()
+                self.spider.disconnect()
+                self.save_state()
+                self.spider.reconnect()
         else:
             print("No saved state found. Creating a new Spider instance.")
             self.spider = spider.Spider()
