@@ -16,11 +16,10 @@ class Connector:
 
     def save_state(self):
         print(f"Saving state to: {get_dir_path()}")
-        if self.spider.is_database():
-            self.spider.disconnect()
-            with open(os.path.join(get_dir_path(), "state.pkl"), "wb") as f:
-                pickle.dump(self.spider, f)
-            self.spider.reconnect()
+        state_path = os.path.join(get_dir_path(), "state.pkl")
+        state = {"db_path": getattr(self.spider, "current_db_path", ":memory:")}
+        with open(state_path, "wb") as f:
+            pickle.dump(state, f)
 
     def load_state(self):
         state_path = os.path.join(get_dir_path(), "state.pkl")
@@ -28,7 +27,9 @@ class Connector:
             print(f"Loading state from: {get_dir_path()}")
             try:
                 with open(state_path, "rb") as f:
-                    self.spider = pickle.load(f)
+                    state = pickle.load(f)
+                db_path = state.get("db_path", ":memory:")
+                self.spider = spider.Spider(db_path=db_path)
                 self.spider.reconnect()
                 print("State loaded successfully.")
             except (EOFError, pickle.UnpicklingError) as e:
