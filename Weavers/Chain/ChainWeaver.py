@@ -96,10 +96,6 @@ class ChainWeaver(Weaver):
                 ],
                 "cost": round(FAKER_GEN.random_number(digits=4), 2),
                 "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                "substitutions": [
-                    FAKER_GEN.bothify("???###")
-                    for _ in range(FAKER_GEN.random_int(0, 3))
-                ],
                 "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
                 "year_range": [
                     FAKER_GEN.random_int(1990, 2024)
@@ -145,10 +141,6 @@ class ChainWeaver(Weaver):
                     ],
                     "cost": round(FAKER_GEN.random_number(digits=4), 2),
                     "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                    "substitutions": [
-                        FAKER_GEN.bothify("???###")
-                        for _ in range(FAKER_GEN.random_int(0, 3))
-                    ],
                     "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
                     "year_range": [
                         FAKER_GEN.random_int(1990, 2024)
@@ -255,10 +247,6 @@ class ChainWeaver(Weaver):
                         "failure_rate": round(
                             FAKER_GEN.random_number(digits=2) / 100, 4
                         ),
-                        "substitutions": [
-                            FAKER_GEN.bothify("???###")
-                            for _ in range(FAKER_GEN.random_int(0, 3))
-                        ],
                         "breakability": round(
                             FAKER_GEN.random_number(digits=2) / 100, 2
                         ),
@@ -509,10 +497,6 @@ class ChainWeaver(Weaver):
                     ],
                     "cost": round(FAKER_GEN.random_number(digits=4), 2),
                     "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                    "substitutions": [
-                        FAKER_GEN.bothify("???###")
-                        for _ in range(FAKER_GEN.random_int(0, 3))
-                    ],
                     "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
                     "year_range": [
                         FAKER_GEN.random_int(1990, 2024)
@@ -565,10 +549,6 @@ class ChainWeaver(Weaver):
                     ],
                     "cost": round(FAKER_GEN.random_number(digits=4), 2),
                     "failure_rate": round(FAKER_GEN.random_number(digits=2) / 100, 4),
-                    "substitutions": [
-                        FAKER_GEN.bothify("???###")
-                        for _ in range(FAKER_GEN.random_int(0, 3))
-                    ],
                     "breakability": round(FAKER_GEN.random_number(digits=2) / 100, 2),
                     "year_range": [
                         FAKER_GEN.random_int(1990, 2024)
@@ -678,10 +658,6 @@ class ChainWeaver(Weaver):
                         "failure_rate": round(
                             FAKER_GEN.random_number(digits=2) / 100, 4
                         ),
-                        "substitutions": [
-                            FAKER_GEN.bothify("???###")
-                            for _ in range(FAKER_GEN.random_int(0, 3))
-                        ],
                         "breakability": round(
                             FAKER_GEN.random_number(digits=2) / 100, 2
                         ),

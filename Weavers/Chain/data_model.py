@@ -128,9 +128,6 @@ class Component(Node):
     failure_rate: float | None = None
     """Expected failure rate (e.g., failures/hour). Rate determined by user."""
 
-    substitutions: List[str] | None = None
-    """List of substitute component IDs"""
-
     breakability: float | None = None
     """Likelihood of breakage (0–1)"""
 
