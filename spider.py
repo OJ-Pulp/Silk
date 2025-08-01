@@ -136,9 +136,7 @@ class Spider:
         """
         Save the current graph state to the database.
         """
-        _edge_matrix, _node_weights, node_idxs = self.filter_graphs(
-            **self.current_state["graph"]
-        )
+        _, _, node_idxs = self.filter_graphs(**self.current_state["graph"])
         print(f"Saving current graph as '{graph_id}' with nodes: {node_idxs}")
         self.graph.add_graph(graph_id, node_idxs)
 
