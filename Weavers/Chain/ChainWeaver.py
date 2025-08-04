@@ -25,7 +25,12 @@ class ChainWeaver(Weaver):
     def __init__(self, num_products: int = 40, variant_distribution: float = 0.25):
         super().__init__()
         self.num_products = num_products
+        logger.debug(f"Num_Products:        {self.num_products}")
         self.variant_distribution = variant_distribution
+        logger.debug(f"Variant_Distribution:        {self.variant_distribution}")
+        self.num_variants = int(self.num_products * self.variant_distribution)
+        logger.debug(f"Num_Variants:        {self.num_variants}")
+        logger.info("Local Main Variables Set")
 
         # Validates and resolves 'inputdata.json'
         try:
@@ -43,15 +48,9 @@ class ChainWeaver(Weaver):
     #                                      BASE_PRODUCTS
     # -------------------------------------------------------------------------------------------
     # region BASE_PRODUCTS
-    def generate_base_products(
-        self,
-        num_base_products: int,
-    ) -> Generator[Component, None, None]:
+    def generate_base_products(self) -> Generator[Component, None, None]:
         """
         Generates a fake dataset of base products and their data.
-
-        :param `num_base_products`: The total number of unique base products to include in the supply chain.
-        :type `num_base_products`: int
 
         :return: A generator yielding base products.
         :rtype: Generator[Component, None, None]
@@ -63,6 +62,9 @@ class ChainWeaver(Weaver):
         designation_counter = {
             designation_type: 0 for designation_type in designation_keys
         }
+
+        num_base_products = self.num_products
+        logger.debug(f"Num_Base_Products:        {num_base_products}")
 
         # Creates all base products
         for _ in range(num_base_products):
@@ -105,6 +107,8 @@ class ChainWeaver(Weaver):
             base_product = Component(**component_data)
 
             self.write_node(base_product)
+            logger.info("Generating Base Products")
+
             yield base_product
 
     # endregion
@@ -465,7 +469,7 @@ class ChainWeaver(Weaver):
         return next_designation
 
     def generate_variant_products(
-        self, base_products: Generator[Component, None, None], num_variants: int = 10
+        self, base_products: Generator[Component, None, None]
     ) -> Generator[Component, None, None]:
         """
         Generates variant products sequentially from base products.
@@ -473,7 +477,7 @@ class ChainWeaver(Weaver):
         manufacturer_keys = list(self.manufacturers.keys())
 
         for base_product in base_products:
-            for i in range(num_variants):
+            for i in range(self.num_variants):
                 # Generate designation based on counter
                 variant_designation = f"{base_product.designation}{chr(ord('A') + i)}"
                 variant_manufacturer = FAKER_GEN.random_element(manufacturer_keys)
@@ -700,20 +704,8 @@ class ChainWeaver(Weaver):
         """
         Weave to generate a fake supply chain.
         """
-        logger.info("Main Start")
-
-        # Sets overall variables
-        logger.debug("Local Main Variables: ")
-        logger.debug(f"Num_Products:        {self.num_products}")
-        logger.debug(f"Variant_Distribution:        {self.variant_distribution}")
-        num_variants = int(self.num_products * self.variant_distribution)
-        logger.debug(f"Num_Variants:        {num_variants}")
-        num_base_products = self.num_products - num_variants
-        logger.debug(f"Num_Base_Products:        {num_base_products}")
-        logger.info("Local Main Variables Set")
-
         # Base products
-        base_products = self.generate_base_products(num_base_products)
+        base_products = self.generate_base_products()
 
         # Base products sprues and edges
         base_product_sprues = self.generate_base_product_sprues(base_products)
@@ -739,7 +731,7 @@ class ChainWeaver(Weaver):
         # logger.info("Base Product Sprues Resolved")
 
         # Variant products
-        variant_products = self.generate_variant_products(base_products, num_variants)
+        variant_products = self.generate_variant_products(base_products)
 
         # Variant sprues
         variant_sprues = self.generate_variant_product_sprues(
