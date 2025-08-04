@@ -3,6 +3,7 @@ import uuid
 import numpy as np
 import os
 import re
+import json
 from typing import Dict, Any, List
 
 
@@ -480,6 +481,15 @@ class GraphDB:
 
     def _add_entities(self, target_id: str, target_type: str, **kwargs) -> None:
         for key, value in kwargs.items():
+            # Skip None values
+            if value is None:
+                continue
+            # Convert bools to int
+            if isinstance(value, bool):
+                value = int(value)
+            # Serialize lists and dicts as JSON strings
+            if isinstance(value, (list, dict)):
+                value = json.dumps(value)
             self.cursor.execute(
                 "SELECT ID, Name, Type FROM Entities WHERE Name = ?", (key,)
             )
