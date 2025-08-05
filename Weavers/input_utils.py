@@ -1,9 +1,25 @@
 """
-OVERALL INPUT SANITATION AND VALIDATION
+`input_utils.py`
+
+This module provides a comprehensive set of utilities for handling, validating, and sanitizing user-provided input, with a primary focus on file-based data and JSON structures. The module is designed to ensure data integrity and provide clear, detailed error reporting when issues are encountered.
+
+Key Components:
+
+-   **Custom Logging:** An enhanced logging configuration is included, which adds a custom `SUCCESS` level to provide granular feedback on the successful completion of specific procedures.
+
+-   **Robust Exception Handling:** The module defines a hierarchical set of custom exception classes (`InputError`, `SanitationError`, `NotFoundError`, `ValidationError`, etc.). These exceptions are designed to be highly specific, providing detailed context about the nature of an error, such as a file not being found, a filename having unaccepted characters, or a JSON structure failing schema validation.
+
+-   **File Sanitization and Loading:** The core workflow begins with the `sanitize()` function, which validates and cleans filenames, handles files missing extensions, and ensures files exist. The `load()` function then uses the sanitized path to read file content, intelligently handling both JSON files (which are loaded into a dictionary) and other file types (read as plain strings).
+
+-   **JSON Validation and Resolution:** For JSON files, the module provides `validate_json()` to check data against a defined schema, ensuring the content is well-formed. The `resolve_json()` function takes this a step further by automatically correcting common data issues, such as missing manufacturer IDs or incorrect part counts, and then saving the corrected data to a new file.
+
+This modular approach ensures that each step of the input processing pipeline is robust, transparent, and user-friendly, with clear feedback provided at every stage.
+
 """
 
-# Standard
+# Standard Imports
 import copy
+import inspect
 import json
 import logging
 import re
@@ -13,39 +29,9 @@ import uuid
 from pathlib import Path
 from typing import Union, Tuple, Any, Optional
 
-# -------------------------------------------------------------------------------------------
-#                                   LOGGING_SETTINGS
-# -------------------------------------------------------------------------------------------
-# region LOGGING_SETTINGS
-
-# SystemExit codes
-SUCCESS = 0
-FAILURE = 1
-INTERRUPTED = 130
-
-SUCCESS_LEVEL_NUM = 15
-
-logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
-
-def success(self, message, *args, **kwargs):
-    if self.isEnabledFor(SUCCESS_LEVEL_NUM):
-        self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)
-
-logging.Logger.success = success
-
-# Configures for logging showing messages level INFO and above
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
-logger = logging.getLogger(__name__)
-
-# endregion
-
-# Third-Party
+# Third-Party Imports
 try:
-    import magic
+    from Weavers.Weaver import logger, FAILURE, INTERRUPTED
     from jsonschema import validate
     from jsonschema import ValidationError as SchemaValidationError
 except ModuleNotFoundError as e:
@@ -54,7 +40,6 @@ except ModuleNotFoundError as e:
 
 FILE_NAME = "/input_utils.py"
 PARENT_DIR = "/Weavers"
-
 
 # -------------------------------------------------------------------------------------------
 #                                   EXCEPTION_CLASSES
