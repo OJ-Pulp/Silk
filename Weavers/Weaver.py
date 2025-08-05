@@ -15,9 +15,15 @@ from Weavers.graph_model import Edge, Node
 # -------------------------------------------------------------------------------------------
 # region LOGGING_SETTINGS
 
+# SystemExit codes
 SUCCESS = 0
 FAILURE = 1
 INTERRUPTED = 130
+
+# Extra logging level for small procedure successes
+SUCCESS_LEVEL_NUM = 15
+
+logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 # Configures for logging showing messages level INFO and above
 logging.basicConfig(
@@ -26,9 +32,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
-
-# Suppresses debug messages from faker library
-logging.getLogger("faker").setLevel(logging.INFO)
 
 # endregion
 
