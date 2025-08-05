@@ -30,13 +30,10 @@ from pathlib import Path
 from typing import Union, Tuple, Any, Optional
 
 # Third-Party Imports
-try:
-    from Weavers.Weaver import logger, FAILURE, INTERRUPTED
-    from jsonschema import validate
-    from jsonschema import ValidationError as SchemaValidationError
-except ModuleNotFoundError as e:
-    logger.critical(f"{type(e).__name__}: Missing Required Module '{e.name}' -- Try 'python -m pip install {e.name}' -- Exiting")
-    raise SystemExit(FAILURE)
+from Weavers.Weaver import logger, FAILURE, INTERRUPTED
+from jsonschema import validate
+from jsonschema import ValidationError as SchemaValidationError
+import magic
 
 FILE_NAME = "/input_utils.py"
 PARENT_DIR = "/Weavers"
@@ -298,7 +295,7 @@ try:
 except Exception as e:
     logger.critical(e)
     raise SystemExit(FAILURE)
-logger.success(f"Input Directory:         '{INPUT_DIR}'")
+logger.info(f"Input Directory:         '{INPUT_DIR}'")
 
 # endregion
 
