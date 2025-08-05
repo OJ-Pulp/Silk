@@ -1,14 +1,39 @@
 """
-OVERALL CHAINWEAVER
+The `ChainWeaver` class is a specialized tool for generating a realistic, fake supply chain network.
+
+Extending the `Weaver` base class, it constructs a complex graph of `Components` (nodes) and
+`Requires` relationships (edges) by leveraging validated input data from JSON files. The class
+orchestrates the creation of base products, their sub-components (sprues and parts), and
+subsequent product variants.
+
+### Key Features
+- **Data Initialization:** The constructor resolves and validates input data from "inputdata.json" to set up
+  the foundational information for manufacturers and product designations.
+- **Base Product Generation:** Methods are included to create a specified number of unique base products,
+  along with their individual sprues and parts.
+- **Data Resolution:** A dedicated method, `resolve_base_product_sprues()`, ensures data integrity by
+  removing any sprues that are not actively used by parts, thus streamlining the final output.
+- **Variant Generation:** The class can generate multiple variants of base products, each with its own
+  set of components, creating a more realistic and expansive supply chain.
+- **Automated Weaving:** The `weave()` method acts as the main orchestrator, calling all
+  the necessary generation and resolution functions in a logical sequence to produce the
+  complete supply chain network.
+- **Custom Naming Conventions:** The class includes helper methods to handle the generation of
+  unique and logical naming conventions for product variants.
+- **Robust Exception Handling:** Custom exceptions like `NamingError` are used to handle issues
+  specific to the supply chain generation process.
+
+This class is designed to be a self-contained, end-to-end solution for producing a detailed
+supply chain dataset for testing, simulation, or data visualization purposes.
 """
 
-# Standard
+# Standard Imports
 import re
 from typing import List, Tuple, Generator
 
-# Local
+# Local Imports
 from Weavers.Chain.data_model import Component, Requires
-from Weavers.Chain.input_utils import resolve_json
+from Weavers.input_utils import resolve_json
 from Weavers.Weaver import Weaver, logger, FAILURE, INTERRUPTED, FAKER_GEN
 
 logger.info("Program Start")
@@ -36,13 +61,13 @@ class ChainWeaver(Weaver):
         try:
             resolved_inputdata = resolve_json("inputdata.json")
         except Exception as e:
-            logger.critical(f"{type(e).__name__}: {e}")
+            logger.critical(e)
             raise SystemExit(FAILURE)
-
-        # logger.info("Inputs Accepted")
 
         self.designations = resolved_inputdata["Designations"]
         self.manufacturers = resolved_inputdata["Manufacturers"]
+
+        logger.info("Inputs Accepted")
 
     # -------------------------------------------------------------------------------------------
     #                                      BASE_PRODUCTS
@@ -68,8 +93,6 @@ class ChainWeaver(Weaver):
 
         # Creates all base products
         for _ in range(num_base_products):
-            # logger.debug(f"Base Product {i}:")
-
             # Generates base product data
             popular_name = FAKER_GEN.word(part_of_speech="noun").capitalize()
             selected_designation = FAKER_GEN.random_element(designation_keys)
@@ -106,6 +129,7 @@ class ChainWeaver(Weaver):
             }
             base_product = Component(**component_data)
 
+            # Records base products
             self.write_node(base_product)
             logger.info("Generating Base Products")
 
@@ -125,6 +149,8 @@ class ChainWeaver(Weaver):
         """
         Yields base product sprue components.
         """
+
+        # Creates 'base_product_sprue' Component Nodes based off of manufacturer
         manufacturer_keys = self.manufacturers.keys()
         for base_product in base_products:
             for manufacturer in manufacturer_keys:
@@ -152,6 +178,8 @@ class ChainWeaver(Weaver):
                     ],
                 }
                 base_product_sprue = Component(**component_data)
+
+                # Records the base product sprues
                 self.write_node(base_product_sprue)
                 yield base_product_sprue
 
@@ -163,6 +191,7 @@ class ChainWeaver(Weaver):
         """
         Yields edges between base products and base product sprues.
         """
+
         # Convert sprues to a list for multiple passes (if needed)
         for base_product in base_products:
             for sprue in base_product_sprues:
@@ -184,6 +213,8 @@ class ChainWeaver(Weaver):
         """
         Yields vital base product sprues.
         """
+
+        # Defines which sprues are vital
         manufacturer_keys = self.manufacturers.keys()
         for base_product in base_products:
             parts_categories = self.designations[base_product.designation]["Parts"]
@@ -205,6 +236,8 @@ class ChainWeaver(Weaver):
                             ):
                                 yield base_product_sprue
 
+    # endregion
+
     # -------------------------------------------------------------------------------------------
     #                                   BASE_PRODUCT_PARTS
     # -------------------------------------------------------------------------------------------
@@ -217,6 +250,8 @@ class ChainWeaver(Weaver):
         """
         Yields base product part components.
         """
+
+        # Generates base product parts and sorts them into the sprues matching their manufacturer
         manufacturer_keys = self.manufacturers.keys()
         for base_product in base_products:
             parts_categories = self.designations[base_product.designation]["Parts"]
@@ -260,6 +295,8 @@ class ChainWeaver(Weaver):
                         ],
                     }
                     base_product_part = Component(**component_data)
+
+                    # Records base product parts
                     self.write_node(base_product_part)
                     yield base_product_part
 
@@ -271,6 +308,8 @@ class ChainWeaver(Weaver):
         """
         Yields edges between base product sprues and base product parts.
         """
+
+        # Generates Requires edges between base product parts and sprues
         for base_product_part in base_product_parts:
             for base_product_sprue in base_product_sprues:
                 if (
@@ -284,6 +323,8 @@ class ChainWeaver(Weaver):
                         base_model=True,
                         lead_time=FAKER_GEN.random_int(1, 1000),
                     )
+
+                    # Records Requires edges
                     self.write_edge(base_product_part_edge)
                     yield base_product_part_edge
 
@@ -322,8 +363,6 @@ class ChainWeaver(Weaver):
 
         # Checks that all sprues are used
         for i, base_product_sprue in enumerate(base_product_sprues, start=1):
-            # logger.debug(f"Sprue {i}:")
-
             # Checks if a sprue has any edges to parts
             has_edge = any(
                 edge.start_node == base_product_sprue
@@ -340,12 +379,6 @@ class ChainWeaver(Weaver):
                     for e in base_product_sprue_edges
                     if e.end_node == base_product_sprue
                 )
-            #     logger.debug(f"Kept Edges for Sprue {i}")
-            #     logger.debug("")
-            # else:
-            #     logger.debug(f"Removed Base Product Sprue {i}:")
-            #     logger.debug(base_product_sprue)
-            #     logger.debug("")
 
         return resolved_base_sprues, resolved_base_sprue_edges
 
@@ -359,7 +392,7 @@ class ChainWeaver(Weaver):
     def get_next_letter(self, current_letter):
         """
         Minor Function to get the variant_designation_letter of multi-layer variants.
-        :param current_letter: The variant_designation_letter of the variant on its last variation.
+        :param `current_letter`: The variant_designation_letter of the variant on its last variation.
         :return: A string of one capital letter to be the next variant_designation_letter.
         """
         # Get the ASCII value of the current letter and adds 1 to get the ASCII of the next
@@ -433,9 +466,7 @@ class ChainWeaver(Weaver):
             raise SystemExit(FAILURE)
         current_letter = match.group(1)
         letters = list(current_letter)
-        # logger.info(f"INPUT: Letters:         {letters}")
         i = len(letters) - 1
-        # logger.debug(f"I:       {i}")
 
         while i >= 0:
             if letters[i] != "Z":
@@ -445,8 +476,6 @@ class ChainWeaver(Weaver):
                 logger.info(
                     f"Start Letter of '{start_letter}' Changed to '{changed_letter}'"
                 )
-                # logger.debug(f"Letters:         {letters}")
-                # logger.debug(f"OUTPUT: New Letters:         {letters}")
                 break
             else:
                 start_letter = letters[i]
@@ -455,17 +484,13 @@ class ChainWeaver(Weaver):
                 logger.info(
                     f"Start Letter of '{start_letter}' Changed to '{changed_letter}'"
                 )
-                # logger.debug(f"Letters:         {letters}")
                 i -= 1
-                # logger.debug(f"I:       {i}")
 
         # If all characters were 'Z', we need to add a new 'A' at the beginning
         if i < 0:
             letters.insert(0, "A")
         next_letters = "".join(letters)
         next_designation = re.sub(r"([A-Z]+)$", next_letters, current_designation)
-        # logger.info(f"OUTPUT: New Letters:         {letters}")
-        # logger.info(f"Next Designation:         {next_designation}")
         return next_designation
 
     def generate_variant_products(
@@ -474,8 +499,10 @@ class ChainWeaver(Weaver):
         """
         Generates variant products sequentially from base products.
         """
+
         manufacturer_keys = list(self.manufacturers.keys())
 
+        # [ ] FLAG -- don't want all num of variants for every base product -- want to choose one randomly total num times
         for base_product in base_products:
             for i in range(self.num_variants):
                 # Generate designation based on counter
@@ -508,6 +535,8 @@ class ChainWeaver(Weaver):
                     ],
                 }
                 variant_product = Component(**component_data)
+
+                # Records the variant products
                 self.write_node(variant_product)
                 yield variant_product
 
