@@ -1,8 +1,10 @@
 import sqlite3
 import uuid
 import numpy as np
-import os, re
-from typing import Dict, Any, List, Tuple
+import os
+import re
+import json
+from typing import Dict, Any, List
 
 
 class GraphDB:
@@ -26,7 +28,10 @@ class GraphDB:
         self.connection.commit()
 
     def add_graph(
-        self, graph_id: str = None, node_ids: List[str] = None, **kwargs
+        self,
+        graph_id: str | None = None,
+        node_ids: List[str] | None = None,
+        **kwargs,
     ) -> int:
         """
         Add a new graph to the web database and return its ID.
@@ -96,7 +101,9 @@ class GraphDB:
         self.cursor.execute("SELECT DISTINCT Graph_ID FROM Graph_Nodes")
         return [row[0] for row in self.cursor.fetchall() if row[0] is not None]
 
-    def add_node(self, graph_ids: List[str], node_id: str = None, **kwargs) -> int:
+    def add_node(
+        self, graph_ids: List[str], node_id: str | None = None, **kwargs
+    ) -> int:
         """
         Add a node to the web database.
 
@@ -259,9 +266,9 @@ class GraphDB:
 
     def create_graph(
         self,
-        graph_filter: List[str] = None,
-        node_filter: Dict[str, List[str]] = None,
-        edge_filter: Dict[str, List[str]] = None,
+        graph_filter: List[str] | None = None,
+        node_filter: Dict[str, List[str]] | None = None,
+        edge_filter: Dict[str, List[str]] | None = None,
     ):
         """
         Create a network based on the specified graph IDs and conditions.
@@ -282,7 +289,9 @@ class GraphDB:
         return node_weights, edge_weights, node_ids
 
     def _weight_nodes(
-        self, node_conditions: Dict[str, List[str]], graph_ids: List[str] = None
+        self,
+        node_conditions: Dict[str, List[str]],
+        graph_ids: List[str] | None = None,
     ) -> np.ndarray:
         """
         Calculate weights for nodes based on specified conditions. If no conditions are provided,
@@ -340,7 +349,7 @@ class GraphDB:
 
                 if operator in ("IN", "NOT IN"):
                     items = [
-                        f"'{item.strip().strip('\"\'')}'"
+                        f"'{item.strip().strip('"\'')}'"
                         for item in re.split(r"[,\s]+", value.strip("()[]"))
                         if item
                     ]
@@ -354,7 +363,7 @@ class GraphDB:
                 else:
                     # Sanitize string value
                     if not value.replace(".", "", 1).isdigit():
-                        value = f"'{value.strip('\"\'')}'"
+                        value = f"'{value.strip('"\'')}'"
                     value_clause = f"{operator} {value}"
 
                 # Build query with inline values
@@ -369,7 +378,7 @@ class GraphDB:
                     WHERE ev.Entity_ID = '{entity_id}'
                     AND ev.Target_Type = 'node'
                     AND ev.Value {value_clause}
-                    AND gn.Graph_ID IN ({', '.join(repr(gid) for gid in graph_ids)})
+                    AND gn.Graph_ID IN ({", ".join(repr(gid) for gid in graph_ids)})
                 """
 
                 self.cursor.execute(query)
@@ -383,7 +392,9 @@ class GraphDB:
         return np.array(list(node_weights.values())), list(node_weights.keys())
 
     def _weight_edges(
-        self, edge_conditions: Dict[str, List[str]], node_ids: List[str] = None
+        self,
+        edge_conditions: Dict[str, List[str]],
+        node_ids: List[str] | None = None,
     ) -> np.ndarray:
         """
         Calculate weights for edges based on specified conditions. If no conditions are provided,
@@ -470,6 +481,15 @@ class GraphDB:
 
     def _add_entities(self, target_id: str, target_type: str, **kwargs) -> None:
         for key, value in kwargs.items():
+            # Skip None values
+            if value is None:
+                continue
+            # Convert bools to int
+            if isinstance(value, bool):
+                value = int(value)
+            # Serialize lists and dicts as JSON strings
+            if isinstance(value, (list, dict)):
+                value = json.dumps(value)
             self.cursor.execute(
                 "SELECT ID, Name, Type FROM Entities WHERE Name = ?", (key,)
             )
@@ -625,7 +645,7 @@ class GraphDB:
         if target_type not in ("graph", "node", "edge"):
             raise ValueError("target_type must be 'graph', 'node', or 'edge'.")
 
-        query = f"""
+        query = """
             SELECT DISTINCT E.ID, E.Name, E.Type
             FROM Entities E
             WHERE E.ID IN (

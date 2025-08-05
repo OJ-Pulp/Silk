@@ -6,15 +6,17 @@ It includes wrapper function for the Hybrid SQL Graph Database (WebDB) and provi
 tool functions for answering network questions.
 """
 
-from config import DEFAULT_PATH, SCHEMA_FILE, join_paths
-from Web.db import GraphDB
-from Web.webmath.math import markov_chain, max_profit_route, mcl, mcc, list_algorithms
-import numpy as np
 from typing import List
+
+import numpy as np
+
+from config import SCHEMA_FILE, join_paths
+from Web.db import GraphDB
+from Web.webmath.math import list_algorithms, markov_chain, max_profit_route, mcc, mcl
 
 
 class Spider:
-    def __init__(self, db_name: str = None, db_path: str = None):
+    def __init__(self, db_name: str | None = None, db_path: str | None = None):
         self.current_state = {
             "graph": {
                 "graph_filter": [],
@@ -29,11 +31,11 @@ class Spider:
                 "Compare Graphs": None,
             },
         }
-        if db_path is None:
-            self.current_db_path = None
-            self.graph = None
-        else:
+        if db_name is not None and db_path is not None:
             self.current_db_path = join_paths(db_path, db_name)
+            self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
+        else:
+            self.current_db_path = ":memory:"
             self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
     # ----------------------------
@@ -48,17 +50,15 @@ class Spider:
         self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
     def disconnect(self):
+        # Instead of setting to None, reset to in-memory DB
         if self.graph is not None:
             self.graph.close()
-            self.graph = None
-        else:
-            print("No active database connection to close.")
+        self.current_db_path = ":memory:"
+        self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
     def reconnect(self):
-        if self.current_db_path is not None:
-            self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
-        else:
-            print("No active database connection to reconnect.")
+        # always reconnect to the current_db_path (which is never none)
+        self.graph = GraphDB(self.current_db_path, SCHEMA_FILE)
 
     def is_database(self):
         return self.graph is not None and self.current_db_path is not None
@@ -136,19 +136,16 @@ class Spider:
         """
         Save the current graph state to the database.
         """
-        _edge_matrix, _node_weights, node_idxs = self.filter_graphs(
-            **self.current_state["graph"]
-        )
+        _, _, node_idxs = self.filter_graphs(**self.current_state["graph"])
         print(f"Saving current graph as '{graph_id}' with nodes: {node_idxs}")
         self.graph.add_graph(graph_id, node_idxs)
 
     def filter_graphs(
         self,
-        graph_filter: List[str] = None,
-        node_filter: str = None,
-        edge_filter: str = None,
+        graph_filter: List[str] | None = None,
+        node_filter: dict | None = None,
+        edge_filter: dict | None = None,
     ):
-
         self.current_state["graph"]["graph_filter"] = graph_filter or []
         self.current_state["graph"]["node_filter"] = node_filter or {}
         self.current_state["graph"]["edge_filter"] = edge_filter or {}
@@ -161,16 +158,16 @@ class Spider:
     # Tool Methods (Graph Algorithms)
     # ----------------------------
 
-    def weight_nodes(self, edge_matrix, node_vector, index_keys):
+    def weight_nodes(self, edge_matrix, index_keys):
         if edge_matrix is None or edge_matrix.size == 0:
             return None
         weights = markov_chain(edge_matrix)
         return list(zip(index_keys, weights))
 
-    def weight_edges(self, edge_matrix, node_vector, index_keys):
+    def weight_edges(self, edge_matrix, index_keys):
         if edge_matrix is None or edge_matrix.size == 0:
             return None
-        edge_weights = mcc(edge_matrix, node_vector)
+        edge_weights = mcc(edge_matrix)
         return [
             ((index_keys[i], index_keys[j]), edge_weights[i, j])
             for i in range(edge_weights.shape[0])
@@ -182,12 +179,14 @@ class Spider:
         start = kwargs.get("start")
         end = kwargs.get("end")
         K = kwargs.get("num_hops")
+        if start is None or end is None or K is None:
+            return None
         route = max_profit_route(edge_matrix, node_vector, start, end, K)
         if route is None:
             return None
         return [index_keys[i] for i in route]
 
-    def cluster_graph(self, edge_matrix, node_vector, index_keys):
+    def cluster_graph(self, edge_matrix, index_keys):
         clusters = mcl(edge_matrix)
         if clusters is None or len(clusters) == 0:
             return None
@@ -195,8 +194,9 @@ class Spider:
             [index_keys[i] for i in cluster] for cluster in clusters if len(cluster) > 0
         ]
 
-    def compare_graphs(self, graph1_id, graph2_id):
-        return self.graph.compare_graphs(graph1_id, graph2_id)
+    # def compare_graphs(self, graph1_id, graph2_id):
+    #     pass
+    # return self.graph.compare_graphs(graph1_id, graph2_id)
 
     def get_all_tools(self):
         # Placeholder; implement dynamic tool discovery if needed

@@ -9,11 +9,23 @@
                 "^[A-Z]$": {
                     "type": "object",
                     "properties": {
-                        "Type": {"type": ["string", "null"]},
-                        "Number of Parts": {"type": ["integer", "null"]},
+                        "Type": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "Number of Parts": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        },
                         "Vital Parts": {
                             "type": "array",
-                            "items": {"type": "string"},
+                            "items": {
+                                "type": "string"
+                            },
                             "minItems": 1
                         },
                         "Parts": {
@@ -21,12 +33,17 @@
                             "minProperties": 1,
                             "additionalProperties": {
                                 "type": "array",
-                                "items": {"type": "string"},
+                                "items": {
+                                    "type": "string"
+                                },
                                 "minItems": 1
                             }
                         }
                     },
-                    "required": ["Vital Parts", "Parts"],
+                    "required": [
+                        "Vital Parts",
+                        "Parts"
+                    ],
                     "additionalProperties": false
                 }
             }
@@ -44,16 +61,23 @@
                         },
                         "Locations": {
                             "type": "array",
-                            "items": {"type": "string"},
+                            "items": {
+                                "type": "string"
+                            },
                             "minItems": 1
                         }
                     },
-                    "required": ["Locations"],
+                    "required": [
+                        "Locations"
+                    ],
                     "additionalProperties": false
                 }
             }
         }
     },
-    "required": ["Designations", "Manufacturers"],
+    "required": [
+        "Designations",
+        "Manufacturers"
+    ],
     "additionalProperties": false
 }
