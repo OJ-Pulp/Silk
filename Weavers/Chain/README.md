@@ -47,8 +47,43 @@ ChainWeaver is a secialized tool for generating a realistic synthetic supply cha
 Here exists a resolve_json functionality pulled from `Weaver.input_utils`.
 
 | **Characteristic** | **Variable** | **Description** |
-| :---: | :---: | :---: | :--- |
+| :---: | :---: | :---: |
 | Designations | `self.designations` | Add Description Here. |
 | Manufacturers | `self.manufacturers` | Add Description Here. |
 
 > **Info:** Inputs Accepted
+
+---
+
+## Base Products
+
+Generates a fake dataset of base product components and their data.
+
+| **Characteristic** | **Variable** | **Description** |
+| :---: | :---: | :---: |
+| Designation Keys | `designation_keys` | Add Description Here. |
+| Designation Counter | `designation_counter` | Add Description Here. |
+| Manufacturer Keys | `manufacturers_keys` | Add Description Here. |
+| Number of Base Products | `num_base_products` | Add Description Here. |
+
+For each base product data is created and assigned:
+
+| **Characteristic** | **Variable** | **Description** |
+| :---: | :---: | :---: |
+| Name | `name` | A mix of the Popular Name and the Designation. |
+| Manufacturer | `manufacturer` | Randomly selected manufacturer name from a list of potential choices. |
+| Locations | `locations` | Randomly selected location from a list predetermined to be associated with the chosen manufacturer. |
+| Full Product | `full_product` | A boolean that designates that this is a full, sale-ready component. |
+| Component Type | `component_type` | A choice of three strings that designates what level of the supply chain the part is at. |
+| Variant | `variant` | A boolean determining whether or not the part is a variant part or product. |
+| Selected Designation | `selected_designation` | FIX LATER |
+| Designation Counter | `designation_counter` | FIX LATER |
+| Designation | `designation` | FIX LATER |
+| Popular Name | `popular_name` | A randomly generated and capitalized noun. |
+| Dimensions | `dimensions` | Three randomly generated integers between 10 and 100. |
+| Cost | `cost` | FIX LATER |
+| Failure Rate | `failure_rate` | FIX LATER |
+| Breakability | `breakability` | FIX LATER |
+| Year Range | `year_range` | FIX LATER |
+
+---
