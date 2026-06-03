@@ -1,6 +1,6 @@
 # ChainWeaver
 
-ChainWeaver is a secialized tool for generating a realistic synthetic supply chain network.
+ChainWeaver is a specialized tool for generating a realistic synthetic supply chain network.
 
 ---
 
@@ -12,7 +12,7 @@ ChainWeaver is a secialized tool for generating a realistic synthetic supply cha
 
 ### Standard Imports
 
-> Do I need to install these?
+> No, standard imports are built into the core Python library and do not need to be manually installed using pip.
 
 ---
 
@@ -21,10 +21,10 @@ ChainWeaver is a secialized tool for generating a realistic synthetic supply cha
 | :---: | :---: |
 | Component | Node |  
 | Requires | Directed Edge |
-| Product | Add Here. |
-| Variant | Add Here. |
-| Designation | Add Here. |
-| Manufacturer | Add Here. |
+| Product | The target parent item linking all associated sub-assemblies, parts, and manufacturing data together. |
+| Variant | A specialized or modified branch of a standard product model. |
+| Designation | The template schema definition determining a product's type, part categorizations, and crucial assembly lists. |
+| Manufacturer | The industrial entity assigned to host specific manufacturing facilities, locations, and asset properties. |
 
 ---
 
@@ -38,7 +38,7 @@ ChainWeaver is a secialized tool for generating a realistic synthetic supply cha
 
 | **Characteristic** | **Variable** | **Default** | **Description** |
 | :---: | :---: | :---: | :--- |
-| Number of Products | `num_products` | 40 | Add Description Here. |
+| Number of Products | `num_products` | 40 | The total target number of unique top-level base products to generate in the dataset. |
 | Variant Distribution | `variant_distribution` | 0.25 | The percentage factor (as a float) used to determine the number of variants. |
 | Number of Variants | `num_variants` | 10 | The calculated number of variants based off of the desired distribution (40 * 0.25). |
 
@@ -48,8 +48,8 @@ Here exists a resolve_json functionality pulled from `Weaver.input_utils`.
 
 | **Characteristic** | **Variable** | **Description** |
 | :---: | :---: | :---: |
-| Designations | `self.designations` | Add Description Here. |
-| Manufacturers | `self.manufacturers` | Add Description Here. |
+| Designations | `self.designations` | Configuration profile mapping distinct product classes to their allowed part categorizations and vital components. |
+| Manufacturers | `self.manufacturers` | Configuration profile storing valid manufacturing entities alongside their localized geographic facilities. |
 
 > **Info:** Inputs Accepted
 
@@ -57,14 +57,14 @@ Here exists a resolve_json functionality pulled from `Weaver.input_utils`.
 
 ## Base Products
 
-Generates a fake dataset of base product components and their data.
+Generates a synthetic dataset of base product components and their data.
 
 | **Characteristic** | **Variable** | **Description** |
 | :---: | :---: | :---: |
-| Designation Keys | `designation_keys` | Add Description Here. |
-| Designation Counter | `designation_counter` | Add Description Here. |
-| Manufacturer Keys | `manufacturers_keys` | Add Description Here. |
-| Number of Base Products | `num_base_products` | Add Description Here. |
+| Designation Keys | `designation_keys` | A list containing the specific item configuration labels extracted from the configuration rules. |
+| Designation Counter | `designation_counter` | An operational tracking variable balancing out model volumes evenly across designated archetypes. |
+| Manufacturer Keys | `manufacturers_keys` | A list collection storing all unique active company production keys. |
+| Number of Base Products | `num_base_products` | The absolute target index total representing how many foundational product items must be generated. |
 
 <br>
 
@@ -78,21 +78,21 @@ For each base product data is created and assigned:
 | Full Product | `full_product` | A boolean that designates that this is a full, sale-ready component. |
 | Component Type | `component_type` | A choice of three strings that designates what level of the supply chain the part is at. |
 | Variant | `variant` | A boolean determining whether or not the part is a variant part or product. |
-| Selected Designation | `selected_designation` | FIX LATER |
-| Designation Counter | `designation_counter` | FIX LATER |
-| Designation | `designation` | FIX LATER |
+| Selected Designation | `selected_designation` | The active configuration pattern index pulled from the structural schema collection. |
+| Designation Counter | `designation_counter` | The running ledger matching and offsetting distribution rates for the active template item. |
+| Designation | `designation` | The assigned identity name defining which component design blueprint applies to this node. |
 | Popular Name | `popular_name` | A randomly generated and capitalized noun. |
 | Dimensions | `dimensions` | Three randomly generated integers between 10 and 100. |
-| Cost | `cost` | FIX LATER |
-| Failure Rate | `failure_rate` | FIX LATER |
-| Breakability | `breakability` | FIX LATER |
-| Year Range | `year_range` | FIX LATER |
+| Cost | `cost` | A randomized financial baseline pricing value up to 4 digits long, formatted to 2 decimal points. |
+| Failure Rate | `failure_rate` | A randomized quality-control variance factor formatted out to 4 decimal places. |
+| Breakability | `breakability` | A randomized operational damage threshold metric formatted precisely to 2 decimal places. |
+| Year Range | `year_range` | A list of 1 to 3 random production lifespan years bounding manufacturing limits between 1990 and 2024. |
 
 ---
 
 ## Base Product Sprues
 
-Generates a fake dataset of base product sprue components based on their respective manufacturers.
+Generates a synthetic dataset of base product sprue components based on their respective manufacturers.
 
 | **Characteristic** | **Variable** | **Description** |
 | :---: | :---: | :---: |
@@ -104,7 +104,7 @@ For each base product sprue, mock data is created, assigned, and stored as a `Co
 
 | **Characteristic** | **Variable** | **Description** |
 | :---: | :---: | :---: |
-| Name | `name` | A fake string name generated dynamically using a random pattern of 3 letters and 8 numbers. |
+| Name | `name` | A synthetic string name generated dynamically using a random pattern of 3 letters and 8 numbers (e.g., `???########`). |
 | Manufacturer | `manufacturer` | The explicit manufacturer assigned to this sprue lifecycle iteration. |
 | Locations | `locations` | A randomly selected location mapped from the allowed locations assigned to the manufacturer. |
 | Full Product | `full_product` | A boolean flag hardcoded to `False`, signifying this is a sub-component rather than a market-ready assembly. |
@@ -146,7 +146,7 @@ Sifts through existing component allocations to flag and yield specific critical
 
 ## Base Product Parts
 
-Generates a fake dataset of base product part components, sorting them structurally based on their manufacturer allocations.
+Generates a synthetic dataset of base product part components, sorting them structurally based on their manufacturer allocations.
 
 | **Characteristic** | **Variable** | **Description** |
 | :---: | :---: | :---: |
@@ -160,7 +160,7 @@ For each base product part, mock data is created, assigned, and stored as a `Com
 
 | **Characteristic** | **Variable** | **Description** |
 | :---: | :---: | :---: |
-| Name | `name` | A string name combining the literal part type with a random pattern of 3 letters and 5 numbers. |
+| Name | `name` | A string name combining the literal part type with a random synthetic pattern of 3 letters and 5 numbers (e.g., `???#####`). |
 | Manufacturer | `manufacturer` | The specific manufacturing entity randomly assigned to produce this individual part. |
 | Locations | `locations` | A randomly selected location mapped from the allowed locations assigned to the chosen part manufacturer. |
 | Full Product | `full_product` | A boolean flag hardcoded to `False`, signifying this is an individual sub-assembly unit. |
