@@ -6,25 +6,27 @@ ChainWeaver is a specialized tool for generating a realistic synthetic supply ch
 
 ## Required Software
 
-### Add VSCode Extensions
+### VSCode Extensions
 
 - **Python ->** Published by: Microsoft
 
 ### Standard Imports
 
-> No, standard imports are built into the core Python library and do not need to be manually installed using pip.
+> Add here
 
 ---
 
 ## Vocabulary
 | **Program Word** | **Explanation** |
 | :---: | :---: |
-| Component | Node |  
-| Requires | Directed Edge |
-| Product | The target parent item linking all associated sub-assemblies, parts, and manufacturing data together. |
-| Variant | A specialized or modified branch of a standard product model. |
-| Designation | The template schema definition determining a product's type, part categorizations, and crucial assembly lists. |
-| Manufacturer | The industrial entity assigned to host specific manufacturing facilities, locations, and asset properties. |
+| Component | Node with types of product, sprue, or part. |  
+| Requires | Directed Edge showing which components require what other components. |
+| Product | A collection of sprues and the final creation. |
+| Sprue | Add here |
+| Part | Add here |
+| Variant | Add here |
+| Designation | Add here |
+| Manufacturer | Add here |
 
 ---
 
@@ -39,17 +41,17 @@ ChainWeaver is a specialized tool for generating a realistic synthetic supply ch
 | **Characteristic** | **Variable** | **Data Type** | **Default** | **Description** |
 | :---: | :---: | :---: | :---: | :--- |
 | Number of Products | `num_products` | `int` | 40 | The total target number of unique top-level base products to generate in the dataset. |
-| Variant Distribution | `variant_distribution` | `float` | 0.25 | The percentage factor (as a float) used to determine the number of variants. |
+| Variant Distribution | `variant_distribution` | `float` | 0.25 | The percentage factor used to determine the number of variants based on the total number of desired products. |
 | Number of Variants | `num_variants` | `int` | 10 | The calculated number of variants based off of the desired distribution (40 * 0.25). |
 
 ### Inputdata.json
 
-Here exists a resolve_json functionality pulled from `Weaver.input_utils`.
+Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A failure of this step causes the program to quit.
 
 | **Characteristic** | **Variable** | **Data Type** | **Description** |
 | :---: | :---: | :---: | :--- |
-| Designations | `self.designations` | `dict` | Configuration profile mapping distinct product classes to their allowed part categorizations and vital components. |
-| Manufacturers | `self.manufacturers` | `dict` | Configuration profile storing valid manufacturing entities alongside their localized geographic facilities. |
+| Designations | `self.designations` | `dict` | Configuration profile mapping distinct product types to their parts formats and vital components. |
+| Manufacturers | `self.manufacturers` | `dict` | Configuration profile mapping different manufacturers to their location options and ID.. |
 
 > **Info:** Inputs Accepted
 
