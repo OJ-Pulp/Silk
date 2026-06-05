@@ -90,7 +90,7 @@ For each base product sprue, data is created, assigned, and stored as a `Compone
 
 Establishes structural supply chain dependencies (`Requires` relationships) linking base products to their respective sprues.
 
-`start_node` -> Product
+`start_node` -> Product <br>
 `end_node`-> Sprue
 
 ```
