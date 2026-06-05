@@ -35,9 +35,11 @@ This is a supply chain network analyzer that applies **graph theory** and **netw
 
 ---
 
-## ChainWeaver.py
+## ChainWeaver.py Process
 
 > **Info:** Program Start
+
+<br>
 
 ## Inputs
  
@@ -49,12 +51,16 @@ This is a supply chain network analyzer that applies **graph theory** and **netw
 | Variant Distribution | `variant_distribution` | `float` | 0.25 | The percentage factor used to determine the number of variants based on the total number of desired products. |
 | Number of Variants | `num_variants` | `int` | 10 | The calculated number of variants based off of the desired distribution (40 * 0.25). |
 
+<br>
+
 > In the future, it is hoped that the Number of Products will instead reflect the total number of base products and variants. For now, at default, there would be a total of 50 products--40 base products and 10 variants.
 
 ### From Inputdata.json
 
 Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A failure of this step causes the program to exit. <br>
 Recieves `designations` and `manufacturers` dictionaries.
+
+<br>
 
 > **Info:** Inputs Accepted
 
@@ -63,6 +69,8 @@ Recieves `designations` and `manufacturers` dictionaries.
 ## Base Products
 
 Generates a synthetic dataset of base product components and their data.
+
+<br>
 
 Values such as `designation_keys`, `designation_counter`, `manufacturers_keys`, `num_base_products` are used to set up values for the `Component` data.
 
