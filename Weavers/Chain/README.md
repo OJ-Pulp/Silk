@@ -93,6 +93,7 @@ Establishes structural supply chain dependencies (`Requires` relationships) link
 `start_node` -> Product
 `end_node`-> Sprue
 
+```
                         +------------------+
                         |     Product      |
                         +---------+--------+
@@ -106,6 +107,7 @@ Establishes structural supply chain dependencies (`Requires` relationships) link
 |      Sprue       |    |      Sprue       |    |      Sprue       |
 |  Manufacturer 1  |    |  Manufacturer 2  |    |  Manufacturer 3  |
 +------------------+    +------------------+    +------------------+
+```
 
 ---
 
