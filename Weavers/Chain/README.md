@@ -94,9 +94,9 @@ Establishes structural supply chain dependencies (`Requires` relationships) link
 `end_node`-> Sprue
 
 ```
-                                                        +------------------+
-                                                        |     Product      |
-                                                        +---------+--------+
+                                                      +------------------+
+                                                      |     Product      |
+                                                      +---------+--------+
                                                                 |
                                         +-----------------------+-----------------------+
                                         |                       |                       |
