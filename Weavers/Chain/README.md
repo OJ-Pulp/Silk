@@ -39,8 +39,6 @@ This is a supply chain network analyzer that applies **graph theory** and **netw
 
 > **Info:** Program Start
 
-<br>
-
 ## Inputs
  
 ### Initial Characteristics
@@ -51,16 +49,12 @@ This is a supply chain network analyzer that applies **graph theory** and **netw
 | Variant Distribution | `variant_distribution` | `float` | 0.25 | The percentage factor used to determine the number of variants based on the total number of desired products. |
 | Number of Variants | `num_variants` | `int` | 10 | The calculated number of variants based off of the desired distribution (40 * 0.25). |
 
-<br>
-
 > In the future, it is hoped that the Number of Products will instead reflect the total number of base products and variants. For now, at default, there would be a total of 50 products--40 base products and 10 variants.
 
 ### From Inputdata.json
 
 Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A failure of this step causes the program to exit. <br>
 Recieves `designations` and `manufacturers` dictionaries.
-
-<br>
 
 > **Info:** Inputs Accepted
 
@@ -70,13 +64,11 @@ Recieves `designations` and `manufacturers` dictionaries.
 
 Generates a synthetic dataset of base product components and their data.
 
-<br>
-
 Values such as `designation_keys`, `designation_counter`, `manufacturers_keys`, `num_base_products` are used to set up values for the `Component` data.
 
-<br>
-
 For each base product, data is created, assigned, and stored as a `Component` node.
+
+> **Info:** Generating Base Products
 
 ---
 
@@ -84,13 +76,11 @@ For each base product, data is created, assigned, and stored as a `Component` no
 
 Generates a synthetic dataset of base product sprue components based on their respective manufacturers.
 
-<br>
-
 Values such as `manufacturer_keys` are used to set up values for the `Comopnent` data.
 
-<br>
+For each base product sprue, data is created, assigned, and stored as a `Component` node.  One sprue is made for each `manufacturer`, then the rest of the data is added.
 
-For each base product sprue, data is created, assigned, and stored as a `Component` node.
+> In the future, it is hoped that sprues will be direct collections of corresponding parts (e.g. an engine sprue would have pistons as parts).  For now, sprues are created based off of the idea that all the parts coming from one manufacturer would be bundled into one sprue grouping.
 
 ---
 
