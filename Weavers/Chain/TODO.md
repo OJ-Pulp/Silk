@@ -18,7 +18,7 @@
     - [ ] Provide instructions and AI prompts for crafting new `inputdata.json` files
 
 ---
-
+ 
 ### Base Products
 
 - [ ] Fix and comment `designation` related variables

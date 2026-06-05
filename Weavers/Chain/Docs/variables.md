@@ -3,7 +3,7 @@
 For the ChainWeaver program, variable names, descriptions, and data types can be found here.
 
 ## Inputs
-
+ 
 ### Initial Characteristics
 
 | **Name** | **Variable** | **Data Type** | **Default** | **Description** |

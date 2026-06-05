@@ -40,7 +40,7 @@ This is a supply chain network analyzer that applies **graph theory** and **netw
 > **Info:** Program Start
 
 ## Inputs
-
+ 
 ### Initial Characteristics
 
 | **Name** | **Variable** | **Data Type** | **Default** | **Description** |
