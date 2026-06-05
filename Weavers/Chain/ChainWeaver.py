@@ -30,6 +30,7 @@ supply chain dataset for testing, simulation, or data visualization purposes.
 # Standard Imports
 import re
 from typing import List, Tuple, Generator
+import pyfiglet
 
 # Local Imports
 from Weavers.Chain.data_model import Component, Requires
@@ -46,6 +47,10 @@ class NamingError(Exception):
 class ChainWeaver(Weaver):
     node_class = Component
     edge_class = Requires
+
+    # Converts the string into ASCII art using the standard font
+    ascii_art = pyfiglet.figlet_format("ChainWeaver")
+    print(ascii_art)
 
     def __init__(self, num_products: int = 40, variant_distribution: float = 0.25):
         super().__init__()
@@ -733,6 +738,7 @@ class ChainWeaver(Weaver):
         """
         Weave to generate a fake supply chain.
         """
+
         # Base products
         base_products = self.generate_base_products()
 

@@ -25,9 +25,9 @@ SUCCESS_LEVEL_NUM = 15
 
 logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
-# Configures for logging showing messages level INFO and above
+# Configures for logging showing messages level DEBUG and above
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
