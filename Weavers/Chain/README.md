@@ -103,10 +103,10 @@ Establishes structural supply chain dependencies (`Requires` relationships) link
                                         |                       |                       |
                                         v                       v                       v
                                         v                       v                       v
-                                +------------------+    +------------------+    +------------------+
-                                |      Sprue       |    |      Sprue       |    |      Sprue       |
-                                |  Manufacturer 1  |    |  Manufacturer 2  |    |  Manufacturer 3  |
-                                +------------------+    +------------------+    +------------------+
+                               +------------------+    +------------------+    +------------------+
+                               |      Sprue       |    |      Sprue       |    |      Sprue       |
+                               |  Manufacturer 1  |    |  Manufacturer 2  |    |  Manufacturer 3  |
+                               +------------------+    +------------------+    +------------------+
 ```
 
 ---
