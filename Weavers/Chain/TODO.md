@@ -30,3 +30,9 @@
 - [ ] Make capability for many interior levels where the amount can be chosen by the user
 - [ ] Change 2024 to 2026 and correct year range meaning
 - [ ] Define breakability and failure rate better or replace them
+
+---
+
+### Base Product Sprues
+
+- [ ] Make sprue attachment more efficient

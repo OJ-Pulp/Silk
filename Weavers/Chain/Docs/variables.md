@@ -94,7 +94,7 @@ Establishes structural supply chain dependencies (`Requires` relationships) link
 | :---: | :---: | :---: | :--- |
 | Start Node | `start_node` | `str` | The human-readable string name of the source base product. |
 | End Node | `end_node` | `str` | The human-readable string name of the dependent target sprue component. |
-| Base Model | `base_model` | `bool` | A boolean flag set to `True` indicating a foundational relationship assignment. |
+| Base Model | `base_model` | `bool` | Indicator that this is a Base Product and Base Sprue not a Variant. |
 | Lead Time | `lead_time` | `int` | A randomly selected logistics delay metric ranging between 1 and 1000 intervals. |
 
 ---

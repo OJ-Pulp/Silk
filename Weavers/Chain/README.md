@@ -56,6 +56,8 @@ This is a supply chain network analyzer that applies **graph theory** and **netw
 Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A failure of this step causes the program to exit. <br>
 Recieves `designations` and `manufacturers` dictionaries.
 
+<br>
+
 > **Info:** Inputs Accepted
 
 ---
@@ -78,7 +80,7 @@ Generates a synthetic dataset of base product sprue components based on their re
 
 Values such as `manufacturer_keys` are used to set up values for the `Comopnent` data.
 
-For each base product sprue, data is created, assigned, and stored as a `Component` node.  One sprue is made for each `manufacturer`, then the rest of the data is added.
+For each base product sprue, data is created, assigned, and stored as a `Component` node.  For each `base_product.id`, one sprue is made for each `manufacturer`.  Then the rest of the data is added.
 
 > In the future, it is hoped that sprues will be direct collections of corresponding parts (e.g. an engine sprue would have pistons as parts).  For now, sprues are created based off of the idea that all the parts coming from one manufacturer would be bundled into one sprue grouping.
 
@@ -88,12 +90,22 @@ For each base product sprue, data is created, assigned, and stored as a `Compone
 
 Establishes structural supply chain dependencies (`Requires` relationships) linking base products to their respective sprues.
 
-| **Name** | **Variable** | **Data Type** | **Description** |
-| :---: | :---: | :---: | :--- |
-| Start Node | `start_node` | `str` | The human-readable string name of the source base product. |
-| End Node | `end_node` | `str` | The human-readable string name of the dependent target sprue component. |
-| Base Model | `base_model` | `bool` | A boolean flag set to `True` indicating a foundational relationship assignment. |
-| Lead Time | `lead_time` | `int` | A randomly selected logistics delay metric ranging between 1 and 1000 intervals. |
+`start_node` -> Product
+`end_node`-> Sprue
+
+                        +------------------+
+                        |     Product      |
+                        +---------+--------+
+                                  |
+          +-----------------------+-----------------------+
+          |                       |                       |
+          |                       |                       |
+          v                       v                       v
+          v                       v                       v
++------------------+    +------------------+    +------------------+
+|      Sprue       |    |      Sprue       |    |      Sprue       |
+|  Manufacturer 1  |    |  Manufacturer 2  |    |  Manufacturer 3  |
++------------------+    +------------------+    +------------------+
 
 ---
 
