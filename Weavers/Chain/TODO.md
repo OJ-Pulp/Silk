@@ -2,12 +2,19 @@
 
 ## ChainWeaver.py
 
+- [ ] Make a command line graphic and title
+
 ### Inputs
 
 - [ ] Set up to ask for initial characteristics from the cmdline or a file
 - [ ] Figure out the local imports from `Weavers`
 - [ ] Decide if I want to switch num_products to num_components or num_nodes or something
     - [ ] If this describes the number of nodes, it should be changed that the number of base products takes the number of nodes minus the number of variants
+- [ ] Provide an option for logical location mapping
+    - [ ] Provide options for location control and US locations only
+- [ ] Provide other options for the `inputdata.json` file
+    - [ ] Make the entire program work for all different topics
+    - [ ] Provide instructions and AI prompts for crafting new `inputdata.json` files
 
 ---
 

@@ -24,6 +24,7 @@ ChainWeaver is a specialized tool for generating a realistic synthetic supply ch
 | Product | A collection of sprues and the final creation. |
 | Sprue | Add here |
 | Part | Add here |
+| Vital Component | A component that cannot change when in a variant because it was deemed that it would fundamentally change the final product. |
 | Variant | Add here |
 | Designation | Add here |
 | Manufacturer | Add here |
@@ -46,12 +47,12 @@ ChainWeaver is a specialized tool for generating a realistic synthetic supply ch
 
 ### Inputdata.json
 
-Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A failure of this step causes the program to quit.
+Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A failure of this step causes the program to exit.
 
 | **Characteristic** | **Variable** | **Data Type** | **Description** |
 | :---: | :---: | :---: | :--- |
 | Designations | `self.designations` | `dict` | Configuration profile mapping distinct product types to their parts formats and vital components. |
-| Manufacturers | `self.manufacturers` | `dict` | Configuration profile mapping different manufacturers to their location options and ID.. |
+| Manufacturers | `self.manufacturers` | `dict` | Configuration profile mapping different manufacturers to their location options and ID. |
 
 > **Info:** Inputs Accepted
 
