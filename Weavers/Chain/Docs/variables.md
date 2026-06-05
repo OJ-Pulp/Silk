@@ -28,10 +28,10 @@ For the ChainWeaver program, variable names, descriptions, and data types can be
 
 | **Name** | **Variable** | **Data Type** | **Description** |
 | :---: | :---: | :---: | :--- |
-| Designation Keys | `designation_keys` | `list[str]` | A list containing the specific item configuration labels extracted from the configuration rules. |
-| Designation Counter | `designation_counter` | `dict` | An operational tracking variable balancing out model volumes evenly across designated archetypes. |
-| Manufacturer Keys | `manufacturers_keys` | `list[str]` | A list collection storing all unique active company production keys. |
-| Number of Base Products | `num_base_products` | `int` | The absolute target index total representing how many foundational product items must be generated. |
+| Designation Keys | `designation_keys` | `list[str]` | Add here. |
+| Designation Counter | `designation_counter` | `dict` | Add here. |
+| Manufacturer Keys | `manufacturers_keys` | `list[str]` | The names of all manufacturers. |
+| Number of Base Products | `num_base_products` | `int` | How many total full base products should exist. |
 
 <br>
 
@@ -61,20 +61,18 @@ For each base product, data is created, assigned, and stored as a `Component` no
 
 ## Base Product Sprues
 
-Generates a synthetic dataset of base product sprue components based on their respective manufacturers.
-
 | **Name** | **Variable** | **Data Type** | **Description** |
 | :---: | :---: | :---: | :--- |
-| Manufacturer Keys | `manufacturer_keys` | `dict_keys` | A collection of the available manufacturer identifiers extracted from the system profile. |
+| Manufacturer Keys | `manufacturer_keys` | `dict_keys` | The names of all manufacturers. |
 
 <br>
 
-For each base product sprue, mock data is created, assigned, and stored as a `Component` node:
+For each base product sprue, data is created, assigned, and stored as a `Component` node:
 
 | **Name** | **Variable** | **Data Type** | **Description** |
 | :---: | :---: | :---: | :--- |
-| Name | `name` | `str` | A synthetic string name generated dynamically using a random pattern of 3 letters and 8 numbers (e.g., `???########`). |
-| Manufacturer | `manufacturer` | `str` | The explicit manufacturer assigned to this sprue lifecycle iteration. |
+| Name | `name` | `str` | Randomly generated using a random pattern of 3 letters and 8 numbers (e.g., `???########`). |
+| Manufacturer | `manufacturer` | `str` | Add here. |
 | Locations | `locations` | `str` | A randomly selected location mapped from the allowed locations assigned to the manufacturer. |
 | Full Product | `full_product` | `bool` | A boolean flag hardcoded to `False`, signifying this is a sub-component rather than a market-ready assembly. |
 | Component Type | `component_type` | `str` | A string identifier set entirely to `"Sprue"` to classify its position in the supply chain. |
