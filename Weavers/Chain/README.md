@@ -51,14 +51,10 @@ This is a supply chain network analyzer that applies **graph theory** and **netw
 
 > In the future, it is hoped that the Number of Products will instead reflect the total number of base products and variants. For now, at default, there would be a total of 50 products--40 base products and 10 variants.
 
-### Inputdata.json
+### From Inputdata.json
 
-Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A failure of this step causes the program to exit.
-
-| **Name** | **Variable** | **Data Type** | **Description** |
-| :---: | :---: | :---: | :--- |
-| Designations | `self.designations` | `dict` | Configuration profile mapping distinct product types to their parts formats and vital components. |
-| Manufacturers | `self.manufacturers` | `dict` | Configuration profile mapping different manufacturers to their location options and ID. |
+Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A failure of this step causes the program to exit. <br>
+Recieves `designations` and `manufacturers` dictionaries.
 
 > **Info:** Inputs Accepted
 
@@ -68,34 +64,11 @@ Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A 
 
 Generates a synthetic dataset of base product components and their data.
 
-| **Name** | **Variable** | **Data Type** | **Description** |
-| :---: | :---: | :---: | :--- |
-| Designation Keys | `designation_keys` | `list[str]` | A list containing the specific item configuration labels extracted from the configuration rules. |
-| Designation Counter | `designation_counter` | `dict` | An operational tracking variable balancing out model volumes evenly across designated archetypes. |
-| Manufacturer Keys | `manufacturers_keys` | `list[str]` | A list collection storing all unique active company production keys. |
-| Number of Base Products | `num_base_products` | `int` | The absolute target index total representing how many foundational product items must be generated. |
+Values such as `designation_keys`, `designation_counter`, `manufacturers_keys`, `num_base_products` are used to set up values for the `Component` data.
 
 <br>
 
-For each base product data is created and assigned:
-
-| **Name** | **Variable** | **Data Type** | **Description** |
-| :---: | :---: | :---: | :--- |
-| Name | `name` | `str` | A mix of the Popular Name and the Designation. |
-| Manufacturer | `manufacturer` | `str` | Randomly selected manufacturer name from a list of potential choices. |
-| Locations | `locations` | `str` | Randomly selected location from a list predetermined to be associated with the chosen manufacturer. |
-| Full Product | `full_product` | `bool` | A boolean that designates that this is a full, sale-ready component. |
-| Component Type | `component_type` | `str` | A choice of three strings that designates what level of the supply chain the part is at. |
-| Variant | `variant` | `bool` | A boolean determining whether or not the part is a variant part or product. |
-| Selected Designation | `selected_designation` | `str` | The active configuration pattern index pulled from the structural schema collection. |
-| Designation Counter | `designation_counter` | `int` | The running ledger matching and offsetting distribution rates for the active template item. |
-| Designation | `designation` | `str` | The assigned identity name defining which component design blueprint applies to this node. |
-| Popular Name | `popular_name` | `str` | A randomly generated and capitalized noun. |
-| Dimensions | `dimensions` | `list[int]` | Three randomly generated integers between 10 and 100. |
-| Cost | `cost` | `float` | A randomized financial baseline pricing value up to 4 digits long, formatted to 2 decimal points. |
-| Failure Rate | `failure_rate` | `float` | A randomized quality-control variance factor formatted out to 4 decimal places. |
-| Breakability | `breakability` | `float` | A randomized operational damage threshold metric formatted precisely to 2 decimal places. |
-| Year Range | `year_range` | `list[int]` | A list of 1 to 3 random production lifespan years bounding manufacturing limits between 1990 and 2024. |
+For each base product, data is created, assigned, and stored as a `Component` node.
 
 ---
 
@@ -103,28 +76,13 @@ For each base product data is created and assigned:
 
 Generates a synthetic dataset of base product sprue components based on their respective manufacturers.
 
-| **Name** | **Variable** | **Data Type** | **Description** |
-| :---: | :---: | :---: | :--- |
-| Manufacturer Keys | `manufacturer_keys` | `dict_keys` | A collection of the available manufacturer identifiers extracted from the system profile. |
+<br>
+
+Values such as `manufacturer_keys` are used to set up values for the `Comopnent` data.
 
 <br>
 
-For each base product sprue, mock data is created, assigned, and stored as a `Component` node:
-
-| **Name** | **Variable** | **Data Type** | **Description** |
-| :---: | :---: | :---: | :--- |
-| Name | `name` | `str` | A synthetic string name generated dynamically using a random pattern of 3 letters and 8 numbers (e.g., `???########`). |
-| Manufacturer | `manufacturer` | `str` | The explicit manufacturer assigned to this sprue lifecycle iteration. |
-| Locations | `locations` | `str` | A randomly selected location mapped from the allowed locations assigned to the manufacturer. |
-| Full Product | `full_product` | `bool` | A boolean flag hardcoded to `False`, signifying this is a sub-component rather than a market-ready assembly. |
-| Component Type | `component_type` | `str` | A string identifier set entirely to `"Sprue"` to classify its position in the supply chain. |
-| Variant | `variant` | `bool` | A boolean flag set to `False` to signal that this represents a foundational part iteration. |
-| Product | `product` | `str` / `int` | The underlying unique identifier (`id`) linking this sprue directly back to its source base product. |
-| Dimensions | `dimensions` | `list[int]` | A list of three randomly generated integers between 10 and 100 representing physical scale. |
-| Cost | `cost` | `float` | A randomized financial value up to 4 digits long, formatted cleanly to 2 decimal places. |
-| Failure Rate | `failure_rate` | `float` | A randomized factory defect metric formatted out to 4 decimal places. |
-| Breakability | `breakability` | `float` | A randomized physical structural tolerance metric formatted to 2 decimal places. |
-| Year Range | `year_range` | `list[int]` | A list containing 1 to 3 random integers between 1990 and 2024 representing valid production years. |
+For each base product sprue, data is created, assigned, and stored as a `Component` node.
 
 ---
 
