@@ -3,6 +3,7 @@
 ## ChainWeaver.py
 
 - [ ] Make a command line graphic and title
+- [ ] Attach documentation file
 
 ### Inputs
 
@@ -27,3 +28,5 @@
     - [ ] Provide a set of generated lists for a couple popular topics and give instructions for a Gemini prompt for users to generate their own
 - [ ] Figure out what Component(Node) is
 - [ ] Make capability for many interior levels where the amount can be chosen by the user
+- [ ] Change 2024 to 2026 and correct year range meaning
+- [ ] Define breakability and failure rate better or replace them

@@ -1,43 +1,6 @@
-# ChainWeaver
+# Variables
 
-ChainWeaver is a specialized tool for generating a realistic synthetic supply chain network.
-
-> Documentation can be found 
-
----
-
-## Required Software
-
-### VSCode Extensions
-
-- **Python ->** Published by: Microsoft
-
-### Standard Imports
-
-> Add here
-
-This is a supply chain network analyzer that applies **graph theory** and **network analysis** to model and visualize supply chains.
-
----
-
-## Vocabulary
-| **Program Word** | **Explanation** |
-| :---: | :--- |
-| Component | Node with types of product, sprue, or part. |  
-| Requires | Directed Edge showing which components require what other components. |
-| Product | A collection of sprues and the final creation. |
-| Sprue | Add here |
-| Part | Add here |
-| Vital Component | A component that cannot change when in a variant because it was deemed that it would fundamentally change the final product. |
-| Variant | Add here |
-| Designation | Add here |
-| Manufacturer | Add here |
-
----
-
-## ChainWeaver.py
-
-> **Info:** Program Start
+For the ChainWeaver program, variable names, descriptions, and data types can be found here.
 
 ## Inputs
 
@@ -51,22 +14,17 @@ This is a supply chain network analyzer that applies **graph theory** and **netw
 
 > In the future, it is hoped that the Number of Products will instead reflect the total number of base products and variants. For now, at default, there would be a total of 50 products--40 base products and 10 variants.
 
-### Inputdata.json
-
-Here exists a `resolve_json` functionality pulled from `Weaver.input_utils`.  A failure of this step causes the program to exit.
+### From Inputdata.json
 
 | **Name** | **Variable** | **Data Type** | **Description** |
 | :---: | :---: | :---: | :--- |
 | Designations | `self.designations` | `dict` | Configuration profile mapping distinct product types to their parts formats and vital components. |
 | Manufacturers | `self.manufacturers` | `dict` | Configuration profile mapping different manufacturers to their location options and ID. |
 
-> **Info:** Inputs Accepted
 
 ---
 
 ## Base Products
-
-Generates a synthetic dataset of base product components and their data.
 
 | **Name** | **Variable** | **Data Type** | **Description** |
 | :---: | :---: | :---: | :--- |
@@ -77,25 +35,27 @@ Generates a synthetic dataset of base product components and their data.
 
 <br>
 
-For each base product data is created and assigned:
+For each base product, data is created, assigned, and stored as a `Component` node:
 
 | **Name** | **Variable** | **Data Type** | **Description** |
 | :---: | :---: | :---: | :--- |
 | Name | `name` | `str` | A mix of the Popular Name and the Designation. |
-| Manufacturer | `manufacturer` | `str` | Randomly selected manufacturer name from a list of potential choices. |
-| Locations | `locations` | `str` | Randomly selected location from a list predetermined to be associated with the chosen manufacturer. |
-| Full Product | `full_product` | `bool` | A boolean that designates that this is a full, sale-ready component. |
-| Component Type | `component_type` | `str` | A choice of three strings that designates what level of the supply chain the part is at. |
-| Variant | `variant` | `bool` | A boolean determining whether or not the part is a variant part or product. |
-| Selected Designation | `selected_designation` | `str` | The active configuration pattern index pulled from the structural schema collection. |
-| Designation Counter | `designation_counter` | `int` | The running ledger matching and offsetting distribution rates for the active template item. |
-| Designation | `designation` | `str` | The assigned identity name defining which component design blueprint applies to this node. |
+| Manufacturer | `manufacturer` | `str` | Randomly selected manufacturer name from a list of options. |
+| Locations | `locations` | `str` | Randomly selected location from a list predetermined to be options for the chosen manufacturer. |
+| Full Product | `full_product` | `bool` | Designates whether or not this is a full, sale-ready component. |
+| Component Type | `component_type` | `str` | Designates what level of the supply chain the part is at. |
+| Variant | `variant` | `bool` | Designates whether or not the part is a variant component. |
+| Selected Designation | `selected_designation` | `str` | Add here.  The assigned identity name defining which component design blueprint applies to this node. |
+| Designation Counter | `designation_counter` | `int` | Add here. |
+| Designation | `designation` | `str` | Add here. |
 | Popular Name | `popular_name` | `str` | A randomly generated and capitalized noun. |
-| Dimensions | `dimensions` | `list[int]` | Three randomly generated integers between 10 and 100. |
-| Cost | `cost` | `float` | A randomized financial baseline pricing value up to 4 digits long, formatted to 2 decimal points. |
-| Failure Rate | `failure_rate` | `float` | A randomized quality-control variance factor formatted out to 4 decimal places. |
-| Breakability | `breakability` | `float` | A randomized operational damage threshold metric formatted precisely to 2 decimal places. |
-| Year Range | `year_range` | `list[int]` | A list of 1 to 3 random production lifespan years bounding manufacturing limits between 1990 and 2024. |
+| Dimensions | `dimensions` | `list[int]` | Three randomly generated integers, each between 10 and 100. |
+| Cost | `cost` | `float` | A randomly generated price up to 4 digits long, formatted to 2 decimal points. |
+| Failure Rate | `failure_rate` | `float` | A randomly generated quality-control variance factor formatted to 4 decimal places. |
+| Breakability | `breakability` | `float` | A randomly generated operational damage threshold metric formatted to 2 decimal places. |
+| Year Range | `year_range` | `list[int]` | Add here. A list of 1 to 3 random production lifespan years bounding manufacturing limits between 1990 and 2024. |
+
+> In the future, it is hoped that breakability and failure rate will be better defined--and that year range will be corrected and also set to include more recent dates. For now, at default, these two data points remain relatively meaningless, and the year range is slightly out of scope.
 
 ---
 
