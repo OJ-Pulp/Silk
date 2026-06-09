@@ -113,36 +113,24 @@ Establishes structural supply chain dependencies (`Requires` relationships) link
 
 ## Vital Base Product Sprues
 
-Sifts through existing component allocations to flag and yield specific critical sprues designated as vital to the core assembly.
+Defines which sprues are vital.  Being vital means that if a product is a variant of a base product, it must have these items in common.  
 
-| **Name** | **Variable** | **Data Type** | **Description** |
-| :---: | :---: | :---: | :--- |
-| Parts Categories | `parts_categories` | `dict` | The comprehensive lists of associated structural categories pulled directly from the base product's design specifications. |
-| Base Product Part Manufacturer | `base_product_part_manufacturer` | `str` | A randomized manufacturer assignment chosen out of the pool of active manufacturing keys. |
-| Is Vital | `is_vital` | `bool` | A boolean calculation testing if the targeted sub-part sits within the explicit "Vital Parts" registry array for that designation. |
+> In the future, it is hoped that there will be a better definition of what parts should be vital or if there should be variants at all.  For now, this is the balance to answer the "If you replace every part on the ship is it still the same ship?" question.
+
+Add here about logic.
 
 ---
 
 ## Base Product Parts
 
-Generates a synthetic dataset of base product part components, sorting them structurally based on their manufacturer allocations.
+Generates a synthetic dataset of base product part components.
 
-| **Name** | **Variable** | **Data Type** | **Description** |
-| :---: | :---: | :---: | :--- |
-| Manufacturer Keys | `manufacturer_keys` | `dict_keys` | A collection of the available manufacturer identifiers extracted from the system profile. |
-| Parts Categories | `parts_categories` | `dict` | The comprehensive lists of associated structural categories pulled directly from the base product's design specifications. |
-| Base Product Part Manufacturer | `base_product_part_manufacturer` | `str` | A randomized manufacturer assignment chosen out of the pool of active manufacturing keys. |
+For each part in the parts list for that designation, a manufacturer is chosen then all the rest of the data is filled in. 
 
-<br>
+---
 
-For each base product part, mock data is created, assigned, and stored as a `Component` node:
+## Base Product Part Edges
 
-| **Name** | **Variable** | **Data Type** | **Description** |
-| :---: | :---: | :---: | :--- |
-| Name | `name` | `str` | A string name combining the literal part type with a random synthetic pattern of 3 letters and 5 numbers (e.g., `???#####`). |
-| Manufacturer | `manufacturer` | `str` | The specific manufacturing entity randomly assigned to produce this individual part. |
-| Locations | `locations` | `str` | A randomly selected location mapped from the allowed locations assigned to the chosen part manufacturer. |
-| Full Product | `full_product` | `bool` | A boolean flag hardcoded to `False`, signifying this is an individual sub-assembly unit. |
-| Component Type | `component_type` | `str` | A string identifier set entirely to `"Part"` to classify its specific position in the supply chain lifecycle. |
-| Variant | `variant` | `bool` | A boolean flag set to `False` to signal that this represents a foundational part iteration. |
-| Product | `product` | `str` / `int` | The underlying unique identifier (`id`) linking this
+Sorts base product parts structurally into sprues based on their manufacturer allocations.
+
+> In the future, it is hoped that parts will be organized into sprues that server as coherent collections of parts.  For now, parts are given to the sprue that shares the same manufacturer as them.
